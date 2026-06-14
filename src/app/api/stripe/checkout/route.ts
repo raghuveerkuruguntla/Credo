@@ -47,6 +47,14 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (err: unknown) {
+    // Log full details so Vercel runtime logs show the real cause
+    const e = err as { type?: string; code?: string; statusCode?: number; message?: string };
+    console.error("Stripe checkout error:", {
+      type: e?.type,
+      code: e?.code,
+      statusCode: e?.statusCode,
+      message: e?.message,
+    });
     const message = err instanceof Error ? err.message : "Failed to create checkout session";
     return NextResponse.json({ error: message }, { status: 500 });
   }
