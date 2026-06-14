@@ -18,7 +18,7 @@ const card = "bg-gradient-to-b from-[#1c1815] to-[#141110] border border-white/[
 const cardHover = "hover:border-white/[0.12] transition-colors";
 
 function StatCard({ label, value, sub, trend, trendValue, accent }: {
-  label: string; value: string; sub: string; trend?: "up" | "down";
+  label: string; value: string; sub: React.ReactNode; trend?: "up" | "down";
   trendValue?: string; accent?: boolean;
 }) {
   return (
@@ -50,10 +50,12 @@ export default function DashboardPage() {
 
   const stats = useMemo(() => {
     const netWorth = accounts.reduce((s, a) => s + signedBalance(a), 0);
-    const cash = accounts.filter((a) => !isDebt(a) && !isInvestment(a)).reduce((s, a) => s + (a.balance ?? 0), 0);
+    const cashAccts = accounts.filter((a) => !isDebt(a) && !isInvestment(a));
+    const cash = cashAccts.reduce((s, a) => s + (a.balance ?? 0), 0); // available
+    const cashCurrent = cashAccts.reduce((s, a) => s + (a.current ?? a.balance ?? 0), 0);
     const debt = accounts.filter(isDebt).reduce((s, a) => s + Math.abs(a.balance ?? 0), 0);
     const investments = accounts.filter(isInvestment).reduce((s, a) => s + (a.balance ?? 0), 0);
-    return { netWorth, cash, debt, investments };
+    return { netWorth, cash, cashCurrent, debt, investments };
   }, [accounts]);
 
   // Income vs spending by month (from the available 90-day window)
@@ -162,7 +164,16 @@ export default function DashboardPage() {
             {/* Stat cards */}
             <div className="grid grid-cols-4 gap-4 mb-5">
               <StatCard label="Net Worth" value={formatCurrency(stats.netWorth)} sub={`Across ${accounts.length} account${accounts.length !== 1 ? "s" : ""}`} accent />
-              <StatCard label="Cash Balance" value={formatCurrency(stats.cash)} sub="Checking & savings" />
+              <StatCard
+                label="Cash Balance"
+                value={formatCurrency(stats.cash)}
+                sub={
+                  <span>
+                    <span className="text-stone-400">{formatCurrency(stats.cashCurrent)}</span>
+                    <span className="text-stone-600"> current balance</span>
+                  </span>
+                }
+              />
               <StatCard label="Debt" value={formatCurrency(stats.debt)} sub="Credit cards & loans" />
               <StatCard label="Investments" value={formatCurrency(stats.investments)} sub="Brokerage & retirement" />
             </div>

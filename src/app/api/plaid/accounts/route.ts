@@ -19,6 +19,15 @@ export async function GET() {
     for (const item of items) {
       const response = await plaidClient.accountsGet({ access_token: item.accessToken });
       for (const acct of response.data.accounts) {
+        // For cash (depository) accounts, prefer the "available" balance so the
+        // figure matches what the user sees in their bank app (current includes
+        // not-yet-posted pending transactions). For credit/loan/investment,
+        // "available" means something different (e.g. available credit), so we
+        // keep "current".
+        const current = acct.balances.current;
+        const available = acct.balances.available;
+        const displayBalance =
+          acct.type === "depository" && available != null ? available : current;
         accounts.push({
           id: acct.account_id,
           itemId: item.itemId,
@@ -26,8 +35,9 @@ export async function GET() {
           officialName: acct.official_name,
           institution: item.institutionName,
           type: acct.subtype ?? acct.type,
-          balance: acct.balances.current,
-          available: acct.balances.available,
+          balance: displayBalance,
+          current,
+          available,
           mask: acct.mask,
           currency: acct.balances.iso_currency_code,
         });

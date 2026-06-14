@@ -9,7 +9,8 @@ export interface LiveAccount {
   officialName?: string | null;
   institution: string;
   type: string;
-  balance: number | null;
+  balance: number | null;   // display balance (available for cash, current otherwise)
+  current: number | null;
   available: number | null;
   mask: string | null;
   currency: string | null;
