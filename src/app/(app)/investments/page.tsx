@@ -44,7 +44,7 @@ export default function InvestmentsPage() {
 
   if (investments.length === 0) {
     return (
-      <div className="p-4 sm:p-6 max-w-5xl">
+      <div className="p-4 sm:p-6 max-w-5xl mx-auto w-full">
         <h1 className="text-xl font-bold text-stone-100 mb-1">Investments</h1>
         <p className="text-sm text-stone-400 mb-6">Brokerage & retirement accounts</p>
         <Card><CardContent className="py-16 text-center">
@@ -56,7 +56,7 @@ export default function InvestmentsPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 max-w-5xl">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto w-full">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-stone-100">Investments</h1>

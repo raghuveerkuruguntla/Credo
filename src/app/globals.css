@@ -19,6 +19,12 @@ body {
 
 * { box-sizing: border-box; }
 
+/* Never allow horizontal page scroll on any device */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 /* Dark app shell: form controls match the Paymark theme */
 .dark-app {
   color-scheme: dark;

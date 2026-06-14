@@ -51,7 +51,7 @@ export default function AccountsPage() {
   }, [accounts]);
 
   return (
-    <div className="p-4 sm:p-6 max-w-5xl">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto w-full">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-stone-100">Accounts</h1>

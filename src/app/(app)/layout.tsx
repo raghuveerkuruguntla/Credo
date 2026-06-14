@@ -16,7 +16,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <AnimatedBackground />
       <div className="relative z-10 flex flex-col h-full min-h-0">
         <TopNav />
-        <main className="flex-1 min-h-0 overflow-y-auto">
+        <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
           <div className="max-w-[1400px] mx-auto w-full h-full animate-in">{children}</div>
         </main>
         <Footer />

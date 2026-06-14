@@ -120,8 +120,8 @@ export default function DashboardPage() {
   const acctName = (id: string) => accounts.find((a) => a.id === id)?.name ?? "";
 
   return (
-    <div className="relative">
-      <div className="absolute top-0 left-1/3 w-[600px] h-[280px] bg-orange-500/[0.07] blur-[120px] rounded-full pointer-events-none" />
+    <div className="relative overflow-x-hidden">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] max-w-full h-[280px] bg-orange-500/[0.07] blur-[120px] rounded-full pointer-events-none" />
 
       <div className="p-4 sm:p-6 relative">
         {/* Header */}
