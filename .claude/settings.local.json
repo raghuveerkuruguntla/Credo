@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx next *)",
+      "Bash(powershell -Command \"\\(Get-Content src/app/'\\(app\\)'/dashboard/page.tsx\\) -replace 'formatter=\\\\{.v: number. => formatCurrency\\\\\\(v\\\\\\)\\\\}', 'formatter={\\(v\\) => formatCurrency\\(Number\\(v\\)\\)}' | Set-Content src/app/'\\(app\\)'/dashboard/page.tsx\")",
+      "Bash(powershell -Command \"\\(Get-Content src/app/'\\(app\\)'/forecast/page.tsx\\) -replace 'formatter=\\\\{.v: number. => formatCurrency\\\\\\(v\\\\\\)\\\\}', 'formatter={\\(v\\) => formatCurrency\\(Number\\(v\\)\\)}' | Set-Content src/app/'\\(app\\)'/forecast/page.tsx\")",
+      "Bash(powershell -Command \"\\(Get-Content src/app/'\\(app\\)'/investments/page.tsx\\) -replace 'formatter=\\\\{.v: number. => formatCurrency\\\\\\(v\\\\\\)\\\\}', 'formatter={\\(v\\) => formatCurrency\\(Number\\(v\\)\\)}' | Set-Content src/app/'\\(app\\)'/investments/page.tsx\")",
+      "Bash(powershell -Command \"\\(Get-Content src/app/'\\(app\\)'/net-worth/page.tsx\\) -replace 'formatter=\\\\{.v: number. => formatCurrency\\\\\\(v\\\\\\)\\\\}', 'formatter={\\(v\\) => formatCurrency\\(Number\\(v\\)\\)}' | Set-Content src/app/'\\(app\\)'/net-worth/page.tsx\")",
+      "Bash(powershell -Command \"\\(Get-Content src/app/'\\(app\\)'/spending/page.tsx\\) -replace 'formatter=\\\\{.v: number. => formatCurrency\\\\\\(v\\\\\\)\\\\}', 'formatter={\\(v\\) => formatCurrency\\(Number\\(v\\)\\)}' | Set-Content src/app/'\\(app\\)'/spending/page.tsx\")",
+      "Bash(Start-Process powershell *)",
+      "Bash(Start-Sleep -Seconds 5)",
+      "Bash(Invoke-WebRequest -Uri \"http://localhost:3000\" -UseBasicParsing -TimeoutSec 10)",
+      "Bash(Select-Object -ExpandProperty StatusCode)",
+      "PowerShell(cd \"C:\\\\Users\\\\Business\\\\OneDrive\\\\Documents\\\\Finance-App\"; Start-Process powershell -ArgumentList \"-NoProfile -Command npx next dev --port 3000\" -WindowStyle Normal; Start-Sleep -Seconds 8; try { \\(Invoke-WebRequest -Uri \"http://localhost:3000\" -UseBasicParsing -TimeoutSec 5\\).StatusCode } catch { \"Server not reachable yet\" })",
+      "Bash(npm install *)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(p.dependencies\\)\")",
+      "Bash(cd \"C:\\\\Users\\\\Business\\\\OneDrive\\\\Documents\\\\Finance-App\" && rm -rf src/app/login src/app/signup && mkdir -p \"src/app/login/[[...rest]]\" \"src/app/signup/[[...rest]]\")",
+      "Bash(grep -n 'py-20\">$' src/app/page.tsx)",
+      "Bash(stripe --version)",
+      "Bash(where.exe stripe *)",
+      "PowerShell(winget install --id Stripe.StripeCLI --accept-source-agreements --accept-package-agreements)",
+      "PowerShell($key = \\(Select-String -Path \"C:\\\\Users\\\\Business\\\\OneDrive\\\\Documents\\\\Finance-App\\\\.env.local\" -Pattern '^STRIPE_SECRET_KEY=\\(.+\\)$'\\).Matches[0].Groups[1].Value; $stripeExe = \\(Get-Command stripe -ErrorAction SilentlyContinue\\).Source; if \\(-not $stripeExe\\) { $stripeExe = \"$env:LOCALAPPDATA\\\\Microsoft\\\\WinGet\\\\Links\\\\stripe.exe\" }; Start-Process -FilePath $stripeExe -ArgumentList \"listen\",\"--api-key\",$key,\"--forward-to\",\"localhost:3000/api/stripe/webhook\" -WindowStyle Minimized -RedirectStandardError \"$env:TEMP\\\\stripe-listen.log\"; Start-Sleep -Seconds 8; Get-Content \"$env:TEMP\\\\stripe-listen.log\")",
+      "PowerShell(Start-Sleep 4; Get-Content \"$env:TEMP\\\\stripe-listen.log\" -Tail 10)",
+      "Bash(npx prisma *)",
+      "Bash(node -e ' *)",
+      "WebFetch(domain:www.framer.com)",
+      "Bash(curl -sL \"https://www.framer.com/marketplace/templates/paymark/\")",
+      "Bash(curl -sL \"https://www.framer.com/marketplace/templates/paymark/\" -o /tmp/paymark.html)",
+      "Read(//tmp/**)",
+      "Bash(grep -oE 'https://y4pdgnepgswqffpt[^\"\\\\\\\\]+' /tmp/paymark.html)",
+      "Bash(grep -oiE 'https://[^\"\\\\\\\\]*paymark[^\"\\\\\\\\]*' /tmp/paymark.html)",
+      "Bash(cygpath -w /tmp/paymark-EuXj8SfKYGlztAkRYhbkwHfdzYnkvP.jpg)",
+      "Bash(python3 -)",
+      "Bash(grep -rn \"bg-\\\\[#16120f\\\\]/\\\\|bg-white/\\\\[0.1\\\\]/70\\\\|text-slate-\\\\|bg-slate-\\\\|border-slate-\" \"src/app/\\(app\\)\" src/components/LiveAccounts.tsx)",
+      "WebFetch(domain:useorigin.com)",
+      "Bash(node -e \"const {PrismaClient}=require\\('@prisma/client'\\); console.log\\(typeof new PrismaClient\\({adapter:null}\\).aiUsage !== 'undefined' ? 'aiUsage model present' : 'missing'\\)\")",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}

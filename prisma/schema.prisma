@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// A connected Plaid Item (one per bank login), owned by a Clerk user.
+model PlaidItem {
+  id              String   @id @default(cuid())
+  userId          String // Clerk user id
+  itemId          String   @unique // Plaid item_id
+  accessToken     String // Plaid access token (treat as secret)
+  institutionName String
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Monthly AI question usage per user (server-enforced plan limits).
+model AiUsage {
+  id     String @id @default(cuid())
+  userId String // Clerk user id
+  month  String // e.g. "2026-06"
+  count  Int    @default(0)
+
+  @@unique([userId, month])
+}
