@@ -8,7 +8,7 @@ import { useFinancialData, refreshFinancialData, signedBalance, isInvestment, is
 import PlaidLinkButton from "@/components/PlaidLinkButton";
 import EmptyState, { LoadingState } from "@/components/EmptyState";
 import {
-  TrendingUp, TrendingDown, RefreshCw, Bell, ArrowRight, Lightbulb, Info,
+  TrendingUp, TrendingDown, RefreshCw, ArrowRight, Lightbulb, Info,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -123,31 +123,28 @@ export default function DashboardPage() {
     <div className="relative">
       <div className="absolute top-0 left-1/3 w-[600px] h-[280px] bg-orange-500/[0.07] blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="p-6 relative">
+      <div className="p-4 sm:p-6 relative">
         {/* Header */}
-        <div className="flex items-center justify-between mb-7">
-          <div>
-            <h1 className="text-xl font-semibold text-stone-50 tracking-tight">
+        <div className="flex items-start sm:items-center justify-between gap-3 mb-7">
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-xl font-semibold text-stone-50 tracking-tight">
               Good morning{user?.firstName ? `, ${user.firstName}` : ""} 👋
             </h1>
-            <p className="text-sm text-stone-500 mt-0.5">
+            <p className="text-xs sm:text-sm text-stone-500 mt-0.5">
               {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={() => { refreshFinancialData(); window.location.reload(); }}
-              className="flex items-center gap-2 text-sm text-stone-400 hover:text-stone-100 px-3 py-2 rounded-xl hover:bg-white/[0.06] transition-colors"
+              className="hidden sm:flex items-center gap-2 text-sm text-stone-400 hover:text-stone-100 px-3 py-2 rounded-xl hover:bg-white/[0.06] transition-colors"
             >
               <RefreshCw className="w-4 h-4" /> Refresh
             </button>
-            <button className="p-2 text-stone-400 hover:text-stone-100 rounded-xl hover:bg-white/[0.06] transition-colors">
-              <Bell className="w-4 h-4" />
-            </button>
             <PlaidLinkButton
               size="sm"
-              label="Connect Account"
-              className="bg-stone-100 text-stone-900 hover:bg-white rounded-full px-4 py-2 font-semibold shadow-[0_0_24px_rgba(249,115,22,0.15)]"
+              label="Connect"
+              className="bg-stone-100 text-stone-900 hover:bg-white rounded-full px-4 py-2 font-semibold shadow-[0_0_24px_rgba(249,115,22,0.15)] whitespace-nowrap"
             />
           </div>
         </div>
@@ -162,7 +159,7 @@ export default function DashboardPage() {
         ) : (
           <>
             {/* Stat cards */}
-            <div className="grid grid-cols-4 gap-4 mb-5">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
               <StatCard label="Net Worth" value={formatCurrency(stats.netWorth)} sub={`Across ${accounts.length} account${accounts.length !== 1 ? "s" : ""}`} accent />
               <StatCard
                 label="Cash Balance"
@@ -181,9 +178,9 @@ export default function DashboardPage() {
               <StatCard label="Investments" value={formatCurrency(stats.investments)} sub="Brokerage & retirement" />
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
               {/* Income vs spending chart */}
-              <div className={`${card} col-span-2 p-5`}>
+              <div className={`${card} lg:col-span-2 p-5`}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-sm font-semibold text-stone-100">Income vs Spending</h2>
                   <div className="flex items-center gap-3 text-xs text-stone-500">
@@ -243,9 +240,9 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Recent Transactions */}
-              <div className={`${card} col-span-2 overflow-hidden`}>
+              <div className={`${card} lg:col-span-2 overflow-hidden`}>
                 <div className="flex items-center justify-between px-5 pt-5 pb-3">
                   <h2 className="text-sm font-semibold text-stone-100">Recent Transactions</h2>
                   <Link href="/transactions" className="text-xs text-orange-400 font-medium hover:text-orange-300 flex items-center gap-1 transition-colors">
@@ -303,7 +300,7 @@ export default function DashboardPage() {
                   Manage <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
-              <div className="grid grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                 {accounts.slice(0, 10).map((acct) => (
                   <div key={acct.id} className="border border-white/[0.06] bg-white/[0.02] rounded-xl p-3.5 hover:border-white/[0.12] hover:bg-white/[0.04] transition-colors">
                     <p className="text-xs text-stone-500 mb-1.5">{acct.institution}</p>

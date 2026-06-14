@@ -152,7 +152,7 @@ Please: (1) identify the specific categories where my budgeting should be improv
   if (mode === "edit") {
     const remaining = suggestedCategories.filter((c) => !(c in draft));
     return (
-      <div className="p-6 max-w-2xl">
+      <div className="p-4 sm:p-6 max-w-2xl">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-xl font-bold text-stone-100">{hasBudget ? "Edit budget" : "Create your budget"}</h1>
@@ -235,7 +235,7 @@ Please: (1) identify the specific categories where my budgeting should be improv
   // ── EMPTY STATE (no budget yet) ──────────────────────────────────
   if (!hasBudget) {
     return (
-      <div className="p-6 max-w-4xl">
+      <div className="p-4 sm:p-6 max-w-4xl">
         <h1 className="text-xl font-bold text-stone-100 mb-1">Budget</h1>
         <p className="text-sm text-stone-400 mb-8">Plan your monthly spending by category.</p>
         <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -261,7 +261,7 @@ Please: (1) identify the specific categories where my budgeting should be improv
   const totalBudget = budgetRows.reduce((s, r) => s + r.limit, 0);
 
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="p-4 sm:p-6 max-w-4xl">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-stone-100">Budget</h1>

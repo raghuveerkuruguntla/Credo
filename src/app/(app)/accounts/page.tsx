@@ -51,7 +51,7 @@ export default function AccountsPage() {
   }, [accounts]);
 
   return (
-    <div className="p-6 max-w-5xl">
+    <div className="p-4 sm:p-6 max-w-5xl">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-stone-100">Accounts</h1>
@@ -78,7 +78,7 @@ export default function AccountsPage() {
       ) : (
         <>
           {/* Summary */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             {[
               { label: "Total Assets", value: totalAssets, color: "text-emerald-400" },
               { label: "Total Liabilities", value: totalDebt, color: "text-red-400" },

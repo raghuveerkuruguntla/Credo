@@ -102,7 +102,7 @@ export default function ForecastPage() {
   if (!hasData) return <div className="p-6"><EmptyState /></div>;
 
   return (
-    <div className="p-6 max-w-6xl">
+    <div className="p-4 sm:p-6 max-w-6xl">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-stone-100">Financial Forecast</h1>
@@ -114,8 +114,8 @@ export default function ForecastPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <Card className="col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <Card className="lg:col-span-2">
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle>Net Worth Projection</CardTitle>
             <div className="flex items-center gap-3 text-xs text-stone-400">
@@ -163,7 +163,7 @@ export default function ForecastPage() {
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><Sliders className="w-4 h-4" /> Scenario Variables</CardTitle></CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm font-medium text-stone-300">Monthly Income</label>

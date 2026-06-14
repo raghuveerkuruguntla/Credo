@@ -96,7 +96,7 @@ export default function SpendingPage() {
   if (!hasData) return <div className="p-6"><EmptyState /></div>;
 
   return (
-    <div className="p-6 max-w-6xl">
+    <div className="p-4 sm:p-6 max-w-6xl">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold text-stone-100">Spending Analytics</h1>
@@ -131,7 +131,7 @@ export default function SpendingPage() {
         <Card><CardContent className="py-16 text-center text-sm text-stone-500">No spending in this period.</CardContent></Card>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
             <Card>
               <CardHeader><CardTitle>Spending by Category</CardTitle></CardHeader>
               <CardContent>

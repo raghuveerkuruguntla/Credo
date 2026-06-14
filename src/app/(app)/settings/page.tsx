@@ -68,7 +68,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-6 max-w-3xl">
+    <div className="p-4 sm:p-6 max-w-3xl">
       <div className="mb-6">
         <h1 className="text-xl font-bold text-stone-100">Settings</h1>
         <p className="text-sm text-stone-400">Manage your account, notifications, and privacy</p>
@@ -96,7 +96,7 @@ export default function SettingsPage() {
             </div>
             <Button variant="outline" size="sm" className="ml-auto" onClick={() => openUserProfile()}>Edit profile</Button>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-stone-400 mb-1">Full name</label>
               <input readOnly value={user?.fullName ?? ""} className="w-full text-sm border border-[#ffffff14] rounded-lg px-3 py-2 bg-[#ffffff08] text-stone-400" title="Managed via Edit profile" />

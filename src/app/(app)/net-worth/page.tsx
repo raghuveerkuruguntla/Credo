@@ -28,7 +28,7 @@ export default function NetWorthPage() {
   const val = (n: number) => (show ? formatCurrency(n) : masked);
 
   return (
-    <div className="p-6 max-w-5xl">
+    <div className="p-4 sm:p-6 max-w-5xl">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-stone-100">Net Worth</h1>
@@ -51,7 +51,7 @@ export default function NetWorthPage() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="flex-row items-center justify-between">
             <CardTitle>Assets</CardTitle>

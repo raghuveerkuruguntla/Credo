@@ -129,7 +129,7 @@ export default function AIPage() {
   const questionsUsed = usage.used;
 
   return (
-    <div className="flex h-full flex-col p-6 max-w-4xl">
+    <div className="flex h-full flex-col p-4 sm:p-6 max-w-4xl">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-xl font-bold text-stone-100 flex items-center gap-2">

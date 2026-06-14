@@ -120,7 +120,7 @@ function BillingContent() {
       </Card>
 
       {/* Plans */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {(["FREE", "PLUS", "PRO"] as Plan[]).map((planKey) => {
           const ent = ENTITLEMENTS[planKey];
           const pricing = PLAN_PRICING[planKey];

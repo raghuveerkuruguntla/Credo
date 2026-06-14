@@ -76,7 +76,7 @@ export default function TransactionsPage() {
   if (!hasData) return <div className="p-6"><EmptyState /></div>;
 
   return (
-    <div className="p-6 max-w-5xl">
+    <div className="p-4 sm:p-6 max-w-5xl">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-stone-100">Transactions</h1>
@@ -102,7 +102,7 @@ export default function TransactionsPage() {
       </div>
 
       {/* Summary bar */}
-      <div className="grid grid-cols-3 gap-4 mb-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
         {[
           { label: "Money In", value: formatCurrency(totalIncome), color: "text-emerald-400" },
           { label: "Money Out", value: formatCurrency(totalExpenses), color: "text-red-400" },

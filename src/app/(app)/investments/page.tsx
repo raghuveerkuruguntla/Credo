@@ -44,7 +44,7 @@ export default function InvestmentsPage() {
 
   if (investments.length === 0) {
     return (
-      <div className="p-6 max-w-5xl">
+      <div className="p-4 sm:p-6 max-w-5xl">
         <h1 className="text-xl font-bold text-stone-100 mb-1">Investments</h1>
         <p className="text-sm text-stone-400 mb-6">Brokerage & retirement accounts</p>
         <Card><CardContent className="py-16 text-center">
@@ -56,7 +56,7 @@ export default function InvestmentsPage() {
   }
 
   return (
-    <div className="p-6 max-w-5xl">
+    <div className="p-4 sm:p-6 max-w-5xl">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-stone-100">Investments</h1>
@@ -68,7 +68,7 @@ export default function InvestmentsPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <Card>
           <CardContent className="pt-5 pb-5">
             <p className="text-xs text-stone-400 uppercase tracking-wide mb-1">Portfolio Value</p>
@@ -91,7 +91,7 @@ export default function InvestmentsPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card>
           <CardHeader><CardTitle>Allocation</CardTitle></CardHeader>
           <CardContent>
@@ -115,7 +115,7 @@ export default function InvestmentsPage() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-2">
+        <Card className="lg:col-span-2">
           <CardHeader><CardTitle>Investment Accounts</CardTitle></CardHeader>
           <div>
             {investments.map((acct, i) => (
