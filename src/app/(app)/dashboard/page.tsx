@@ -34,7 +34,7 @@ function StatCard({ label, value, sub, trend, trendValue, accent }: {
         )}
       </div>
       <p className="text-[26px] font-semibold text-stone-50 tracking-tight">{value}</p>
-      <p className="text-xs text-stone-500 mt-1">{sub}</p>
+      <div className="text-xs text-stone-500 mt-1">{sub}</div>
     </div>
   );
 }
@@ -168,10 +168,13 @@ export default function DashboardPage() {
                 label="Cash Balance"
                 value={formatCurrency(stats.cash)}
                 sub={
-                  <span>
-                    <span className="text-stone-400">{formatCurrency(stats.cashCurrent)}</span>
-                    <span className="text-stone-600"> current balance</span>
-                  </span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span>Checking &amp; savings</span>
+                    <span className="inline-flex items-center gap-1 bg-white/[0.08] border border-white/[0.08] rounded-full px-2 py-0.5">
+                      <span className="text-stone-300 font-medium">{formatCurrency(stats.cashCurrent)}</span>
+                      <span className="text-stone-500 text-[10px]">current</span>
+                    </span>
+                  </div>
                 }
               />
               <StatCard label="Debt" value={formatCurrency(stats.debt)} sub="Credit cards & loans" />
