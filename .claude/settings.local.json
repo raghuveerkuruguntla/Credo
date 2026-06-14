@@ -34,7 +34,9 @@
       "Bash(grep -rn \"bg-\\\\[#16120f\\\\]/\\\\|bg-white/\\\\[0.1\\\\]/70\\\\|text-slate-\\\\|bg-slate-\\\\|border-slate-\" \"src/app/\\(app\\)\" src/components/LiveAccounts.tsx)",
       "WebFetch(domain:useorigin.com)",
       "Bash(node -e \"const {PrismaClient}=require\\('@prisma/client'\\); console.log\\(typeof new PrismaClient\\({adapter:null}\\).aiUsage !== 'undefined' ? 'aiUsage model present' : 'missing'\\)\")",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Make landing page fully responsive for mobile *)"
     ]
   }
 }

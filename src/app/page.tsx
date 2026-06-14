@@ -12,57 +12,57 @@ const features = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Nav */}
-      <nav className="border-b border-slate-100 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
+      <nav className="border-b border-slate-100 px-4 sm:px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
             <Zap className="w-5 h-5 text-white" />
           </div>
           <span className="text-lg font-bold text-slate-900">FinPilot</span>
         </div>
-        <div className="flex items-center gap-4">
-          <a href="#pricing" className="text-sm text-slate-600 hover:text-slate-900">Pricing</a>
+        <div className="flex items-center gap-3 sm:gap-4">
+          <a href="#pricing" className="hidden sm:inline text-sm text-slate-600 hover:text-slate-900">Pricing</a>
           <Link href="/login" className="text-sm text-slate-600 hover:text-slate-900">Sign in</Link>
-          <Link href="/signup" className="bg-indigo-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-            Get started free
+          <Link href="/signup" className="bg-indigo-600 text-white text-sm font-medium px-3.5 sm:px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap">
+            Get started
           </Link>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="max-w-6xl mx-auto px-6 py-20 text-center">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20 text-center">
         <div className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
           <Zap className="w-3 h-3" /> AI-powered personal finance
         </div>
-        <h1 className="text-5xl font-bold text-slate-900 leading-tight mb-6">
+        <h1 className="text-3xl sm:text-5xl font-bold text-slate-900 leading-tight mb-5 sm:mb-6">
           Your money,<br />
           <span className="text-indigo-600">finally under control</span>
         </h1>
-        <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-10">
+        <p className="text-base sm:text-xl text-slate-600 max-w-2xl mx-auto mb-8 sm:mb-10">
           Connect all your bank accounts, credit cards, and investments. Get AI-powered insights, smart budgets, and future forecasts — all in one secure platform.
         </p>
-        <div className="flex items-center justify-center gap-4">
-          <Link href="/dashboard" className="bg-indigo-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors flex items-center gap-2 text-base">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4">
+          <Link href="/signup" className="bg-indigo-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 text-base">
             Start for free <ArrowRight className="w-4 h-4" />
           </Link>
-          <Link href="/dashboard" className="text-slate-700 font-semibold px-6 py-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-base">
-            View demo
+          <Link href="/login" className="text-slate-700 font-semibold px-6 py-3 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-base text-center">
+            Sign in
           </Link>
         </div>
         <p className="text-xs text-slate-400 mt-4">No credit card required · 256-bit encrypted · SOC2 compliant</p>
       </section>
 
       {/* Dashboard preview */}
-      <section className="max-w-5xl mx-auto px-6 pb-16">
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-12 sm:pb-16">
         <div className="rounded-2xl border border-slate-200 shadow-2xl shadow-slate-200 overflow-hidden bg-slate-50">
           <div className="bg-slate-900 px-4 py-3 flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-red-400" />
             <div className="w-3 h-3 rounded-full bg-yellow-400" />
             <div className="w-3 h-3 rounded-full bg-green-400" />
-            <div className="flex-1 mx-4 bg-slate-800 rounded-md px-3 py-1 text-xs text-slate-400">app.finpilot.com/dashboard</div>
+            <div className="flex-1 mx-2 sm:mx-4 bg-slate-800 rounded-md px-3 py-1 text-xs text-slate-400 truncate">app.finpilot.com/dashboard</div>
           </div>
-          <div className="grid grid-cols-4 gap-4 p-6 bg-slate-50">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 p-4 sm:p-6 bg-slate-50">
             {[
               { label: "Net Worth", value: "$75,887", change: "+$1,287 this month", color: "bg-indigo-50 border-indigo-100" },
               { label: "Cash", value: "$17,271", change: "Across 2 accounts", color: "bg-green-50 border-green-100" },
@@ -71,7 +71,7 @@ export default function LandingPage() {
             ].map((card) => (
               <div key={card.label} className={`rounded-xl border p-4 ${card.color}`}>
                 <p className="text-xs text-slate-500 mb-1">{card.label}</p>
-                <p className="text-xl font-bold text-slate-900">{card.value}</p>
+                <p className="text-lg sm:text-xl font-bold text-slate-900">{card.value}</p>
                 <p className="text-xs text-slate-500 mt-1">{card.change}</p>
               </div>
             ))}
@@ -80,10 +80,10 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section className="bg-slate-50 py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-3xl font-bold text-slate-900 text-center mb-12">Everything you need to master your finances</h2>
-          <div className="grid grid-cols-3 gap-6">
+      <section className="bg-slate-50 py-14 sm:py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 text-center mb-8 sm:mb-12">Everything you need to master your finances</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {features.map(({ icon: Icon, title, desc }) => (
               <div key={title} className="bg-white rounded-xl border border-slate-100 p-6">
                 <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
@@ -98,10 +98,10 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing teaser */}
-      <section id="pricing" className="max-w-6xl mx-auto px-6 py-20">
-        <h2 className="text-3xl font-bold text-slate-900 text-center mb-4">Simple, transparent pricing</h2>
-        <p className="text-slate-600 text-center mb-12">Start free. Upgrade when you need more.</p>
-        <div className="grid grid-cols-3 gap-6">
+      <section id="pricing" className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 text-center mb-3 sm:mb-4">Simple, transparent pricing</h2>
+        <p className="text-slate-600 text-center mb-8 sm:mb-12">Start free. Upgrade when you need more.</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-md md:max-w-none mx-auto">
           {[
             { name: "Free", price: "$0", features: ["2 institutions", "Basic analytics", "1 budget", "10 AI questions/mo"], cta: "Get started", highlight: false },
             { name: "Plus", price: "$9.99/mo", features: ["5 institutions", "Advanced analytics", "Unlimited budgets", "50 AI questions/mo"], cta: "Try Plus", highlight: true },
@@ -119,7 +119,7 @@ export default function LandingPage() {
                 ))}
               </ul>
               <Link
-                href="/dashboard"
+                href="/signup"
                 className={`block text-center py-2.5 rounded-lg text-sm font-semibold transition-colors ${tier.highlight ? "bg-indigo-600 text-white hover:bg-indigo-700" : "border border-slate-300 text-slate-700 hover:bg-slate-50"}`}
               >
                 {tier.cta}
@@ -130,26 +130,26 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-indigo-600 py-16">
-        <div className="max-w-3xl mx-auto text-center px-6">
-          <h2 className="text-3xl font-bold text-white mb-4">Take control of your financial future</h2>
+      <section className="bg-indigo-600 py-14 sm:py-16">
+        <div className="max-w-3xl mx-auto text-center px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Take control of your financial future</h2>
           <p className="text-indigo-200 mb-8">Join thousands of users who trust FinPilot to manage their money smarter.</p>
-          <Link href="/dashboard" className="bg-white text-indigo-600 font-bold px-8 py-3 rounded-xl hover:bg-indigo-50 transition-colors inline-flex items-center gap-2">
+          <Link href="/signup" className="bg-white text-indigo-600 font-bold px-8 py-3 rounded-xl hover:bg-indigo-50 transition-colors inline-flex items-center gap-2">
             Get started free <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-100 py-8 px-6">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <footer className="border-t border-slate-100 py-8 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center gap-4 sm:justify-between text-center sm:text-left">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-indigo-600 rounded flex items-center justify-center">
               <Zap className="w-4 h-4 text-white" />
             </div>
             <span className="text-sm font-bold text-slate-900">FinPilot</span>
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-400 max-w-md order-last sm:order-none">
             FinPilot provides financial information and budgeting support. It does not provide legal, tax, or investment advice.
           </p>
           <div className="flex gap-4 text-xs text-slate-400">
