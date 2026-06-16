@@ -38,7 +38,7 @@ export default function OnboardingPage() {
       return;
     }
     if (birthDate > maxDate) {
-      setError("You must be at least 18 years old to use FinPilot.");
+      setError("You must be at least 18 years old to use Finza.");
       return;
     }
 
@@ -65,18 +65,18 @@ export default function OnboardingPage() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-[#0d0b0a] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a0b0f] flex items-center justify-center">
         <Loader2 className="w-5 h-5 animate-spin text-stone-500" />
       </div>
     );
   }
 
   return (
-    <div className="dark-app min-h-screen bg-[#0d0b0a] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="dark-app min-h-screen bg-[#0a0b0f] flex items-center justify-center p-4 relative overflow-hidden">
       <AnimatedBackground />
       <div className="w-full max-w-sm relative z-10 animate-in">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_24px_rgba(249,115,22,0.35)]">
+          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_24px_rgba(99,102,241,0.35)]">
             <Zap className="w-7 h-7 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-stone-50">
@@ -89,7 +89,7 @@ export default function OnboardingPage() {
           </p>
         </div>
 
-        <form onSubmit={submit} className="bg-gradient-to-b from-[#1c1815] to-[#141110] border border-white/[0.06] rounded-2xl p-6 space-y-4">
+        <form onSubmit={submit} className="bg-gradient-to-b from-[#171a21] to-[#0f1117] border border-white/[0.06] rounded-2xl p-6 space-y-4">
           {needsName && (
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -117,7 +117,7 @@ export default function OnboardingPage() {
               max={maxDate} min="1900-01-01"
               className="w-full border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/40"
             />
-            <p className="text-xs text-stone-600 mt-1.5">You must be 18 or older to use FinPilot.</p>
+            <p className="text-xs text-stone-600 mt-1.5">You must be 18 or older to use Finza.</p>
           </div>
 
           {error && (
@@ -128,7 +128,7 @@ export default function OnboardingPage() {
 
           <button
             type="submit" disabled={submitting}
-            className="w-full bg-stone-100 text-stone-900 hover:bg-white font-semibold py-2.5 rounded-full transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-60 shadow-[0_0_20px_rgba(249,115,22,0.15)]"
+            className="w-full bg-stone-100 text-stone-900 hover:bg-white font-semibold py-2.5 rounded-full transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-60 shadow-[0_0_20px_rgba(99,102,241,0.15)]"
           >
             {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
             Continue to dashboard

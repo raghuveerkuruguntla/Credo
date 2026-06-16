@@ -28,8 +28,8 @@ export function stripeConfigured(): boolean {
 // Plan definitions used to create Checkout sessions with inline prices,
 // so no products need to be pre-created in the Stripe dashboard.
 export const PLANS = {
-  plus: { name: "FinPilot Plus", amount: 999, interval: "month" as const },
-  pro: { name: "FinPilot Pro", amount: 1999, interval: "month" as const },
+  plus: { name: "Finza Plus", amount: 999, interval: "month" as const },
+  pro: { name: "Finza Pro", amount: 1999, interval: "month" as const },
 };
 
 export type PlanKey = keyof typeof PLANS;

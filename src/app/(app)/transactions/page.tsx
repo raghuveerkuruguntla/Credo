@@ -62,7 +62,7 @@ export default function TransactionsPage() {
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
     const a = document.createElement("a");
     a.href = url;
-    a.download = `finpilot-transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `finza-transactions-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }

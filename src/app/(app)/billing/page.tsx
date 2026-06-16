@@ -73,7 +73,7 @@ function BillingContent() {
         <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-xl p-4 mb-5 flex items-center gap-3">
           <PartyPopper className="w-5 h-5 text-emerald-400 flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-emerald-300">Welcome to FinPilot {justUpgraded === "pro" ? "Pro" : "Plus"}!</p>
+            <p className="text-sm font-semibold text-emerald-300">Welcome to Finza {justUpgraded === "pro" ? "Pro" : "Plus"}!</p>
             <p className="text-xs text-emerald-400">Your payment was successful. It may take a few seconds for your plan to update.</p>
           </div>
         </div>
@@ -99,7 +99,7 @@ function BillingContent() {
               </div>
               <div>
                 <p className="font-semibold text-stone-100">
-                  {currentPlan === "FREE" ? "Free Plan" : currentPlan === "PLUS" ? "FinPilot Plus" : "FinPilot Pro"}
+                  {currentPlan === "FREE" ? "Free Plan" : currentPlan === "PLUS" ? "Finza Plus" : "Finza Pro"}
                 </p>
                 <p className="text-sm text-stone-400">
                   {currentPlan === "FREE" ? "$0/month" : currentPlan === "PLUS" ? "$9.99/month" : "$19.99/month"}
@@ -223,7 +223,7 @@ function BillingContent() {
       {/* Security note */}
       <div className="flex items-start gap-2 text-xs text-stone-500">
         <Shield className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-        <span>Payments are processed securely by Stripe. FinPilot never stores your card details. You can cancel anytime.</span>
+        <span>Payments are processed securely by Stripe. Finza never stores your card details. You can cancel anytime.</span>
       </div>
     </div>
   );

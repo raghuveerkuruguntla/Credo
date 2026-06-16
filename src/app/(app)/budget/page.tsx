@@ -298,7 +298,7 @@ Please: (1) identify the specific categories where my budgeting should be improv
             <div className="mt-4 flex items-start gap-2 bg-[#ffffff08] border border-[#ffffff0f] rounded-lg p-3">
               <Info className="w-3.5 h-3.5 text-stone-500 mt-0.5 flex-shrink-0" />
               <p className="text-[11px] text-stone-500 leading-relaxed">
-                <strong className="text-stone-400">Disclaimer:</strong> These suggestions are AI-generated for informational and educational purposes only and are based on general budgeting guidelines. They are <strong className="text-stone-400">not financial, investment, tax, or legal advice</strong>. FinPilot is not a licensed financial advisor. You are solely responsible for your own financial choices.
+                <strong className="text-stone-400">Disclaimer:</strong> These suggestions are AI-generated for informational and educational purposes only and are based on general budgeting guidelines. They are <strong className="text-stone-400">not financial, investment, tax, or legal advice</strong>. Finza is not a licensed financial advisor. You are solely responsible for your own financial choices.
               </p>
             </div>
           </CardContent>
@@ -321,7 +321,7 @@ Please: (1) identify the specific categories where my budgeting should be improv
             </Badge>
           </div>
           <div className="h-3 bg-[#ffffff12] rounded-full overflow-hidden">
-            <div className="h-full rounded-full transition-all" style={{ width: `${totalBudget > 0 ? Math.min((thisMonthSpend / totalBudget) * 100, 100) : 0}%`, background: thisMonthSpend > totalBudget ? "#ef4444" : "#f97316" }} />
+            <div className="h-full rounded-full transition-all" style={{ width: `${totalBudget > 0 ? Math.min((thisMonthSpend / totalBudget) * 100, 100) : 0}%`, background: thisMonthSpend > totalBudget ? "#ef4444" : "#6366f1" }} />
           </div>
           <p className="text-xs text-stone-500 mt-2">{formatCurrency(Math.max(totalBudget - thisMonthSpend, 0))} remaining this month</p>
         </CardContent>

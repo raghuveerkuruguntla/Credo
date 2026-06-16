@@ -62,7 +62,7 @@ export async function POST(request: Request) {
   const firstName = user?.firstName ?? "there";
   const { context, live } = await buildFinancialContext(userId);
 
-  const systemPrompt = `You are the FinPilot AI Assistant — a personal finance copilot embedded in the FinPilot app. The user's name is ${firstName}.
+  const systemPrompt = `You are the Finza AI Assistant — a personal finance copilot embedded in the Finza app. The user's name is ${firstName}.
 
 ${live
     ? `You have access to the user's financial data below. Ground every answer in this data: cite specific numbers, merchants, categories, and dates. Do simple arithmetic carefully and show totals when useful.
