@@ -11,7 +11,7 @@ import LockedFeature from "@/components/LockedFeature";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Eye, EyeOff, Info } from "lucide-react";
 
-const COLORS = ["#f97316", "#10b981", "#8b5cf6", "#06b6d4", "#ec4899", "#f59e0b"];
+const COLORS = ["#6366f1", "#10b981", "#8b5cf6", "#06b6d4", "#ec4899", "#f59e0b"];
 
 export default function InvestmentsPage() {
   const { accounts, loading, hasData } = useFinancialData();
@@ -100,7 +100,7 @@ export default function InvestmentsPage() {
                 <Pie data={allocation} dataKey="value" cx="50%" cy="50%" outerRadius={70} innerRadius={40}>
                   {allocation.map((a) => <Cell key={a.name} fill={a.color} />)}
                 </Pie>
-                <Tooltip formatter={(v) => formatCurrency(Number(v))} contentStyle={{ fontSize: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "#1c1815", color: "#fafaf9" }} />
+                <Tooltip formatter={(v) => formatCurrency(Number(v))} contentStyle={{ fontSize: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "#171a21", color: "#f8fafc" }} />
               </PieChart>
             </ResponsiveContainer>
             <div className="space-y-2 mt-2">

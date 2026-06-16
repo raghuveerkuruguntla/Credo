@@ -1,20 +1,27 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "FinPilot – Personal Finance Command Center",
+  title: "Finza – Personal Finance Command Center",
   description: "Track spending, budgets, investments, and net worth with AI-powered insights.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    title: "FinPilot",
+    title: "Finza",
     statusBarStyle: "black",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0d0b0a",
+  themeColor: "#0a0b0f",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -23,7 +30,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" className={inter.variable}>
         <body>{children}</body>
       </html>
     </ClerkProvider>

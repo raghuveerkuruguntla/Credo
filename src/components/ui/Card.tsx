@@ -11,7 +11,7 @@ export function Card({ children, className, onClick }: CardProps) {
   return (
     <div
       className={cn(
-        "bg-gradient-to-b from-[#1c1815] to-[#141110] rounded-2xl border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
+        "bg-gradient-to-b from-[#171a21] to-[#0f1117] rounded-2xl border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]",
         onClick && "cursor-pointer hover:border-white/[0.12] transition-colors",
         className
       )}

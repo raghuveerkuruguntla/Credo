@@ -20,7 +20,7 @@ export default function AccountsPage() {
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
 
   async function disconnect(itemId: string, institution: string) {
-    if (!confirm(`Disconnect ${institution}? This removes its accounts and revokes FinPilot's access. You can reconnect anytime.`)) return;
+    if (!confirm(`Disconnect ${institution}? This removes its accounts and revokes Finza's access. You can reconnect anytime.`)) return;
     setDisconnecting(itemId);
     try {
       const res = await fetch("/api/plaid/disconnect", {
@@ -105,7 +105,7 @@ export default function AccountsPage() {
                   <button onClick={() => toggleInst(inst)} className="w-full text-left">
                     <CardHeader className="flex-row items-center justify-between pb-3 cursor-pointer hover:bg-[#ffffff08] rounded-t-xl transition-colors">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm">
                           {inst[0]}
                         </div>
                         <div>

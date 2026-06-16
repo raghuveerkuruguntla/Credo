@@ -281,7 +281,7 @@ export const mockPricingTiers = [
     name: "Pro",
     price: 19.99,
     period: "month",
-    description: "The full FinPilot experience for serious wealth builders.",
+    description: "The full Finza experience for serious wealth builders.",
     features: [
       "Unlimited institutions",
       "Advanced AI assistant",

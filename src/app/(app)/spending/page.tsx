@@ -45,7 +45,7 @@ function renderLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent }: an
   const y = cy + r * Math.sin(-midAngle * RADIAN);
   if (percent < 0.06) return null;
   return (
-    <text x={x} y={y} fill="#fafaf9" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={600}>
+    <text x={x} y={y} fill="#f8fafc" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={600}>
       {`${(percent * 100).toFixed(0)}%`}
     </text>
   );
@@ -141,7 +141,7 @@ export default function SpendingPage() {
                       <Pie data={byCategory} dataKey="amount" cx="50%" cy="50%" innerRadius={55} outerRadius={90} labelLine={false} label={renderLabel}>
                         {byCategory.map((entry) => <Cell key={entry.category} fill={entry.color} />)}
                       </Pie>
-                      <Tooltip formatter={(v) => formatCurrency(Number(v))} contentStyle={{ fontSize: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "#1c1815", color: "#fafaf9" }} />
+                      <Tooltip formatter={(v) => formatCurrency(Number(v))} contentStyle={{ fontSize: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "#171a21", color: "#f8fafc" }} />
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="flex-1 space-y-2">
@@ -164,10 +164,10 @@ export default function SpendingPage() {
                   <ResponsiveContainer width="100%" height={220}>
                     <BarChart data={weekly}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                      <XAxis dataKey="week" tick={{ fontSize: 10, fill: "#78716c" }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fontSize: 11, fill: "#78716c" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
-                      <Tooltip formatter={(v) => formatCurrency(Number(v))} contentStyle={{ fontSize: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "#1c1815", color: "#fafaf9" }} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
-                      <Bar dataKey="amount" fill="#f97316" radius={[4, 4, 0, 0]} name="Spent" />
+                      <XAxis dataKey="week" tick={{ fontSize: 10, fill: "#64748b" }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
+                      <Tooltip formatter={(v) => formatCurrency(Number(v))} contentStyle={{ fontSize: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "#171a21", color: "#f8fafc" }} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+                      <Bar dataKey="amount" fill="#6366f1" radius={[4, 4, 0, 0]} name="Spent" />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (

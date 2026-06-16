@@ -159,7 +159,7 @@ export default function SettingsPage() {
         <div>
           {institutions.map((inst, i) => (
             <div key={inst} className={`flex items-center gap-3 px-6 py-3.5 hover:bg-[#ffffff0a] transition-colors ${i < institutions.length - 1 ? "border-b border-[#ffffff0a]" : ""}`}>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold bg-gradient-to-br from-orange-500 to-orange-600">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold bg-gradient-to-br from-indigo-500 to-violet-600">
                 {inst[0]}
               </div>
               <div className="flex-1">
@@ -185,7 +185,7 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-stone-100">Data sharing for improvements</p>
-                <p className="text-xs text-stone-500">Share anonymized usage data to improve FinPilot</p>
+                <p className="text-xs text-stone-500">Share anonymized usage data to improve Finza</p>
               </div>
               <Toggle checked={prefs.dataSharing} onChange={() => toggle("dataSharing")} />
             </div>

@@ -25,7 +25,7 @@ export default function EmptyState({
       <PlaidLinkButton
         size="md"
         label="Connect your first account"
-        className="bg-stone-100 text-stone-900 hover:bg-white rounded-full px-5 font-semibold shadow-[0_0_24px_rgba(249,115,22,0.15)]"
+        className="bg-stone-100 text-stone-900 hover:bg-white rounded-full px-5 font-semibold shadow-[0_0_24px_rgba(99,102,241,0.15)]"
       />
     </div>
   );

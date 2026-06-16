@@ -36,7 +36,16 @@
       "Bash(node -e \"const {PrismaClient}=require\\('@prisma/client'\\); console.log\\(typeof new PrismaClient\\({adapter:null}\\).aiUsage !== 'undefined' ? 'aiUsage model present' : 'missing'\\)\")",
       "mcp__Claude_Preview__preview_start",
       "Bash(git add *)",
-      "Bash(git commit -m 'Make landing page fully responsive for mobile *)"
+      "Bash(git commit -m 'Make landing page fully responsive for mobile *)",
+      "Bash(git push *)",
+      "Read(//c/Users/Business/.claude/**)",
+      "Bash(echo \"=== user plugins ===\" && find \"C:\\\\Users\\\\Business\\\\.claude\" -maxdepth 4 -iname \"*ui*ux*\" 2>/dev/null; ls \"C:\\\\Users\\\\Business\\\\.claude\\\\plugins\" 2>/dev/null; echo \"=== plugin config / marketplaces ===\" && cat \"C:\\\\Users\\\\Business\\\\.claude\\\\plugins\\\\config.json\" 2>/dev/null | head -40; cat \"C:\\\\Users\\\\Business\\\\.claude\\\\plugins\\\\repos\"/*/.* 2>/dev/null | head; echo \"=== any skill dir named ui-ux ===\"; find \"C:\\\\Users\\\\Business\\\\.claude\" \"C:\\\\Users\\\\Business\\\\AppData\\\\Roaming\\\\Claude\" -type d -iname \"*ui-ux*\" 2>/dev/null | head; echo \"=== project ===\" && find \"C:\\\\Users\\\\Business\\\\OneDrive\\\\Documents\\\\Finance-App\\\\.claude\" -type d 2>/dev/null)",
+      "Bash(python scripts/search.py \"fintech personal finance account aggregation dashboard trustworthy modern\" --design-system -f markdown -p \"FinPilot\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}  size=%{size_download}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(npx tsc *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(git checkout *)"
     ]
   }
 }

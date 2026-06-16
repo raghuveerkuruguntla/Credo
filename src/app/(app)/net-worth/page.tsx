@@ -41,7 +41,7 @@ export default function NetWorthPage() {
       </div>
 
       {/* Hero */}
-      <Card className="mb-6 bg-gradient-to-br from-orange-600 to-orange-800 border-0">
+      <Card className="mb-6 bg-gradient-to-br from-indigo-600 to-violet-700 border-0">
         <CardContent className="pt-8 pb-8 text-center">
           <p className="text-orange-100/80 text-sm mb-2 uppercase tracking-wide">Total Net Worth</p>
           <p className="text-5xl font-bold mb-2 text-white">{val(netWorth)}</p>
@@ -60,7 +60,7 @@ export default function NetWorthPage() {
           <div>
             {assets.map((acct, i) => (
               <div key={acct.id} className={`flex items-center gap-3 px-6 py-3.5 hover:bg-[#ffffff0a] transition-colors ${i < assets.length - 1 ? "border-b border-[#ffffff0a]" : ""}`}>
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold">
                   {acct.institution[0]}
                 </div>
                 <div className="flex-1">
