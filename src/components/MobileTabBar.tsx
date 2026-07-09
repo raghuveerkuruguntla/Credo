@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Landmark, ArrowLeftRight, PieChart, Bot } from "lucide-react";
+import { LayoutDashboard, Lightbulb, ArrowLeftRight, Landmark, Bot } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const tabs: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-  { href: "/accounts", label: "Accounts", icon: Landmark },
+  { href: "/insights", label: "Insights", icon: Lightbulb },
   { href: "/transactions", label: "Activity", icon: ArrowLeftRight },
-  { href: "/budget", label: "Budget", icon: PieChart },
+  { href: "/accounts", label: "Accounts", icon: Landmark },
   { href: "/ai", label: "AI", icon: Bot },
 ];
 
