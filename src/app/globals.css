@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ============================================================================
-   FinPilot / Finza — Premium dark theme
+   FinPilot / Credo — Premium dark theme
    Brand accent is INDIGO→VIOLET. To re-skin the whole app from one place we
    remap Tailwind's built-in `orange` scale to indigo and the `stone` scale to
    cool slate. Every existing `text-orange-*`, `bg-orange-*`, `text-stone-*`,
@@ -60,8 +60,17 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: #3a414f; }
 * { box-sizing: border-box; scrollbar-color: #2a2f3a transparent; }
 
-/* Never allow horizontal page scroll on any device */
-html, body { max-width: 100%; overflow-x: hidden; }
+/* Never allow horizontal page scroll on any device.
+   `clip` (not `hidden`) prevents horizontal scroll WITHOUT creating a scroll
+   container — `overflow-x: hidden` on an ancestor silently breaks
+   `position: sticky` descendants like the navbar. */
+html, body { max-width: 100%; overflow-x: clip; }
+
+/* Smooth in-page anchor scrolling (respects reduced motion below) */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
 
 /* Respect the iOS safe area for fixed bottom navigation (PWA) */
 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
@@ -114,6 +123,42 @@ html, body { max-width: 100%; overflow-x: hidden; }
   to   { opacity: 1; transform: translateY(0); }
 }
 .animate-in { animation: fade-in-up 0.4s ease-out both; }
+
+/* ── Logo marquee: continuous horizontal drift of partner bank logos ──────── */
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-x 38s linear infinite;
+  will-change: transform;
+}
+.marquee-track:hover { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+}
+
+/* Scroll cue — smooth vertical float (no bounce), exponential-ish ease-in-out */
+@keyframes scroll-cue {
+  0%, 100% { transform: translateY(0); opacity: 0.55; }
+  50%      { transform: translateY(6px); opacity: 1; }
+}
+.animate-scroll-cue { animation: scroll-cue 2.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll-cue { animation: none; }
+}
+
+/* Slow ambient drift for hero aurora blobs */
+@keyframes aurora-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(3%, -4%, 0) scale(1.08); }
+}
+.aurora-blob { animation: aurora-drift 18s ease-in-out infinite; will-change: transform; }
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob { animation: none; }
+}
 
 /* The ambient background animates regardless of OS motion settings (purely
    decorative). Only the one-time content entrance respects reduced-motion. */

@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import EmptyState, { LoadingState } from "@/components/EmptyState";
-import { Zap, Loader2, Sparkles, X, Info, Plus, Pencil, Wallet, Trash2 } from "lucide-react";
+import { Loader2, Sparkles, X, Info, Plus, Pencil, Wallet, Trash2 } from "lucide-react";
 
 type Budget = Record<string, number>;
 
@@ -270,12 +270,12 @@ Please: (1) identify the specific categories where my budgeting should be improv
         <div className="flex items-center gap-2">
           {ent.aiBudgetSuggestions ? (
             <Button variant="outline" size="sm" onClick={getAiSuggestions} disabled={aiLoading}>
-              {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+              {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               AI Suggestions
             </Button>
           ) : (
             <Link href="/billing">
-              <Button variant="outline" size="sm"><Zap className="w-4 h-4" /> AI Suggestions (Plus)</Button>
+              <Button variant="outline" size="sm"><Sparkles className="w-4 h-4" /> AI Suggestions (Plus)</Button>
             </Link>
           )}
           <Button size="sm" onClick={startEdit}><Pencil className="w-4 h-4" /> Edit budget</Button>
@@ -298,7 +298,7 @@ Please: (1) identify the specific categories where my budgeting should be improv
             <div className="mt-4 flex items-start gap-2 bg-[#ffffff08] border border-[#ffffff0f] rounded-lg p-3">
               <Info className="w-3.5 h-3.5 text-stone-500 mt-0.5 flex-shrink-0" />
               <p className="text-[11px] text-stone-500 leading-relaxed">
-                <strong className="text-stone-400">Disclaimer:</strong> These suggestions are AI-generated for informational and educational purposes only and are based on general budgeting guidelines. They are <strong className="text-stone-400">not financial, investment, tax, or legal advice</strong>. Finza is not a licensed financial advisor. You are solely responsible for your own financial choices.
+                <strong className="text-stone-400">Disclaimer:</strong> These suggestions are AI-generated for informational and educational purposes only and are based on general budgeting guidelines. They are <strong className="text-stone-400">not financial, investment, tax, or legal advice</strong>. Credo is not a licensed financial advisor. You are solely responsible for your own financial choices.
               </p>
             </div>
           </CardContent>

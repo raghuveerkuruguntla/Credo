@@ -7,7 +7,7 @@ import { ENTITLEMENTS, PLAN_FEATURES, PLAN_PRICING, normalizePlan, type Plan } f
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Check, Zap, CreditCard, Shield, Loader2, PartyPopper, ExternalLink } from "lucide-react";
+import { Check, Sparkles, CreditCard, Shield, Loader2, PartyPopper, ExternalLink } from "lucide-react";
 
 function BillingContent() {
   const { user } = useUser();
@@ -73,7 +73,7 @@ function BillingContent() {
         <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-xl p-4 mb-5 flex items-center gap-3">
           <PartyPopper className="w-5 h-5 text-emerald-400 flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-emerald-300">Welcome to Finza {justUpgraded === "pro" ? "Pro" : "Plus"}!</p>
+            <p className="text-sm font-semibold text-emerald-300">Welcome to Credo {justUpgraded === "pro" ? "Pro" : "Plus"}!</p>
             <p className="text-xs text-emerald-400">Your payment was successful. It may take a few seconds for your plan to update.</p>
           </div>
         </div>
@@ -95,11 +95,11 @@ function BillingContent() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#ffffff12] flex items-center justify-center">
-                <Zap className={`w-5 h-5 ${currentPlan === "FREE" ? "text-stone-400" : "text-orange-400"}`} />
+                <Sparkles className={`w-5 h-5 ${currentPlan === "FREE" ? "text-stone-400" : "text-orange-400"}`} />
               </div>
               <div>
                 <p className="font-semibold text-stone-100">
-                  {currentPlan === "FREE" ? "Free Plan" : currentPlan === "PLUS" ? "Finza Plus" : "Finza Pro"}
+                  {currentPlan === "FREE" ? "Free Plan" : currentPlan === "PLUS" ? "Credo Plus" : "Credo Pro"}
                 </p>
                 <p className="text-sm text-stone-400">
                   {currentPlan === "FREE" ? "$0/month" : currentPlan === "PLUS" ? "$9.99/month" : "$19.99/month"}
@@ -223,7 +223,7 @@ function BillingContent() {
       {/* Security note */}
       <div className="flex items-start gap-2 text-xs text-stone-500">
         <Shield className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-        <span>Payments are processed securely by Stripe. Finza never stores your card details. You can cancel anytime.</span>
+        <span>Payments are processed securely by Stripe. Credo never stores your card details. You can cancel anytime.</span>
       </div>
     </div>
   );

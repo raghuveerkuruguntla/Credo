@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { Zap, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 
 export default function OnboardingPage() {
@@ -38,7 +38,7 @@ export default function OnboardingPage() {
       return;
     }
     if (birthDate > maxDate) {
-      setError("You must be at least 18 years old to use Finza.");
+      setError("You must be at least 18 years old to use Credo.");
       return;
     }
 
@@ -77,7 +77,7 @@ export default function OnboardingPage() {
       <div className="w-full max-w-sm relative z-10 animate-in">
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_24px_rgba(99,102,241,0.35)]">
-            <Zap className="w-7 h-7 text-white" />
+            <span className="text-white font-bold text-xl leading-none">C</span>
           </div>
           <h1 className="text-2xl font-bold text-stone-50">
             {needsName ? "Tell us about yourself" : `Welcome${user?.firstName ? `, ${user.firstName}` : ""}!`}
@@ -117,7 +117,7 @@ export default function OnboardingPage() {
               max={maxDate} min="1900-01-01"
               className="w-full border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/40"
             />
-            <p className="text-xs text-stone-600 mt-1.5">You must be 18 or older to use Finza.</p>
+            <p className="text-xs text-stone-600 mt-1.5">You must be 18 or older to use Credo.</p>
           </div>
 
           {error && (

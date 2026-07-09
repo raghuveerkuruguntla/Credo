@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service – Finza",
+  title: "Terms of Service – Credo",
 };
 
 const updated = "June 12, 2026";
@@ -14,21 +14,21 @@ export default function TermsPage() {
 
       <div className="space-y-6 text-sm text-stone-400 leading-relaxed">
         <p>
-          These Terms of Service (&quot;Terms&quot;) govern your access to and use of Finza (the
+          These Terms of Service (&quot;Terms&quot;) govern your access to and use of Credo (the
           &quot;Service&quot;). By creating an account or using the Service, you agree to be bound by
           these Terms. If you do not agree, do not use the Service.
         </p>
 
         <Section title="1. Eligibility">
-          You must be at least 18 years old to use Finza. By using the Service you represent
+          You must be at least 18 years old to use Credo. By using the Service you represent
           that you are 18 or older and that the information you provide is accurate.
         </Section>
 
         <Section title="2. Not Financial Advice">
-          Finza provides financial information, budgeting tools, and AI-generated insights for
+          Credo provides financial information, budgeting tools, and AI-generated insights for
           informational and educational purposes only. The Service does <strong className="text-stone-200">not</strong> provide
           financial, investment, tax, accounting, or legal advice, and nothing in the Service should
-          be relied upon as such. Finza is not a registered investment adviser, broker-dealer, or
+          be relied upon as such. Credo is not a registered investment adviser, broker-dealer, or
           financial planner. You are solely responsible for your financial decisions. Consult a
           qualified licensed professional before acting on any information provided.
         </Section>
@@ -40,14 +40,14 @@ export default function TermsPage() {
         </Section>
 
         <Section title="4. Connecting Financial Accounts">
-          Finza uses Plaid Inc. to connect to your financial institutions. By linking an account,
+          Credo uses Plaid Inc. to connect to your financial institutions. By linking an account,
           you authorize us and Plaid to access read-only information such as balances and
           transactions. We never receive or store your bank login password. Your use of Plaid is also
           subject to Plaid&apos;s end user privacy policy.
         </Section>
 
         <Section title="5. Subscriptions and Billing">
-          Finza offers Free, Plus, and Pro plans. Paid subscriptions are billed in advance on a
+          Credo offers Free, Plus, and Pro plans. Paid subscriptions are billed in advance on a
           recurring basis through our payment processor, Stripe. You can upgrade, downgrade, or cancel
           at any time through the billing portal; cancellations take effect at the end of the current
           billing period. Fees are non-refundable except where required by law.
@@ -62,7 +62,7 @@ export default function TermsPage() {
         <Section title="7. Disclaimers and Limitation of Liability">
           The Service is provided &quot;as is&quot; without warranties of any kind. We do not guarantee
           that information displayed is accurate, complete, or current, as it depends on data supplied
-          by third parties. To the maximum extent permitted by law, Finza shall not be liable for
+          by third parties. To the maximum extent permitted by law, Credo shall not be liable for
           any indirect, incidental, or consequential damages, or for any financial losses arising from
           your use of, or reliance on, the Service.
         </Section>
@@ -77,7 +77,7 @@ export default function TermsPage() {
         </Section>
 
         <p className="text-xs text-stone-600 border-t border-white/[0.06] pt-6">
-          This document is a general template provided for the Finza application and does not
+          This document is a general template provided for the Credo application and does not
           constitute legal advice. Have it reviewed by a qualified attorney before relying on it in
           production.
         </p>

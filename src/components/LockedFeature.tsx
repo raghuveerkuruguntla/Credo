@@ -21,7 +21,7 @@ export default function LockedFeature({
       </div>
       <h2 className="text-base font-semibold text-stone-100 mb-1">{feature} is a {planLabel} feature</h2>
       <p className="text-sm text-stone-500 max-w-sm mb-5">
-        {description ?? `Upgrade to Finza ${planLabel} to unlock ${feature.toLowerCase()}.`}
+        {description ?? `Upgrade to Credo ${planLabel} to unlock ${feature.toLowerCase()}.`}
       </p>
       <Link
         href="/billing"

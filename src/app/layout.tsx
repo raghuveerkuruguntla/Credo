@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Inter } from "next/font/google";
+import { Inter, Anton } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -9,13 +9,21 @@ const inter = Inter({
   display: "swap",
 });
 
+// Display face for the hero tagline (outlined treatment)
+const anton = Anton({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-display",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Finza – Personal Finance Command Center",
+  title: "Credo – Personal Finance Command Center",
   description: "Track spending, budgets, investments, and net worth with AI-powered insights.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    title: "Finza",
+    title: "Credo",
     statusBarStyle: "black",
   },
 };
@@ -30,7 +38,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <html lang="en" className={inter.variable}>
+      <html lang="en" className={`${inter.variable} ${anton.variable}`}>
         <body>{children}</body>
       </html>
     </ClerkProvider>
