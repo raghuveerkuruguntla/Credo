@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import {
-  Zap, LayoutDashboard, Landmark, ArrowLeftRight, PieChart, Wallet,
-  TrendingUp, BarChart3, LineChart, Bot, Settings, Sparkles,
+  LayoutDashboard, Landmark, ArrowLeftRight, PieChart, Wallet,
+  TrendingUp, BarChart3, LineChart, Bot, Settings, Sparkles, Lightbulb,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -15,6 +15,7 @@ const groups: { heading: string; items: { href: string; label: string; icon: Luc
     heading: "Overview",
     items: [
       { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/insights", label: "Insights", icon: Lightbulb },
       { href: "/accounts", label: "Accounts", icon: Landmark },
       { href: "/transactions", label: "Transactions", icon: ArrowLeftRight },
     ],
@@ -47,9 +48,9 @@ export default function Sidebar() {
       {/* Logo */}
       <Link href="/dashboard" className="flex items-center gap-2.5 h-16 px-5 shrink-0 border-b border-white/[0.06]">
         <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center shadow-[0_0_16px_rgba(99,102,241,0.4)]">
-          <Zap className="w-5 h-5 text-white" />
+          <span className="text-white font-bold text-base leading-none">C</span>
         </div>
-        <span className="text-[15px] font-bold text-white tracking-tight">Finza</span>
+        <span className="text-[15px] font-bold text-white tracking-tight">Credo</span>
       </Link>
 
       {/* Nav groups */}

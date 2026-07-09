@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import EmptyState, { LoadingState } from "@/components/EmptyState";
 import LockedFeature from "@/components/LockedFeature";
+import WhyExplanation, { ConfidenceBadge } from "@/components/WhyExplanation";
+import type { Confidence, ExplanationPayload } from "@/lib/intelligence";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { Sliders, RotateCcw, Info } from "lucide-react";
+import { Sliders, RotateCcw, Info, Circle, CircleDashed } from "lucide-react";
 
 const MONTH_LABELS = ["Now", "M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10", "M11", "M12"];
 
@@ -74,6 +76,21 @@ export default function ForecastPage() {
   const baselineNW = baselineSeries[12];
   const monthlyNet = income - scenarioExpenses;
 
+  // Confidence in the projection scales with how much real history backs it —
+  // uncertainty is shown, not hidden (spec 005, Interaction Principle 3).
+  const historyMonths = monthlyAverages(transactions).months;
+  const confidence: Confidence = historyMonths >= 6 ? "high" : historyMonths >= 3 ? "medium" : "low";
+  const projectionExplanation: ExplanationPayload = {
+    sourceFacts: [
+      { label: "Today's net worth (fact)", detail: "Sum of connected balances", amount: base.netWorth, href: "/accounts" },
+      { label: "Avg monthly income", detail: `${historyMonths}-month average`, amount: base.income },
+      { label: "Avg monthly spending", detail: `${historyMonths}-month average`, amount: -base.expenses },
+      { label: "Investments compounding", detail: `at ${investmentReturn}% / yr`, amount: base.investments },
+    ],
+    reasoningSummary: `Each month, net worth changes by (income − expenses) and investments compound at the chosen annual return. Only today's balance is a fact; every point after it is a projection based on ${historyMonths} month(s) of your history.`,
+    confidence,
+  };
+
   // Sliders scale relative to the user's actual income/cash, not fixed caps
   const incomeMax = Math.max(20000, Math.ceil((base.income * 3) / 1000) * 1000);
   const expenseMax = expenseTarget === "ALL"
@@ -124,6 +141,16 @@ export default function ForecastPage() {
             </div>
           </CardHeader>
           <CardContent>
+            {/* Fact vs projection — the first point is real, the rest are modelled. */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-3">
+              <span className="flex items-center gap-1.5 text-[11px] text-stone-400">
+                <Circle className="w-3 h-3 text-stone-300 fill-current" /> Today&apos;s balance — fact
+              </span>
+              <span className="flex items-center gap-1.5 text-[11px] text-stone-400">
+                <CircleDashed className="w-3 h-3 text-stone-500" /> Months 1–12 — projection, subject to uncertainty
+              </span>
+              <ConfidenceBadge confidence={confidence} className="ml-auto" />
+            </div>
             <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={chartData}>
                 <defs>
@@ -213,9 +240,14 @@ export default function ForecastPage() {
 
       <div className="mt-4 bg-sky-500/10 border border-sky-500/20 rounded-xl p-4 flex items-start gap-3">
         <Info className="w-4 h-4 text-sky-400 mt-0.5 flex-shrink-0" />
-        <p className="text-xs text-stone-400">
-          Sliders are scaled to your actual income ({formatCurrency(base.income)}/mo) and current investments ({formatCurrency(base.investments)}). Each month, net worth grows by (income − expenses) and investments compound at the chosen return. This is a simplified model for exploration only — not financial advice.
-        </p>
+        <div className="min-w-0">
+          <p className="text-xs text-stone-400">
+            Sliders are scaled to your actual income ({formatCurrency(base.income)}/mo) and current investments ({formatCurrency(base.investments)}). Each month, net worth grows by (income − expenses) and investments compound at the chosen return. This is a simplified model for exploration only — not financial advice.
+          </p>
+          <div className="mt-2">
+            <WhyExplanation explanation={projectionExplanation} />
+          </div>
+        </div>
       </div>
     </div>
   );
