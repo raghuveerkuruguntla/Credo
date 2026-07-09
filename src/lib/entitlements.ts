@@ -101,5 +101,5 @@ export const PLAN_FEATURES: Record<Plan, string[]> = {
 export const PLAN_PRICING: Record<Plan, { price: number; description: string }> = {
   FREE: { price: 0, description: "Get started with the essentials — free forever." },
   PLUS: { price: 9.99, description: "Smarter analytics, forecasting, and more AI." },
-  PRO: { price: 19.99, description: "The complete Finza experience." },
+  PRO: { price: 19.99, description: "The complete Credo experience." },
 };

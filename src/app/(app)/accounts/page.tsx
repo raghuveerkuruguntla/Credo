@@ -20,7 +20,7 @@ export default function AccountsPage() {
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
 
   async function disconnect(itemId: string, institution: string) {
-    if (!confirm(`Disconnect ${institution}? This removes its accounts and revokes Finza's access. You can reconnect anytime.`)) return;
+    if (!confirm(`Disconnect ${institution}? This removes its accounts and revokes Credo's access. You can reconnect anytime.`)) return;
     setDisconnecting(itemId);
     try {
       const res = await fetch("/api/plaid/disconnect", {

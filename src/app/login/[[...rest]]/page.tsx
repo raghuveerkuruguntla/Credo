@@ -1,6 +1,6 @@
 import { SignIn } from "@clerk/nextjs";
 import Link from "next/link";
-import { Zap, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 
 export default function LoginPage() {
@@ -16,9 +16,9 @@ export default function LoginPage() {
       <div className="relative z-10 flex flex-col items-center animate-in">
         <div className="text-center mb-6">
           <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_24px_rgba(99,102,241,0.35)]">
-            <Zap className="w-7 h-7 text-white" />
+            <span className="text-white font-bold text-xl leading-none">C</span>
           </div>
-          <h1 className="text-2xl font-bold text-stone-50">Sign in to Finza</h1>
+          <h1 className="text-2xl font-bold text-stone-50">Sign in to Credo</h1>
           <p className="text-stone-500 text-sm mt-1">Your financial command center</p>
         </div>
         <SignIn

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
-import { Zap, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 // Full nav list for the mobile "more" sheet (the bottom tab bar covers the rest).
 const navItems = [
@@ -37,9 +37,9 @@ export default function TopNav() {
       <div className="px-4 h-16 flex items-center justify-between gap-3">
         <Link href="/dashboard" className="flex items-center gap-2.5 flex-shrink-0">
           <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center shadow-[0_0_16px_rgba(99,102,241,0.4)]">
-            <Zap className="w-5 h-5 text-white" />
+            <span className="text-white font-bold text-base leading-none">C</span>
           </div>
-          <span className="text-[15px] font-bold text-white tracking-tight">Finza</span>
+          <span className="text-[15px] font-bold text-white tracking-tight">Credo</span>
         </Link>
 
         <div className="flex items-center gap-1.5">

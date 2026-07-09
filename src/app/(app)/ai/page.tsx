@@ -56,7 +56,7 @@ export default function AIPage() {
     {
       id: "intro",
       role: "assistant",
-      content: `Hi there! 👋 I'm your Finza AI Assistant. I have access to your accounts, transactions, budgets, and investments — so I can give you personalized financial insights.\n\nWhat would you like to know about your finances today?`,
+      content: `Hi there! 👋 I'm your Credo AI Assistant. I have access to your accounts, transactions, budgets, and investments — so I can give you personalized financial insights.\n\nWhat would you like to know about your finances today?`,
     },
   ]);
   const [input, setInput] = useState("");

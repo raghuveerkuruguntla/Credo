@@ -185,7 +185,7 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-stone-100">Data sharing for improvements</p>
-                <p className="text-xs text-stone-500">Share anonymized usage data to improve Finza</p>
+                <p className="text-xs text-stone-500">Share anonymized usage data to improve Credo</p>
               </div>
               <Toggle checked={prefs.dataSharing} onChange={() => toggle("dataSharing")} />
             </div>

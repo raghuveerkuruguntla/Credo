@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < dob.getDate())) age--;
   if (age < 18) {
     return NextResponse.json(
-      { error: "You must be at least 18 years old to use Finza." },
+      { error: "You must be at least 18 years old to use Credo." },
       { status: 403 }
     );
   }

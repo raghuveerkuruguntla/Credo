@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy – Finza",
+  title: "Privacy Policy – Credo",
 };
 
 const updated = "June 12, 2026";
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
 
       <div className="space-y-6 text-sm text-stone-400 leading-relaxed">
         <p>
-          This Privacy Policy explains how Finza (&quot;we&quot;, &quot;us&quot;) collects, uses,
+          This Privacy Policy explains how Credo (&quot;we&quot;, &quot;us&quot;) collects, uses,
           and protects your information when you use our personal finance application (the
           &quot;Service&quot;).
         </p>
@@ -43,7 +43,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="4. Third-Party Service Providers">
-          We rely on trusted providers to operate Finza: Plaid (bank connections), our
+          We rely on trusted providers to operate Credo: Plaid (bank connections), our
           authentication provider (sign-in and account management), Stripe (payment processing), and
           our database and hosting providers. Each processes your data only as needed to provide their
           service and under their own privacy commitments.
@@ -83,7 +83,7 @@ export default function PrivacyPage() {
         </Section>
 
         <p className="text-xs text-stone-600 border-t border-white/[0.06] pt-6">
-          This document is a general template provided for the Finza application and does not
+          This document is a general template provided for the Credo application and does not
           constitute legal advice. Have it reviewed by a qualified attorney and tailored to your
           actual data practices and jurisdiction before relying on it in production.
         </p>

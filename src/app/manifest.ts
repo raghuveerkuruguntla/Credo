@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Finza – Personal Finance Command Center",
-    short_name: "Finza",
+    name: "Credo – Personal Finance Command Center",
+    short_name: "Credo",
     description: "Track spending, budgets, investments, and net worth with AI-powered insights.",
     start_url: "/dashboard",
     display: "standalone",
