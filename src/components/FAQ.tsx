@@ -17,11 +17,11 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 const FAQS = [
   {
     q: "How does Credo connect to my bank?",
-    a: "Through Plaid, the same secure infrastructure used by Venmo and Robinhood. You log in at your bank — Credo never sees or stores your credentials, only a read-only token that can't move money.",
+    a: "Through Plaid, the bank-connection service trusted by thousands of finance apps. You log in at your own bank — Credo never sees or stores your bank username or password, only a read-only token that can view balances and transactions but can't move money.",
   },
   {
     q: "Is my financial data safe?",
-    a: "Yes. Everything is protected with 256-bit encryption in transit and at rest, connections are read-only, and we never sell your data. You can disconnect any institution and delete your data at any time.",
+    a: "Yes. Because Credo connects through Plaid, your bank login never touches our servers, and connections are read-only. The access tokens we store are encrypted with AES-256, all traffic is encrypted in transit over TLS, and we never sell your data. You can disconnect any institution and delete your data at any time.",
   },
   {
     q: "Is there really a free plan?",
@@ -29,11 +29,11 @@ const FAQS = [
   },
   {
     q: "What can the AI assistant actually do?",
-    a: "It answers questions grounded in your real accounts — \"How much did I spend on dining last month?\", \"Can I afford a $2,000 trip in March?\" — and suggests budgets based on your actual patterns rather than generic advice.",
+    a: "It answers questions grounded in your real accounts — like \"How much did I spend on dining last month?\" or \"What's my savings rate?\" — using your actual data instead of generic advice. On paid plans it can also suggest budgets from your spending patterns and run forecasts.",
   },
   {
     q: "Which accounts can I track?",
-    a: "Checking, savings, credit cards, loans, and investment accounts across 11,000+ institutions. Balances, transactions, budgets, and portfolio holdings all live in one dashboard.",
+    a: "Checking, savings, credit cards, loans, and investment accounts across 11,000+ institutions — with balances, transactions, and budgets in one dashboard. Investment balances and allocation are available on the Pro plan.",
   },
   {
     q: "Can I cancel anytime?",
