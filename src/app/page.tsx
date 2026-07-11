@@ -629,22 +629,6 @@ export default function LandingPage() {
               <img src="/pricing-light.webp" alt="" loading="lazy" decoding="async" className="pointer-events-none absolute top-1/2 select-none" style={{
                 left: "-18%", height: "155%", width: "auto", transform: "translateY(-50%) scaleX(-1)", mixBlendMode: "screen", opacity: 0.42, filter: "blur(1.2px) saturate(110%)",
               }} />
-              {/* floating glass bubbles */}
-              {[
-                { d: 118, top: "12%", left: "9%",  o: 0.55 },
-                { d: 60,  top: "40%", left: "24%", o: 0.42 },
-                { d: 150, top: "16%", left: "88%", o: 0.5 },
-                { d: 70,  top: "30%", left: "78%", o: 0.4 },
-                { d: 40,  top: "78%", left: "13%", o: 0.38 },
-              ].map((b, i) => (
-                <span key={i} className="pointer-events-none absolute rounded-full" style={{
-                  width: b.d, height: b.d, top: b.top, left: b.left, transform: "translate(-50%,-50%)",
-                  background: "radial-gradient(circle at 35% 30%, rgba(255,255,255,0.20) 0%, rgba(170,140,255,0.07) 40%, transparent 70%)",
-                  border: "1px solid rgba(200,184,255,0.20)",
-                  boxShadow: `inset 0 0 ${b.d/3}px rgba(180,150,255,0.12), 0 0 ${b.d/4}px rgba(140,110,240,0.14)`,
-                  opacity: b.o,
-                }} />
-              ))}
               {/* legibility scrim — keeps the centred copy crisp while the edges glow */}
               <div className="pointer-events-none absolute inset-0 rounded-[40px]" style={{
                 background: "radial-gradient(ellipse 68% 78% at 50% 48%, rgba(10,8,18,0.74) 0%, rgba(10,8,18,0.42) 48%, transparent 80%)",
@@ -778,7 +762,7 @@ export default function LandingPage() {
                 </ul>
               </div>
             </div>
-            <div className="border-t border-white/[0.06] pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+            <div className="pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
               <p className="text-xs text-slate-600">&copy; 2026 Credo. All rights reserved.</p>
               <button className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors rounded-full px-4 py-2 border border-white/[0.08] flex-shrink-0" style={{ background: "rgba(16,14,28,0.6)" }}>
                 <Globe className="w-4 h-4" />
