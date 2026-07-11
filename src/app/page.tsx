@@ -15,8 +15,8 @@ const features = [
   { icon: Wallet, title: "Smart Budgeting", desc: "Set monthly limits per category and track them against real spending." },
   { icon: TrendingUp, title: "Future Forecasting", desc: "Run what-if scenarios to see how today's choices shape tomorrow." },
   { icon: Bot, title: "AI Financial Assistant", desc: "Ask anything about your money — answers grounded in your real data." },
-  { icon: Shield, title: "Bank-Level Security", desc: "256-bit encryption, Plaid connections, and zero credential storage." },
-  { icon: Sparkles, title: "Investment Tracking", desc: "Monitor holdings, allocation, and portfolio performance over time." },
+  { icon: Shield, title: "Bank-Level Security", desc: "Read-only Plaid connections, AES-256 encryption, and we never store your bank login." },
+  { icon: Sparkles, title: "Investment Tracking", desc: "Track your investment accounts, balances, and allocation in one view." },
 ];
 
 // Liquid-glass surface (Higgsfield render) mapped as one continuous image across
@@ -119,6 +119,8 @@ function BankMark({ k }:{ k:string }) {
       <img
         src={`/logos/cut/${file}`}
         alt=""
+        loading="lazy"
+        decoding="async"
         className="object-contain"
         style={{
           maxWidth: "100%", maxHeight: "100%", width: "auto", height: "auto",
@@ -131,7 +133,7 @@ function BankMark({ k }:{ k:string }) {
 
 export default function LandingPage() {
   return (
-    <div className="dark-app relative min-h-screen bg-black text-slate-200 overflow-x-hidden">
+    <div className="dark-app relative min-h-screen bg-black text-slate-200 overflow-x-clip">
       <AnimatedBackground />
       <div className="relative z-10">
 
@@ -238,7 +240,7 @@ export default function LandingPage() {
                 </span>
               </HeroItem>
               <HeroItem as="p">
-                <span className="block text-[14px] sm:text-[16px] mb-8 leading-relaxed mx-auto max-w-[24rem]" style={{ color: "rgba(206,204,224,0.88)", textShadow: "0 1px 10px rgba(0,0,0,0.8)" }}>Connect every account, balance, and budget in one calm, secure dashboard — with AI that actually understands your money.</span>
+                <span className="block text-[14px] sm:text-[16px] mb-8 leading-relaxed mx-auto max-w-[22rem]" style={{ color: "rgba(206,204,224,0.88)", textShadow: "0 1px 10px rgba(0,0,0,0.8)" }}>Every account in one place — with AI that actually gets your money.</span>
               </HeroItem>
               <HeroItem className="flex items-center justify-center">
                 <Link href="/signup" className="group inline-flex items-center justify-center gap-2 font-semibold px-9 py-3.5 rounded-full transition-all text-[15px] w-full sm:w-auto text-white hover:-translate-y-0.5" style={{
@@ -252,7 +254,7 @@ export default function LandingPage() {
               <HeroItem className="mt-7 flex items-center justify-center gap-2 text-[12px]" >
                 <span className="inline-flex items-center gap-2" style={{ color: "rgba(180,176,204,0.78)" }}>
                   <Shield className="w-3.5 h-3.5" style={{ color: "#A99CFF" }} />
-                  Bank-level encryption · No credit card to start
+                  Encrypted &amp; read-only · No credit card to start
                 </span>
               </HeroItem>
             </HeroReveal>
@@ -275,8 +277,8 @@ export default function LandingPage() {
             <Stagger className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-px rounded-2xl overflow-hidden" >
               {[
                 { node: <Counter to={11000} suffix="+" />, label: "Institutions supported" },
-                { node: <>256-bit</>, label: "Bank-grade encryption" },
-                { node: <Counter to={6} />, label: "Tools, one dashboard" },
+                { node: <>AES-256</>, label: "Token encryption" },
+                { node: <>Read-only</>, label: "Bank connections" },
                 { node: <>$0</>, label: "To get started" },
               ].map((s, i) => (
                 <StaggerItem key={i} className="flex flex-col items-center justify-center text-center px-4 py-7" style={{ background: "rgba(14,12,26,0.5)", boxShadow: "inset 0 0 0 1px rgba(184,170,255,0.08)" }}>
@@ -473,6 +475,8 @@ export default function LandingPage() {
                       <img
                         src="/pricing-light.webp"
                         alt=""
+                        loading="lazy"
+                        decoding="async"
                         className="pointer-events-none absolute top-1/2 -translate-y-1/2 select-none"
                         style={{
                           right: "-26%",
@@ -617,12 +621,12 @@ export default function LandingPage() {
               }} />
               {/* flowing violet silk light — right side, bleeds off the edge (Higgsfield render) */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/pricing-light.webp" alt="" className="pointer-events-none absolute top-1/2 -translate-y-1/2 select-none" style={{
+              <img src="/pricing-light.webp" alt="" loading="lazy" decoding="async" className="pointer-events-none absolute top-1/2 -translate-y-1/2 select-none" style={{
                 right: "-10%", height: "155%", width: "auto", mixBlendMode: "screen", opacity: 0.82, filter: "blur(0.6px) saturate(115%)",
               }} />
               {/* fainter mirrored streak — left side */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/pricing-light.webp" alt="" className="pointer-events-none absolute top-1/2 select-none" style={{
+              <img src="/pricing-light.webp" alt="" loading="lazy" decoding="async" className="pointer-events-none absolute top-1/2 select-none" style={{
                 left: "-18%", height: "155%", width: "auto", transform: "translateY(-50%) scaleX(-1)", mixBlendMode: "screen", opacity: 0.42, filter: "blur(1.2px) saturate(110%)",
               }} />
               {/* floating glass bubbles */}

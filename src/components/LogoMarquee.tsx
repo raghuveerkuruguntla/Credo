@@ -26,6 +26,8 @@ function Mark({ file, treat }: { file: string; treat: "white" | "color" }) {
       <img
         src={`/logos/cut/${file}`}
         alt=""
+        loading="lazy"
+        decoding="async"
         className="object-contain h-7 sm:h-8 w-auto opacity-70 hover:opacity-100 transition-opacity"
         style={{
           filter:
