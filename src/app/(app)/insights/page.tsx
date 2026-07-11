@@ -164,7 +164,7 @@ export default function InsightsPage() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {restRecs.map((rec) => (
-                  <div key={rec.id} className={`${card} p-5`}>
+                  <div key={rec.id} className={`${card} p-5 min-w-0 overflow-hidden`}>
                     <RecommendationBody
                       rec={rec}
                       value={adjust[rec.id] ?? (rec.action.type === "adjustable" ? rec.action.amount : 0)}
@@ -304,8 +304,10 @@ function RecommendationBody({
         </div>
       )}
 
-      {/* Actions — always accept / adjust / dismiss in the same view (C5). */}
-      <div className="flex items-center gap-2 mt-4">
+      {/* Actions — always accept / adjust / dismiss in the same view (C5).
+          flex-wrap so the buttons + confidence badge never overflow a narrow
+          two-column card (they wrap to a new line instead). */}
+      <div className="flex flex-wrap items-center gap-2 mt-4">
         <button
           onClick={onAccept}
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 rounded-full px-4 py-2 shadow-[0_0_20px_rgba(99,102,241,0.25)] transition-all cursor-pointer"
