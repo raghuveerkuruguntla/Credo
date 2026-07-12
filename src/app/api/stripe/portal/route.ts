@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { getStripe, stripeConfigured } from "@/lib/stripe";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
+  const limited = await enforceRateLimit(`stripe:${userId}`, LIMITS.stripe);
+  if (limited) return limited;
   if (!stripeConfigured()) {
     return NextResponse.json({ error: "Stripe is not configured" }, { status: 503 });
   }

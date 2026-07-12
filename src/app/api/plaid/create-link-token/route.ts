@@ -3,6 +3,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { plaidClient, plaidConfigured } from "@/lib/plaid";
 import { getItemsForUser } from "@/lib/store";
 import { entitlementsFor } from "@/lib/entitlements";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 import { CountryCode, Products } from "plaid";
 
 export async function POST() {
@@ -10,6 +11,8 @@ export async function POST() {
   if (!userId) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
+  const limited = await enforceRateLimit(`plaid:${userId}`, LIMITS.plaid);
+  if (limited) return limited;
   if (!plaidConfigured()) {
     return NextResponse.json(
       { error: "Plaid is not configured. Add PLAID_CLIENT_ID and PLAID_SECRET to .env.local." },

@@ -2,12 +2,15 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { plaidClient, plaidConfigured } from "@/lib/plaid";
 import { getItemsForUser } from "@/lib/store";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 
 export async function GET() {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
+  const limited = await enforceRateLimit(`plaid:${userId}`, LIMITS.plaid);
+  if (limited) return limited;
   if (!plaidConfigured()) {
     return NextResponse.json({ accounts: [], configured: false });
   }
