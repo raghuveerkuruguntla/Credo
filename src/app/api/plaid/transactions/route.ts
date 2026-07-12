@@ -45,7 +45,7 @@ export async function GET() {
     transactions.sort((a, b) => b.date.localeCompare(a.date));
     return NextResponse.json({ transactions, configured: true });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to fetch transactions";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Plaid transactions error:", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "Couldn't load your transactions right now. Please try again." }, { status: 500 });
   }
 }
