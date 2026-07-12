@@ -3,6 +3,12 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { buildFinancialContext } from "@/lib/financial-context";
 import { getPrisma, databaseConfigured } from "@/lib/db";
 import { entitlementsFor } from "@/lib/entitlements";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
+
+// Bound per-request prompt size so a single call can't run up token cost.
+const MAX_MESSAGES = 10;         // most recent turns sent to the model
+const MAX_MESSAGE_CHARS = 2000;  // per message
+const MAX_TOTAL_CHARS = 12000;   // across all messages in a request
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL = "llama-3.3-70b-versatile";
@@ -27,6 +33,10 @@ export async function POST(request: Request) {
       { status: 503 }
     );
   }
+
+  // Burst rate limit (per user) — caps cost even for unlimited (Pro) plans.
+  const limited = await enforceRateLimit(`ai:${userId}`, LIMITS.ai);
+  if (limited) return limited;
 
   const user = await currentUser();
   const ent = entitlementsFor(user?.publicMetadata?.plan);
@@ -57,6 +67,22 @@ export async function POST(request: Request) {
   };
   if (!Array.isArray(messages) || messages.length === 0) {
     return NextResponse.json({ error: "No messages provided" }, { status: 400 });
+  }
+
+  // Sanitize + bound the input so a request can't blow up token usage: keep only
+  // valid roles, take the most recent turns, and clamp each message's length.
+  let running = 0;
+  const cleanMessages = messages
+    .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+    .slice(-MAX_MESSAGES)
+    .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_MESSAGE_CHARS) }))
+    .filter((m) => {
+      if (m.content.trim() === "" || running >= MAX_TOTAL_CHARS) return false;
+      running += m.content.length;
+      return true;
+    });
+  if (cleanMessages.length === 0) {
+    return NextResponse.json({ error: "No valid message content provided" }, { status: 400 });
   }
 
   const firstName = user?.firstName ?? "there";
@@ -90,7 +116,7 @@ Guidelines:
         model: MODEL,
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages.slice(-12),
+          ...cleanMessages,
         ],
         temperature: 0.4,
         max_tokens: 1024,

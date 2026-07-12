@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 // Saves the user's monthly budget (category -> limit) to their profile.
 export async function POST(request: Request) {
@@ -7,6 +8,8 @@ export async function POST(request: Request) {
   if (!userId) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
+  const limited = await enforceRateLimit(`write:${userId}`, { limit: 30, windowSec: 60 });
+  if (limited) return limited;
 
   const { budget } = (await request.json()) as { budget?: Record<string, unknown> };
   if (budget == null || typeof budget !== "object") {
