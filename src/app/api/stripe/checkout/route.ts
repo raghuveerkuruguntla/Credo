@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { getStripe, stripeConfigured, PLANS, PlanKey } from "@/lib/stripe";
 import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
+import { getBaseUrl } from "@/lib/base-url";
 
 export async function POST(request: Request) {
   const { userId } = await auth();
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
 
   const user = await currentUser();
   const email = user?.primaryEmailAddress?.emailAddress;
-  const origin = request.headers.get("origin") ?? "http://localhost:3000";
+  const origin = getBaseUrl(request);
   const existingCustomerId = user?.publicMetadata?.stripeCustomerId as string | undefined;
 
   try {
@@ -58,7 +59,6 @@ export async function POST(request: Request) {
       statusCode: e?.statusCode,
       message: e?.message,
     });
-    const message = err instanceof Error ? err.message : "Failed to create checkout session";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "Couldn't start checkout. Please try again." }, { status: 500 });
   }
 }

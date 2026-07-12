@@ -49,7 +49,7 @@ export async function GET() {
 
     return NextResponse.json({ accounts, configured: true });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to fetch accounts";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Plaid accounts error:", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "Couldn't load your accounts right now. Please try again." }, { status: 500 });
   }
 }

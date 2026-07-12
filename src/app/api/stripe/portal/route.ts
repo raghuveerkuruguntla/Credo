@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { getStripe, stripeConfigured } from "@/lib/stripe";
 import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
+import { getBaseUrl } from "@/lib/base-url";
 
 export async function POST(request: Request) {
   const { userId } = await auth();
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No billing account found — upgrade to a paid plan first" }, { status: 404 });
   }
 
-  const origin = request.headers.get("origin") ?? "http://localhost:3000";
+  const origin = getBaseUrl(request);
 
   try {
     const session = await getStripe().billingPortal.sessions.create({
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ url: session.url });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to open billing portal";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Stripe portal error:", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "Couldn't open the billing portal. Please try again." }, { status: 500 });
   }
 }

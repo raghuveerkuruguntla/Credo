@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, item_id: response.data.item_id });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to exchange token";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Plaid exchange-token error:", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "Couldn't finish connecting your bank. Please try again." }, { status: 500 });
   }
 }

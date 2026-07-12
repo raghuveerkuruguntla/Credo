@@ -147,7 +147,7 @@ Guidelines:
 
     return NextResponse.json({ reply, live, usage: { used, limit } });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "AI request failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("AI chat error:", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "The assistant is unavailable right now. Please try again." }, { status: 500 });
   }
 }

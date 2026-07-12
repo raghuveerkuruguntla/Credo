@@ -46,7 +46,7 @@ export async function POST() {
     });
     return NextResponse.json({ link_token: response.data.link_token });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Failed to create link token";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Plaid create-link-token error:", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "Couldn't start the bank connection. Please try again." }, { status: 500 });
   }
 }
