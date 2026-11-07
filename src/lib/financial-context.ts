@@ -1,6 +1,7 @@
 import { plaidClient, plaidConfigured } from "@/lib/plaid";
 import { getItemsForUser } from "@/lib/store";
-import { computeHealth, healthInputsFrom, healthSummaryText, type HealthAccount, type HealthTxn } from "@/lib/health";
+import { computeHealth, healthInputsFrom, healthSummaryText } from "@/lib/health";
+import { detectBlindSpots, blindSpotsSummaryText, healthPenalty, type BSAccount, type BSTxn } from "@/lib/blindspots";
 
 // Builds a plain-text snapshot of the user's finances for the AI assistant
 // from their live Plaid-connected accounts. If the user has no connections,
@@ -14,8 +15,9 @@ export async function buildFinancialContext(userId: string): Promise<{ context: 
 
     const lines: string[] = ["LIVE DATA from the user's connected bank accounts (via Plaid):", ""];
     let totalBalance = 0;
-    const healthAccounts: HealthAccount[] = [];
-    const healthTxns: HealthTxn[] = [];
+    // Same shapes the app uses, so the health score and blind spots match the UI.
+    const healthAccounts: BSAccount[] = [];
+    const healthTxns: BSTxn[] = [];
 
     for (const item of items) {
       const accountsRes = await plaidClient.accountsGet({ access_token: item.accessToken });
@@ -25,6 +27,9 @@ export async function buildFinancialContext(userId: string): Promise<{ context: 
         const signed = a.type === "credit" || a.type === "loan" ? -bal : bal;
         totalBalance += signed;
         healthAccounts.push({
+          id: a.account_id,
+          name: a.name,
+          mask: a.mask,
           type: a.subtype ?? a.type,
           balance: a.type === "depository" && a.balances.available != null ? a.balances.available : a.balances.current,
           current: a.balances.current,
@@ -55,13 +60,21 @@ export async function buildFinancialContext(userId: string): Promise<{ context: 
         const cat = t.personal_finance_category?.primary ?? "OTHER";
         if (t.amount > 0) categoryTotals[cat] = (categoryTotals[cat] ?? 0) + t.amount;
         else totalIncome += Math.abs(t.amount);
-        healthTxns.push({ date: t.date, amount: -t.amount, category: cat }); // app convention: negative = money out
+        healthTxns.push({ id: t.transaction_id, accountId: t.account_id, date: t.date, merchant: t.merchant_name ?? t.name, amount: -t.amount, category: cat, pending: t.pending }); // app convention: negative = money out
         txnLines.push(`  ${t.date} | ${t.merchant_name ?? t.name} | $${t.amount.toFixed(2)} | ${cat}${t.pending ? " (pending)" : ""}`);
       }
     }
 
-    const healthText = healthSummaryText(computeHealth(healthInputsFrom(healthAccounts, healthTxns)));
-    if (healthText) lines.push(healthText, "");
+    const health = computeHealth(healthInputsFrom(healthAccounts, healthTxns));
+    const blind = detectBlindSpots(healthAccounts, healthTxns);
+    const healthText = healthSummaryText(health);
+    if (healthText) {
+      const penalty = healthPenalty(blind.findings);
+      lines.push(healthText);
+      if (penalty > 0) lines.push(`  Blind-spot deduction: −${penalty} (unresolved critical −5, needs-attention −2, capped at −15) → about ${Math.max(0, health.score - penalty)}/100 as shown in the app, unless the user has resolved or dismissed some.`);
+      lines.push("");
+    }
+    lines.push(blindSpotsSummaryText(blind.findings), "");
 
     lines.push(`Total income (money in) over last 90 days: $${totalIncome.toFixed(2)}`);
     lines.push("", "Spending by category (last 90 days, money out):");

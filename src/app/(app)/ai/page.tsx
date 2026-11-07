@@ -11,7 +11,7 @@ type Message = { role: "user" | "assistant"; content: string; id: string };
 
 const QUICK_PROMPTS = [
   { icon: HeartPulse, text: "Explain my health score. What should I fix first?" },
-  { icon: Target, text: "What's my next best move this week?" },
+  { icon: Target, text: "What are my biggest financial blind spots?" },
   { icon: Plane, text: "Can I afford a $1,500 trip next month?" },
   { icon: Wallet, text: "Should I pay down my card or build savings?" },
 ];
@@ -82,6 +82,20 @@ export default function AIPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Deep link from a Blind Spot ("Ask the coach"): /ai?ask=<question>. The user
+  // clicked to ask, so send it once usage has loaded, then clean the URL so a
+  // refresh doesn't ask again.
+  const askedRef = useRef(false);
+  useEffect(() => {
+    if (!usageLoaded || askedRef.current) return;
+    const q = new URLSearchParams(window.location.search).get("ask");
+    if (!q) return;
+    askedRef.current = true;
+    window.history.replaceState(null, "", window.location.pathname);
+    send(q.slice(0, 1500));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usageLoaded]);
 
   async function send(text?: string) {
     const msg = (text ?? input).trim();

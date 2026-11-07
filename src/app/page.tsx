@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Shield, Bot, TrendingUp, Wallet, ArrowRight, Check, Sparkles, Star, Lock, Gift, Crown, PieChart, Target, HeartPulse, CalendarClock, Sliders, Compass, Landmark } from "lucide-react";
+import { Shield, Bot, TrendingUp, Wallet, ArrowRight, Check, Sparkles, Star, Lock, Gift, Crown, PieChart, Target, HeartPulse, CalendarClock, Sliders, Radar, Landmark } from "lucide-react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import LandingNav from "@/components/LandingNav";
 import AccountMarquee from "@/components/AccountMarquee";
@@ -15,11 +15,11 @@ import FAQ from "@/components/FAQ";
 // a coach to talk it through, and one confident next move.
 const features = [
   { icon: Landmark, title: "Your Whole Picture", desc: "Checking, savings, CDs, IRAs, cards, auto and personal loans, and your mortgage — with net worth in one view." },
-  { icon: HeartPulse, title: "Financial Health Score", desc: "One score from four indicators — emergency cushion, debt load, credit utilization, savings rate — each with a clear target." },
+  { icon: HeartPulse, title: "Health Score & Next Move", desc: "One score from four indicators — cushion, debt load, credit utilization, savings rate — plus the single move that lifts it fastest." },
   { icon: CalendarClock, title: "Forecast & Upcoming Bills", desc: "See recurring bills before they hit and project your balances and net worth months ahead." },
   { icon: Sliders, title: "What-If Simulator", desc: "Pay down a card, cut spending, change income — see your score and cash six months out before you commit." },
   { icon: Bot, title: "Conversational Coach", desc: "Ask \"Can I afford this?\" and get an answer built on your balances, bills, and score — ending in one clear step." },
-  { icon: Compass, title: "Next Best Move", desc: "Credo finds your weakest indicator and hands you the single action that lifts it fastest. Every insight shows its math." },
+  { icon: Radar, title: "Blind Spot Detector", desc: "Finds money you're losing without noticing (price hikes, double charges, fees, low-balance risks) and tells you which to fix first." },
 ];
 
 // Liquid-glass surface (Higgsfield render) mapped as one continuous image across
