@@ -34,7 +34,7 @@ const groups: { heading: string; items: { href: string; label: string; icon: Luc
     items: [
       { href: "/net-worth", label: "Net Worth", icon: BarChart3 },
       { href: "/investments", label: "Investments", icon: LineChart },
-      { href: "/ai", label: "AI Assistant", icon: Bot },
+      { href: "/ai", label: "AI Coach", icon: Bot },
     ],
   },
 ];
