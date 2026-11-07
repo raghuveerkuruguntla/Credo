@@ -6,14 +6,13 @@ import { useUser } from "@clerk/nextjs";
 import { cn, formatCurrency, formatShortDate } from "@/lib/utils";
 import { useFinancialData, refreshFinancialData, signedBalance, isInvestment, isDebt, prettyCategory, categoryColor } from "@/lib/useFinancialData";
 import { buildIntelligence } from "@/lib/intelligence";
-import { STATUS_LABEL, statusFor } from "@/lib/health";
 import { useBlindSpots } from "@/lib/useBlindSpots";
-import { pickNextMove } from "@/lib/navigator";
+import NextBestMove from "@/components/NextBestMove";
 import WhyExplanation from "@/components/WhyExplanation";
 import PlaidLinkButton from "@/components/PlaidLinkButton";
-import EmptyState, { LoadingState } from "@/components/EmptyState";
+import { LoadingState } from "@/components/EmptyState";
 import {
-  TrendingUp, TrendingDown, RefreshCw, ArrowRight, Lightbulb, HeartPulse, Radar, ShieldAlert, AlertTriangle, Sparkles,
+  TrendingUp, TrendingDown, RefreshCw, ArrowRight, Lightbulb, Radar, ShieldAlert, AlertTriangle, Sparkles,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -132,15 +131,12 @@ export default function DashboardPage() {
 
   // Shared three-layer intelligence engine (spec 006) — the same ranked,
   // explainable insights and recommendations that power the /insights surface.
-  const { insights, recommendations } = useMemo(
+  const { insights } = useMemo(
     () => buildIntelligence(accounts, transactions),
     [accounts, transactions]
   );
   const topInsights = insights.slice(0, 3);
   const bs = useBlindSpots();
-  const health = bs.baseHealth;
-  const next = pickNextMove(recommendations, health.weakest);
-  const leadRec = next?.move;
 
   const recentTxns = transactions.slice(0, 6);
   const acctName = (id: string) => accounts.find((a) => a.id === id)?.name ?? "";
@@ -179,12 +175,12 @@ export default function DashboardPage() {
         {loading ? (
           <LoadingState />
         ) : !hasData ? (
-          <EmptyState
-            title="Welcome to Credo"
-            message="Your dashboard is empty because no accounts are connected yet. Connect your bank to see your net worth, spending, and personalized AI insights."
-          />
+          <NextBestMove />
         ) : (
           <div className="space-y-4">
+            {/* ── Your Next Best Move: the Financial Priority Engine ───────── */}
+            <NextBestMove />
+
             {/* ── HERO: net-worth focal panel + monthly pulse ─────────────── */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Net worth focal */}
@@ -266,33 +262,6 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-
-            {/* ── Health score + next best move (decisions, not dashboards) ── */}
-            {(health.indicators.length > 0 || leadRec) && (
-              <Link href="/health" className={`${card} p-4 sm:p-5 flex flex-wrap sm:flex-nowrap items-center gap-4 group hover:border-white/[0.12] transition-colors`}>
-                {health.indicators.length > 0 && (
-                  <span className="flex items-center gap-3 shrink-0 pr-4 sm:border-r border-white/[0.06]">
-                    <span className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
-                      <HeartPulse className="w-5 h-5 text-indigo-400" />
-                    </span>
-                    <span>
-                      <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-indigo-300/90">Health score</span>
-                      <span className="block text-2xl font-semibold text-white leading-tight">{bs.healthScore}<span className="text-sm text-slate-500 font-normal"> / 100 · {STATUS_LABEL[statusFor(bs.healthScore)]}</span></span>
-                    </span>
-                  </span>
-                )}
-                {leadRec && (
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-indigo-300/90">Your next best move</span>
-                    <span className="block text-sm font-semibold text-white truncate mt-0.5">{leadRec.title}</span>
-                    <span className="block text-xs text-slate-400 truncate">{leadRec.impactLabel}{next?.targets ? ` · lifts your ${next.targets.name.toLowerCase()}` : ""}</span>
-                  </span>
-                )}
-                <span className="hidden sm:inline-flex items-center gap-1 text-xs font-medium text-indigo-300 group-hover:text-indigo-200 shrink-0 ml-auto">
-                  See your health <ArrowRight className="w-3.5 h-3.5" />
-                </span>
-              </Link>
-            )}
 
             {/* ── Financial Blind Spots ─────────────────────────────────── */}
             <div className={`${card} p-4 sm:p-5`}>
