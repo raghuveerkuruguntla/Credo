@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { plaidClient, plaidConfigured } from "@/lib/plaid";
 import { getItemsForUser } from "@/lib/store";
-import { entitlementsFor } from "@/lib/entitlements";
 import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 import { CountryCode, Products } from "plaid";
+
+const MAX_INSTITUTIONS = 10;
 
 export async function POST() {
   const { userId } = await auth();
@@ -20,20 +21,13 @@ export async function POST() {
     );
   }
 
-  // Enforce the per-plan institution limit
-  const user = await currentUser();
-  const ent = entitlementsFor(user?.publicMetadata?.plan);
-  if (ent.maxInstitutions !== null) {
-    const existing = await getItemsForUser(userId);
-    if (existing.length >= ent.maxInstitutions) {
-      return NextResponse.json(
-        {
-          error: `Your ${ent.label} plan allows up to ${ent.maxInstitutions} connected institution${ent.maxInstitutions === 1 ? "" : "s"}. Upgrade to connect more.`,
-          limitReached: true,
-        },
-        { status: 403 }
-      );
-    }
+  // Everyone gets every feature; this is only an abuse/cost safeguard, not a plan limit.
+  const existing = await getItemsForUser(userId);
+  if (existing.length >= MAX_INSTITUTIONS) {
+    return NextResponse.json(
+      { error: `You can connect up to ${MAX_INSTITUTIONS} institutions. Remove one in Accounts to add another.`, limitReached: true },
+      { status: 403 }
+    );
   }
 
   try {

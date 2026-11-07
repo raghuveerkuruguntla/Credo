@@ -4,7 +4,7 @@
 // Supports headings, paragraphs, bold/italic/code, links, bullet and numbered
 // lists (one level of nesting), tables, blockquotes, rules and code blocks.
 // All text is HTML-escaped before inline formatting is applied, so model output
-// can never inject markup. Links are limited to http(s) and open in a new tab.
+// can never inject markup. Links are never rendered as clickable anchors.
 
 import { Fragment, type ReactNode } from "react";
 
@@ -17,7 +17,16 @@ function inline(s: string): string {
   return escapeHtml(s)
     // Protect inline code from further formatting.
     .replace(/`([^`]+)`/g, (_m, c: string) => `\u0000${codes.push(c) - 1}\u0000`)
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-300 underline underline-offset-2 hover:text-indigo-200">$1</a>')
+    // Links are shown as text with their destination, never as clickable
+    // anchors: a manipulated answer can't hide a data-leaking URL behind a label.
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (_m, label: string, url: string) => {
+      let host = url;
+      try { host = new URL(url.replace(/&amp;/g, "&")).hostname; } catch {}
+      return `${label} <span class="text-stone-500 text-[0.85em]">(${host})</span>`;
+    })
+    .replace(/\bhttps?:\/\/[^\s<)]+/g, (url: string) => {
+      try { return `<span class="text-stone-400">${new URL(url.replace(/&amp;/g, "&")).hostname}</span>`; } catch { return ""; }
+    })
     .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-white">$1</strong>')
     .replace(/(^|\s)__([^_]+)__(?=\s|[.,;:!?]|$)/g, '$1<strong class="font-semibold text-white">$2</strong>')
     .replace(/(^|[\s(])\*([^*\s][^*\n]*?)\*(?=[\s.,;:!?)]|$)/g, "$1<em>$2</em>")

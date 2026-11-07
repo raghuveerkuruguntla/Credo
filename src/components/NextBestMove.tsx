@@ -6,6 +6,7 @@
 // attention.
 
 import Link from "next/link";
+import AskCoachLink from "@/components/AskCoachLink";
 import { useState } from "react";
 import { usePriorities, SNOOZE_DAYS } from "@/lib/usePriorities";
 import { COACH_QUESTIONS, coachQuestion, type PriorityItem, type PriorityLevel } from "@/lib/priorities";
@@ -47,13 +48,12 @@ function AskCoach({ item, healthScore }: { item: PriorityItem; healthScore: numb
   return (
     <div className="flex flex-wrap gap-2">
       {COACH_QUESTIONS.map((q) => (
-        <Link
-          key={q}
-          href={`/ai?ask=${encodeURIComponent(coachQuestion(item, q, healthScore))}`}
+        <AskCoachLink
+          key={q} question={coachQuestion(item, q, healthScore)}
           className="text-xs text-slate-300 rounded-full border border-white/[0.08] px-3 py-1.5 hover:border-indigo-400/40 hover:text-white hover:bg-indigo-500/[0.06] transition-colors"
         >
           {q}
-        </Link>
+        </AskCoachLink>
       ))}
     </div>
   );
@@ -139,7 +139,7 @@ function SecondaryRow({ item, onDecide, healthScore }: { item: PriorityItem; onD
           <p className="text-[13px] text-slate-200"><span className="text-slate-400">Recommended action: </span>{item.action}</p>
           <div className="flex flex-wrap items-center gap-2">
             <Link href={item.cta.href} className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg border border-white/[0.1] text-slate-200 hover:bg-white/[0.05]">{item.cta.label} <ArrowRight className="w-3.5 h-3.5" /></Link>
-            <Link href={`/ai?ask=${encodeURIComponent(coachQuestion(item, COACH_QUESTIONS[4], healthScore))}`} className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-white/[0.05]"><MessageCircle className="w-3.5 h-3.5" /> Ask the coach</Link>
+            <AskCoachLink question={coachQuestion(item, COACH_QUESTIONS[4], healthScore)} className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-white/[0.05]"><MessageCircle className="w-3.5 h-3.5" /> Ask the coach</AskCoachLink>
             <span className="flex-1" />
             <Controls item={item} onDecide={onDecide} compact />
           </div>
@@ -175,7 +175,7 @@ function CompactNextBestMove({ p }: { p: ReturnType<typeof usePriorities> }) {
           <p className="text-xs text-slate-400 mt-1 line-clamp-2">{item.action}</p>
           <div className="mt-auto pt-4 flex flex-wrap items-center gap-2">
             <Link href={item.cta.href} className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-white text-[#0a0b0f] hover:bg-slate-200">{item.cta.label} <ArrowRight className="w-3.5 h-3.5" /></Link>
-            <Link href={`/ai?ask=${encodeURIComponent(coachQuestion(item, COACH_QUESTIONS[0], p.healthScore))}`} className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border border-white/[0.1] text-slate-300 hover:bg-white/[0.05]"><MessageCircle className="w-3.5 h-3.5" /> Ask the coach</Link>
+            <AskCoachLink question={coachQuestion(item, COACH_QUESTIONS[0], p.healthScore)} className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border border-white/[0.1] text-slate-300 hover:bg-white/[0.05]"><MessageCircle className="w-3.5 h-3.5" /> Ask the coach</AskCoachLink>
             <span className="flex-1" />
             <Link href="/health#insights" className="text-xs text-slate-500 hover:text-slate-300">{more ? `+${more} more` : "View all"}</Link>
           </div>

@@ -2,8 +2,6 @@
 
 import { useState, useMemo } from "react";
 import { useFinancialData, prettyCategory, categoryColor } from "@/lib/useFinancialData";
-import { usePlan } from "@/lib/usePlan";
-import Link from "next/link";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -14,7 +12,6 @@ const PAGE_SIZE = 10;
 
 export default function TransactionsPage() {
   const { accounts, transactions, loading, hasData } = useFinancialData();
-  const { ent } = usePlan();
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedAccount, setSelectedAccount] = useState("All");
@@ -87,17 +84,9 @@ export default function TransactionsPage() {
             {hideAmounts ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
             {hideAmounts ? "Show" : "Hide"} amounts
           </Button>
-          {ent.dataExport ? (
-            <Button variant="outline" size="sm" onClick={exportCsv}>
-              <Download className="w-4 h-4" /> Export CSV
-            </Button>
-          ) : (
-            <Link href="/billing">
-              <Button variant="outline" size="sm">
-                <Download className="w-4 h-4" /> Export CSV (Pro)
-              </Button>
-            </Link>
-          )}
+          <Button variant="outline" size="sm" onClick={exportCsv}>
+            <Download className="w-4 h-4" /> Export CSV
+          </Button>
         </div>
       </div>
 

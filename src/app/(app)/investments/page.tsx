@@ -2,12 +2,10 @@
 
 import { useState, useMemo } from "react";
 import { useFinancialData, isInvestment } from "@/lib/useFinancialData";
-import { usePlan } from "@/lib/usePlan";
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import EmptyState, { LoadingState } from "@/components/EmptyState";
-import LockedFeature from "@/components/LockedFeature";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Eye, EyeOff, Info } from "lucide-react";
 
@@ -15,7 +13,6 @@ const COLORS = ["#6366f1", "#10b981", "#8b5cf6", "#06b6d4", "#ec4899", "#f59e0b"
 
 export default function InvestmentsPage() {
   const { accounts, loading, hasData } = useFinancialData();
-  const { ent, isLoaded } = usePlan();
   const [show, setShow] = useState(false);
   const masked = "••••••";
 
@@ -27,19 +24,7 @@ export default function InvestmentsPage() {
     color: COLORS[i % COLORS.length],
   }));
 
-  if (loading || !isLoaded) return <div className="p-6"><LoadingState /></div>;
-  if (!ent.investmentAnalytics) {
-    return (
-      <div className="p-6">
-        <h1 className="text-xl font-bold text-stone-100 mb-1">Investments</h1>
-        <LockedFeature
-          feature="Investment analytics"
-          requiredPlan="PRO"
-          description="Track your portfolio, allocation, and investment accounts. Available on Pro."
-        />
-      </div>
-    );
-  }
+  if (loading) return <div className="p-6"><LoadingState /></div>;
   if (!hasData) return <div className="p-6"><EmptyState /></div>;
 
   if (investments.length === 0) {

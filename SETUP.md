@@ -39,24 +39,14 @@ In **sandbox** mode you connect fake banks — use credentials `user_good` / `pa
 
 To connect **real banks**, apply for Production access in the Plaid dashboard (free for first 100 connections), then set `PLAID_ENV=production` and use your production secret.
 
-## 3. Paid plans (Stripe)
+## 3. AI coach (Groq)
 
-1. Create a free account at https://dashboard.stripe.com (or use an existing one)
-2. Copy your **test secret key** from https://dashboard.stripe.com/test/apikeys into `.env.local`:
-   ```
-   STRIPE_SECRET_KEY=sk_test_...
-   ```
-3. For the webhook (updates the user's plan after payment), run the Stripe CLI in a second terminal during development:
-   ```bash
-   stripe listen --forward-to localhost:3000/api/stripe/webhook
-   ```
-   It prints a `whsec_...` signing secret — put it in `.env.local` as `STRIPE_WEBHOOK_SECRET`.
-   (Install the CLI from https://docs.stripe.com/stripe-cli)
-4. Restart the dev server, go to **Billing**, and click **Upgrade to Plus**. Use Stripe's test card `4242 4242 4242 4242`, any future expiry, any CVC.
+Every feature is free for every user; there are no paid plans. The AI coach is protected by per-user rate limits (8/minute, 60/hour, 200/day, in `src/lib/rate-limit.ts`) instead of a monthly quota.
 
-No products need to be created in the Stripe dashboard — checkout sessions use inline prices ($9.99 Plus / $19.99 Pro, defined in `src/lib/stripe.ts`). The user's plan is stored in Clerk user metadata (`publicMetadata.plan`) by the webhook. Subscribers manage/cancel via the Stripe billing portal ("Manage subscription" button).
+1. Create a key at https://console.groq.com and set `GROQ_API_KEY`.
+2. Optional: `GROQ_MODEL` to override the model, and `AI_SIGNING_SECRET` (any long random string) used to sign coach answers so chat history can't be forged. Without it, `ENCRYPTION_KEY` is used.
 
-For **production**: use your live secret key, and create a permanent webhook endpoint at https://dashboard.stripe.com/webhooks pointing to `https://yourdomain.com/api/stripe/webhook` (events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`), then use that endpoint's signing secret. Also enable the billing portal at https://dashboard.stripe.com/settings/billing/portal.
+Prompt-injection defences live in `src/lib/promptSafety.ts`: bank-provided text is sanitised and fenced as untrusted data, earlier answers must carry a valid signature, and only in-app buttons can auto-send a question.
 
 ## 4. Database (Neon Postgres + Prisma)
 
@@ -89,7 +79,7 @@ The AI assistant calls Groq's `llama-3.3-70b-versatile` model, grounded in the u
 ## 6. Before deploying for real users
 
 - Set `DATABASE_URL` (Neon) — the file fallback does not work on serverless hosts.
-- Set all env vars in your hosting provider (Vercel: Project → Settings → Environment Variables): Clerk, Plaid, Stripe, `DATABASE_URL`, `GROQ_API_KEY`.
+- Set all env vars in your hosting provider (Vercel: Project → Settings → Environment Variables): Clerk, Plaid, `DATABASE_URL`, `GROQ_API_KEY`, `ENCRYPTION_KEY` (and optionally `AI_SIGNING_SECRET`).
 - Plaid production access requires completing their security questionnaire.
 - Rotate any API keys that were shared in chats or committed anywhere.
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Shield, Bot, TrendingUp, Wallet, ArrowRight, Check, Sparkles, Star, Lock, Gift, Crown, PieChart, Target, HeartPulse, CalendarClock, Sliders, Radar, Landmark } from "lucide-react";
+import { Shield, Bot, TrendingUp, Wallet, ArrowRight, Sparkles, Lock, PieChart, Target, HeartPulse, CalendarClock, Sliders, Radar, Landmark } from "lucide-react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import LandingNav from "@/components/LandingNav";
 import AccountMarquee from "@/components/AccountMarquee";
@@ -64,11 +64,6 @@ function CardRibbon({ index }: { index: number }) {
   );
 }
 
-const tiers = [
-  { name: "Free",  icon: Gift,  price: "$0",    note: "forever", features: ["2 institutions","Dashboard & net worth","Financial health score","Next best move","10 AI coach questions/mo"],                     cta: "Get started",    highlight: false },
-  { name: "Plus",  icon: Star,  price: "$9.99", note: "/mo",     features: ["5 institutions","Forecasting & what-if scenarios","Advanced analytics","AI budget suggestions","50 AI coach questions/mo"],              cta: "Start with Plus",highlight: true  },
-  { name: "Pro",   icon: Crown, price: "$19.99",note: "/mo",     features: ["Unlimited institutions","Investment analytics","Data export (CSV)","Unlimited AI coach questions","Priority support"],cta: "Go Pro",         highlight: false },
-];
 
 // Circle-grid geometry for the hero. Rings sit on integer grid cells (i,j)
 // measured from the centre; empty cells render as glowing rings. Large rings
@@ -190,7 +185,7 @@ export default function LandingPage() {
               <HeroItem className="mt-7 flex items-center justify-center gap-2 text-[12px]" >
                 <span className="inline-flex items-center gap-2" style={{ color: "rgba(180,176,204,0.78)" }}>
                   <Shield className="w-3.5 h-3.5" style={{ color: "#A99CFF" }} />
-                  Encrypted &amp; read-only · No credit card to start
+                  Encrypted &amp; read-only · Every feature included
                 </span>
               </HeroItem>
             </HeroReveal>
@@ -417,141 +412,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION 4: PRICING — liquid-glass cards; the highlighted plan carries the flowing silk light */}
-        <section id="pricing" className="py-20 sm:py-28">
-          <div className="max-w-6xl mx-auto px-6">
-            <Reveal className="text-center mb-14">
-              <div className="inline-flex items-center gap-2 mb-5 px-4 py-1.5 rounded-full text-[11px] font-semibold tracking-[0.18em]" style={{
-                color: "rgba(208,198,255,0.9)",
-                background: "rgba(12,10,22,0.6)",
-                border: "1px solid rgba(184,170,255,0.22)",
-                boxShadow: "0 0 22px rgba(140,110,240,0.18)",
-              }}>
-                <Star className="w-3 h-3" style={{ color: "#C9BEFF" }} />
-                SIMPLE, TRANSPARENT PRICING
-              </div>
-              <h2 className="text-3xl sm:text-5xl font-bold text-white tracking-tight mb-4 text-balance">Choose the plan that fits you</h2>
-              <p className="text-slate-400">Start free. Upgrade only when you need more.</p>
-            </Reveal>
-            <Stagger className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-md md:max-w-none mx-auto md:items-center">
-              {tiers.map(({ name, icon:TierIcon, price, note, features:feats, cta, highlight })=>(
-                <StaggerItem key={name} className={"relative " + (highlight ? "md:-translate-y-2 z-10" : "")}>
-                  {/* "Most popular" badge — sits in this non-clipping wrapper so it overflows the card edge */}
-                  {highlight && (
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-30">
-                      <span className="inline-flex items-center gap-1.5 text-white text-xs font-bold px-3.5 py-1 rounded-full whitespace-nowrap" style={{
-                        background: "linear-gradient(90deg,#6366F1,#8B5CF6)",
-                        boxShadow: "0 0 22px rgba(99,102,241,0.6), inset 0 1px 0 rgba(255,255,255,0.25)",
-                      }}>
-                        <Star className="w-3 h-3" /> Most popular
-                      </span>
-                    </div>
-                  )}
-                  <div className={"group relative rounded-[26px] p-7 overflow-hidden transition-all duration-300 " + (highlight ? "md:py-9" : "")} style={{
-                  background: highlight
-                    ? "linear-gradient(160deg, rgba(54,47,82,0.42) 0%, rgba(20,17,32,0.48) 100%)"
-                    : "linear-gradient(160deg, rgba(44,39,60,0.38) 0%, rgba(15,13,24,0.46) 100%)",
-                  backdropFilter: "blur(26px) saturate(150%) brightness(1.07)",
-                  WebkitBackdropFilter: "blur(26px) saturate(150%) brightness(1.07)",
-                  boxShadow: [
-                    "inset 0 2px 0 rgba(255,255,255,0.55)",          // bright thick top edge
-                    "inset 2px 0 0 rgba(255,255,255,0.22)",          // left edge
-                    "inset -2px -2px 0 rgba(190,160,255,0.42)",      // bottom-right purple rim
-                    "inset 0 0 60px rgba(192,170,255,0.10)",         // overall frosted inner glow
-                    "inset 0 44px 72px rgba(200,178,255,0.10)",      // top frosted highlight
-                    "inset 0 -36px 64px rgba(0,0,0,0.30)",           // bottom depth
-                    highlight ? "0 0 0 1.5px rgba(190,164,255,0.70)" : "0 0 0 1px rgba(198,178,255,0.34)",
-                    "0 28px 60px rgba(0,0,0,0.52)",
-                    highlight ? "0 0 90px rgba(124,92,224,0.42)" : "0 0 52px rgba(132,98,232,0.18)",
-                  ].join(","),
-                }}>
-                  {/* highlighted plan: a single silky light streak that curves down the right side and bleeds off the right edge */}
-                  {highlight && (
-                    <>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src="/pricing-light.webp"
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                        className="pointer-events-none absolute top-1/2 -translate-y-1/2 select-none"
-                        style={{
-                          right: "-26%",
-                          height: "128%",
-                          width: "auto",
-                          mixBlendMode: "screen",
-                          opacity: 0.82,
-                          filter: "blur(0.8px) saturate(115%)",
-                        }}
-                      />
-                      {/* frosted veil over the streak — the glass haze diffuses the light so it reads as under glass */}
-                      <div className="pointer-events-none absolute inset-0 rounded-[26px]" style={{
-                        background: "radial-gradient(120% 100% at 100% 50%, rgba(198,180,255,0.12) 0%, transparent 52%)",
-                        backdropFilter: "blur(1px)",
-                        WebkitBackdropFilter: "blur(1px)",
-                        WebkitMaskImage: "radial-gradient(120% 100% at 100% 50%, #000 0%, transparent 60%)",
-                        maskImage: "radial-gradient(120% 100% at 100% 50%, #000 0%, transparent 60%)",
-                      }} />
-                      {/* legibility scrim — darkens the left where the copy sits, lets the right glow */}
-                      <div className="pointer-events-none absolute inset-0 rounded-[26px]" style={{
-                        background: "linear-gradient(to right, rgba(10,8,18,0.78) 0%, rgba(10,8,18,0.40) 46%, rgba(10,8,18,0.05) 74%, transparent 100%)",
-                      }} />
-                    </>
-                  )}
-                  {/* luminous gradient rim — bright thick glass bevel */}
-                  <div className="pointer-events-none absolute inset-0 rounded-[26px]" style={{
-                    padding: "1.75px",
-                    background: highlight
-                      ? "linear-gradient(135deg, rgba(255,253,255,1) 0%, rgba(202,182,255,0.55) 28%, rgba(255,255,255,0.20) 52%, rgba(208,182,255,0.90) 100%)"
-                      : "linear-gradient(135deg, rgba(252,250,255,0.98) 0%, rgba(190,170,250,0.42) 30%, rgba(255,255,255,0.16) 54%, rgba(206,182,255,0.82) 100%)",
-                    WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
-                    WebkitMaskComposite: "xor",
-                    maskComposite: "exclude",
-                  }} />
-                  {/* glossy top sheen — frosted light pooling on the upper glass */}
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-[26px]" style={{
-                    background: "linear-gradient(to bottom, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 24%, transparent 60%)",
-                  }} />
-
-                  <div className="relative z-10">
-                    <div className="w-[56px] h-[56px] rounded-[16px] flex items-center justify-center mb-5" style={{
-                      background: "linear-gradient(150deg, rgba(126,94,228,0.46), rgba(80,60,180,0.20))",
-                      border: "1px solid rgba(190,176,255,0.40)",
-                      boxShadow: "0 0 30px rgba(132,102,238,0.38), inset 0 1px 0 rgba(255,255,255,0.14)",
-                    }}>
-                      <TierIcon className="w-6 h-6" style={{ color: "#CDC2FF" }} />
-                    </div>
-                    <h3 className="font-bold text-2xl text-white mb-1.5">{name}</h3>
-                    <div className="flex items-baseline gap-1.5 mb-6">
-                      <span className="text-[2.75rem] leading-none font-bold text-white tracking-tight">{price}</span>
-                      <span className="text-slate-400 text-sm">{note}</span>
-                    </div>
-                    <ul className="space-y-3 mb-7">
-                      {feats.map(f=>(
-                        <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: "rgba(208,204,224,0.92)" }}>
-                          <Check className="w-4 h-4 mt-0.5 flex-shrink-0 text-indigo-300" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-                    <Link href="/signup" className={"block text-center py-3.5 rounded-full text-sm font-bold transition-all " + (highlight ? "text-white hover:brightness-110" : "text-slate-100 hover:bg-white/[0.1]")} style={highlight ? {
-                      background: "linear-gradient(90deg,#6366F1,#8B5CF6)",
-                      boxShadow: "0 0 28px rgba(99,102,241,0.5), inset 0 1px 0 rgba(255,255,255,0.22)",
-                    } : {
-                      background: "rgba(255,255,255,0.06)",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
-                    }}>
-                      {cta}
-                    </Link>
-                  </div>
-                </div>
-                </StaggerItem>
-              ))}
-            </Stagger>
-          </div>
-        </section>
-
         {/* SECTION 4.6: FAQ — glass accordion */}
         <section id="faq" className="relative py-16 sm:py-24">
           <div className="max-w-3xl mx-auto px-6">
@@ -680,7 +540,7 @@ export default function LandingPage() {
                 </Link>
                 <div className="mt-5 flex items-center justify-center gap-1.5 text-xs" style={{ color: "rgba(180,176,204,0.8)" }}>
                   <Shield className="w-3.5 h-3.5" style={{ color: "#A99CFF" }} />
-                  Free to start &middot; No credit card required
+                  Free &middot; Every feature included
                 </div>
               </div>
             </div>
@@ -707,7 +567,7 @@ export default function LandingPage() {
               <div>
                 <h4 className="text-white text-sm font-semibold mb-4">Product</h4>
                 <ul className="space-y-2.5">
-                  {[{label:"Features",href:"#features"},{label:"How It Works",href:"#how"},{label:"Pricing",href:"#pricing"}].map(item=>(
+                  {[{label:"Features",href:"#features"},{label:"How It Works",href:"#how"},{label:"FAQ",href:"#faq"}].map(item=>(
                     <li key={item.label}><a href={item.href} className="text-slate-500 text-sm hover:text-slate-300 transition-colors">{item.label}</a></li>
                   ))}
                 </ul>

@@ -46,11 +46,10 @@ export default function TermsPage() {
           subject to Plaid&apos;s end user privacy policy.
         </Section>
 
-        <Section title="5. Subscriptions and Billing">
-          Credo offers Free, Plus, and Pro plans. Paid subscriptions are billed in advance on a
-          recurring basis through our payment processor, Stripe. You can upgrade, downgrade, or cancel
-          at any time through the billing portal; cancellations take effect at the end of the current
-          billing period. Fees are non-refundable except where required by law.
+        <Section title="5. Cost and Fair Use">
+          Credo is free to use and all features are available to every user. To keep the Service
+          fast and reliable for everyone, we apply reasonable usage limits (for example, how often
+          the AI coach can be asked questions in a short period).
         </Section>
 
         <Section title="6. Acceptable Use">

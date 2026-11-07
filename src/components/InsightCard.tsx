@@ -5,6 +5,7 @@
 // score (only when the scoring model says so), and what to do.
 
 import Link from "next/link";
+import AskCoachLink from "@/components/AskCoachLink";
 import { coachPrompt, type BlindSpot, type FindingKind, type Certainty } from "@/lib/blindspots";
 import { cn, formatCurrency } from "@/lib/utils";
 import WhyExplanation from "@/components/WhyExplanation";
@@ -74,9 +75,9 @@ export default function InsightCard({ f, contribution, open, onToggle, onDecide 
           </div>
           <WhyExplanation explanation={f.explanation} />
           <div className="flex flex-wrap items-center gap-2 pt-1">
-            <Link href={`/ai?ask=${encodeURIComponent(coachPrompt(f, contribution?.text))}`} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-white text-[#0a0b0f] hover:bg-stone-200">
+            <AskCoachLink question={coachPrompt(f, contribution?.text)} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-white text-[#0a0b0f] hover:bg-stone-200">
               <Bot className="w-3.5 h-3.5" /> Ask the coach
-            </Link>
+            </AskCoachLink>
             {f.links.filter((l) => !l.href.startsWith("/health")).map((l) => (
               <Link key={l.href + l.label} href={l.href} className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-stone-300 hover:bg-white/[0.05]">
                 {l.label} <ArrowRight className="w-3 h-3" />
