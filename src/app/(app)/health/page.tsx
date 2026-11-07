@@ -185,7 +185,8 @@ export default function HealthPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* What-if */}
-        <Card className="lg:col-span-3 scroll-mt-20" id="whatif">
+        <div id="whatif" className="lg:col-span-3 scroll-mt-20">
+        <Card className="h-full">
           <CardHeader><CardTitle className="flex items-center gap-2"><Sliders className="w-4 h-4" /> What if… (6 months from now)</CardTitle></CardHeader>
           <CardContent className="space-y-5">
             <div>
@@ -254,6 +255,7 @@ export default function HealthPage() {
             <p className="text-[11px] text-stone-500 flex gap-1.5"><Info className="w-3.5 h-3.5 shrink-0 mt-px" /> Each month, cash grows by income minus spending and drops by any extra card payment. Interest is ignored, so payoff is slightly optimistic. For exploring, not financial advice.</p>
           </CardContent>
         </Card>
+        </div>
 
         {/* Upcoming bills */}
         <UpcomingBills transactions={transactions} cash={inputs.cash} className="lg:col-span-2" forecastLink />
