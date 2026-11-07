@@ -11,7 +11,11 @@ const MAX_MESSAGE_CHARS = 2000;  // per message
 const MAX_TOTAL_CHARS = 12000;   // across all messages in a request
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-const MODEL = "llama-3.3-70b-versatile";
+// Groq retired llama-3.3-70b-versatile on 2026-08-16 (requests now 404).
+// Default to its recommended replacement; override with GROQ_MODEL in Vercel
+// so future retirements don't need a code change.
+// https://console.groq.com/docs/deprecations
+const MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
 
 function currentMonth(): string {
   return new Date().toISOString().slice(0, 7);
@@ -123,7 +127,10 @@ Guidelines:
           ...cleanMessages,
         ],
         temperature: 0.4,
-        max_tokens: 1024,
+        // gpt-oss is a reasoning model: reasoning tokens count toward the
+        // limit, so keep reasoning light and leave room for the answer.
+        ...(MODEL.includes("gpt-oss") ? { reasoning_effort: "low" } : {}),
+        max_completion_tokens: 2048,
       }),
     });
 
@@ -137,7 +144,7 @@ Guidelines:
     }
 
     const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content ?? "Sorry, I couldn't generate a response.";
+    const reply = data.choices?.[0]?.message?.content?.trim() || "Sorry, I couldn't generate a response. Please try asking again.";
 
     // Count this question (only after a successful reply)
     if (databaseConfigured()) {
