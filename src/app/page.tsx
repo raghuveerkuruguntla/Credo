@@ -15,11 +15,11 @@ import FAQ from "@/components/FAQ";
 // a coach to talk it through, and one confident next move.
 const features = [
   { icon: Landmark, title: "Your Whole Picture", desc: "Checking, savings, CDs, IRAs, cards, auto and personal loans, and your mortgage — with net worth in one view." },
-  { icon: HeartPulse, title: "Health Score & Next Move", desc: "One score from four indicators — cushion, debt load, credit utilization, savings rate — plus the single move that lifts it fastest." },
+  { icon: HeartPulse, title: "Financial Health Score", desc: "One score across five categories: cash flow, debt, savings, spending and bills. Every number shows its formula and target." },
   { icon: CalendarClock, title: "Forecast & Upcoming Bills", desc: "See recurring bills before they hit and project your balances and net worth months ahead." },
   { icon: Sliders, title: "What-If Simulator", desc: "Pay down a card, cut spending, change income — see your score and cash six months out before you commit." },
   { icon: Bot, title: "Conversational Coach", desc: "Ask \"Can I afford this?\" and get an answer built on your balances, bills, and score — ending in one clear step." },
-  { icon: Radar, title: "Blind Spot Detector", desc: "Finds money you're losing without noticing (price hikes, double charges, fees, low-balance risks) and tells you which to fix first." },
+  { icon: Radar, title: "Insights Behind the Score", desc: "Uncovers what you might be missing (price hikes, double charges, fees, low-balance risks) inside the category it affects." },
 ];
 
 // Liquid-glass surface (Higgsfield render) mapped as one continuous image across
@@ -341,7 +341,7 @@ export default function LandingPage() {
             <Stagger className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
               {[
                 { n: "1", title: "Connect everything", desc: "Link banks, cards, loans and investment accounts read-only through Plaid. Credo builds your whole picture and net worth." },
-                { n: "2", title: "Get your health score", desc: "Four indicators scored against clear targets show exactly where you're strong and where you're exposed." },
+                { n: "2", title: "Get your health score", desc: "Five categories scored against clear targets, with the insights behind each one, show exactly where you're strong and where you're exposed." },
                 { n: "3", title: "Make your next move", desc: "Test choices in the simulator, talk them through with the coach, and act on the one move that helps most." },
               ].map((step) => (
                 <StaggerItem key={step.n} className="rounded-[22px] p-6" style={{ background: "rgba(14,12,26,0.55)", border: "1px solid rgba(184,170,255,0.16)" }}>
@@ -371,7 +371,7 @@ export default function LandingPage() {
                 <div className="lg:col-span-3 flex flex-col gap-3">
                   <div className="self-end max-w-[85%] rounded-2xl rounded-br-md px-4 py-3 text-[15px] text-white" style={{ background: "linear-gradient(90deg,#6366F1,#8B5CF6)" }}>Can I afford an $1,800 trip in March?</div>
                   <div className="self-start max-w-[92%] rounded-2xl rounded-bl-md px-4 py-3 text-[15px] leading-relaxed text-slate-200" style={{ background: "rgba(10,8,18,0.6)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                    <p>You can, but paying from savings today drops your emergency cushion from <b className="text-white">1.7 to 1.4 months</b> — and that&apos;s already your weakest indicator.</p>
+                    <p>You can, but paying from savings today drops your emergency cushion from <b className="text-white">1.7 to 1.4 months</b> — and savings is already your weakest category.</p>
                     <p className="mt-2">You keep about <b className="text-white">$700/mo</b> after spending. Setting aside <b className="text-white">$450/mo</b> covers the trip by March and leaves your cushion untouched.</p>
                     <p className="mt-2 font-medium" style={{ color: "#C4B5FD" }}>Next step: start a $450 monthly transfer to a &ldquo;March trip&rdquo; goal this week.</p>
                   </div>
@@ -650,7 +650,7 @@ export default function LandingPage() {
                 }}>
                   {[
                     { icon:Wallet,    label:"Whole Picture",   sub:"Every account and your net worth" },
-                    { icon:PieChart,  label:"Health Score",    sub:"Four indicators, clear targets" },
+                    { icon:PieChart,  label:"Health Score",    sub:"Five categories, clear targets" },
                     { icon:Target,    label:"Next Best Move",  sub:"One clear action at a time" },
                     { icon:Shield,    label:"Secure & Private", sub:"Read-only, encrypted connections" },
                   ].map(({ icon:Icon, label, sub })=>(

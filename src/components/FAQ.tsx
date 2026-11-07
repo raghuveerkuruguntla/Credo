@@ -21,11 +21,11 @@ const FAQS = [
   },
   {
     q: "How is my financial health score calculated?",
-    a: "Your score is the average of four indicators, each scored 0–100 against a clear target: emergency cushion (cash ÷ monthly spending, target 6 months), debt payments (loan and card payments ÷ income, target under 20%), credit utilization (card balances ÷ limits, target under 10%), and savings rate (target 20%). Every number links back to the accounts and transactions it came from, and indicators without data are left out rather than guessed.",
+    a: "Your score is the average of five categories: Cash Flow & Income (savings rate, income stability, spending trend), Debt Management (credit utilization, debt payments vs income), Savings & Emergency Prep (months of spending your cash covers), Spending Behavior (discretionary share, recurring price increases) and Obligations & Payments (whether checking covers upcoming bills, and any overdraft or late fees). Each metric is scored 0–100 against a stated target with the formula shown. If there isn't enough data, we tell you instead of guessing a score.",
   },
   {
-    q: "What is the Blind Spot Detector?",
-    a: "It scans your accounts and transactions for problems that are easy to miss: possible double charges, bills that quietly went up, subscriptions adding up, fees and interest, upcoming bills that could overdraw your checking, thin emergency savings, high credit utilization, and spending patterns like payday splurges. Each finding shows the data behind it, an annual cost estimate, whether it's verified or just worth checking, and the step to fix it. Unresolved blind spots lower your health score, so fixing them shows up in your score. Credo never moves money or cancels anything for you.",
+    q: "What are the insights behind my score?",
+    a: "Credo scans your accounts for things that are easy to miss (possible double charges, bills that quietly went up, subscriptions adding up, fees and interest, upcoming bills that could overdraw your checking, thin emergency savings, high card utilization) and files each one under the health category it affects. Each is labelled a risk, an opportunity or an informational insight, with the data behind it. Only risks tied to a scored metric affect your score, and the score changes when your data does, not when you click a button. Credo never moves money or cancels anything for you.",
   },
   {
     q: "Is my financial data safe?",

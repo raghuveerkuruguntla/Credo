@@ -4,13 +4,14 @@
 // Choices persist in this browser, like Insights and Blind Spots. A completed
 // or dismissed item stays hidden unless its situation materially changes
 // (its fingerprint differs); a snoozed item returns after the snooze ends.
-// Completing/dismissing a blind-spot item also resolves/dismisses it in Blind
-// Spots, so the health score reflects it.
+// Completing/dismissing an insight-based item also resolves/dismisses that
+// finding in Financial Health & Insights (the score itself only changes when
+// the underlying data does).
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFinancialData } from "@/lib/useFinancialData";
 import { buildIntelligence } from "@/lib/intelligence";
-import { useBlindSpots } from "@/lib/useBlindSpots";
+import { useFinancialHealth } from "@/lib/useFinancialHealth";
 import { rankPriorities, buildView, type PriorityItem, type PriorityView } from "@/lib/priorities";
 
 const KEY = "credo.priorities.decisions.v1";
@@ -22,7 +23,7 @@ export const SNOOZE_DAYS = 7;
 export interface PrioritiesState extends PriorityView {
   loading: boolean;
   hasData: boolean;
-  healthScore: number;
+  healthScore: number | null;
   totalOpen: number;                       // all ranked items still open
   decide: (item: PriorityItem, status: PriorityDecision) => void;
   undo: () => void;
@@ -31,7 +32,7 @@ export interface PrioritiesState extends PriorityView {
 
 export function usePriorities(): PrioritiesState {
   const { accounts, transactions, loading, hasData } = useFinancialData();
-  const bs = useBlindSpots();
+  const fh = useFinancialHealth();
   const intel = useMemo(() => buildIntelligence(accounts, transactions), [accounts, transactions]);
 
   const [stored, setStored] = useState<Stored>({});
@@ -51,8 +52,8 @@ export function usePriorities(): PrioritiesState {
   }, []);
 
   const ranked = useMemo(
-    () => rankPriorities({ hasData, blindSpots: bs.active, recommendations: intel.recommendations, health: bs.baseHealth, gainFor: bs.gainFor }),
-    [hasData, bs.active, intel.recommendations, bs.baseHealth, bs.gainFor],
+    () => rankPriorities({ hasData, findings: fh.active, recommendations: intel.recommendations, health: fh.health, contribution: fh.contribution }),
+    [hasData, fh.active, intel.recommendations, fh.health, fh.contribution],
   );
 
   const visible = useMemo(() => {
@@ -73,24 +74,25 @@ export function usePriorities(): PrioritiesState {
     const until = status === "snoozed" ? new Date(Date.now() + SNOOZE_DAYS * 86400000).toISOString() : undefined;
     persist({ ...stored, [item.id]: { status, at: new Date().toISOString(), until, fingerprint: item.fingerprint } });
     if (item.source === "blindspot" && status !== "snoozed") {
-      bs.decide(item.id.replace(/^bs:/, ""), status === "completed" ? "resolved" : "dismissed");
+      const f = fh.active.find((x) => `bs:${x.id}` === item.id);
+      if (f) fh.decide(f, status === "completed" ? "resolved" : "dismissed");
     }
     setLast({ item, status });
-  }, [stored, persist, bs]);
+  }, [stored, persist, fh]);
 
   const undo = useCallback(() => {
     if (!lastDecision || !prevStored) return;
     persist(prevStored);
-    if (lastDecision.item.source === "blindspot" && lastDecision.status !== "snoozed") bs.reopen(lastDecision.item.id.replace(/^bs:/, ""));
+    if (lastDecision.item.source === "blindspot" && lastDecision.status !== "snoozed") fh.reopen(lastDecision.item.id.replace(/^bs:/, ""));
     setLast(null);
     setPrevStored(null);
-  }, [lastDecision, prevStored, persist, bs]);
+  }, [lastDecision, prevStored, persist, fh]);
 
   return {
     ...view,
-    loading: loading || bs.loading,
+    loading: loading || fh.loading,
     hasData,
-    healthScore: bs.healthScore,
+    healthScore: fh.health.score,
     totalOpen: visible.length,
     decide,
     undo,

@@ -8,17 +8,17 @@ import { Badge } from "@/components/ui/Badge";
 import ChatMarkdown, { splitFollowups } from "@/components/ChatMarkdown";
 import { cn } from "@/lib/utils";
 import {
-  ArrowUp, Square, Sparkles, Lock, Wallet, Target, HeartPulse, Plane, Copy, Check, RotateCcw,
+  ArrowUp, Square, Sparkles, Lock, Wallet, Target, HeartPulse, TrendingUp, Copy, Check, RotateCcw,
   SquarePen, AlertTriangle, CornerDownRight,
 } from "lucide-react";
 
 type Message = { id: string; role: "user" | "assistant"; content: string; error?: boolean };
 
 const QUICK_PROMPTS = [
-  { icon: HeartPulse, title: "Explain my health score", sub: "and what to fix first", text: "Explain my health score. What should I fix first?" },
-  { icon: Target, title: "Find my blind spots", sub: "money I'm losing without noticing", text: "What are my biggest financial blind spots?" },
-  { icon: Plane, title: "Can I afford a trip?", sub: "a $1,500 trip next month", text: "Can I afford a $1,500 trip next month?" },
-  { icon: Wallet, title: "Debt or savings?", sub: "where my next dollar should go", text: "Should I pay down my card or build savings?" },
+  { icon: HeartPulse, title: "Why is my score this number?", sub: "walk me through each category", text: "Why is my financial health score this number?" },
+  { icon: Target, title: "What am I overlooking?", sub: "insights I might be missing", text: "What am I overlooking?" },
+  { icon: Wallet, title: "What's hurting my score most?", sub: "and how to improve my weakest category", text: "What's hurting my score the most, and how can I improve my weakest category?" },
+  { icon: TrendingUp, title: "Biggest improvement", sub: "which action helps my finances most", text: "Which action would improve my finances the most?" },
 ];
 
 const THINKING = ["Reading your accounts…", "Checking recent transactions…", "Looking at your health score…", "Putting it together…"];
@@ -252,7 +252,7 @@ export default function AIPage() {
               <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
                 Hi{user?.firstName ? ` ${user.firstName}` : ""}, what would you like to know about your money?
               </h2>
-              <p className="text-stone-400 mt-2">I can see your accounts, recent transactions, health score and blind spots, so my answers are about your situation, not money in general.</p>
+              <p className="text-stone-400 mt-2">I can see your accounts, recent transactions, health score and insights, so my answers are about your situation, not money in general.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-8">
                 {QUICK_PROMPTS.map(({ icon: Icon, title, sub, text }) => (
                   <button
