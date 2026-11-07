@@ -4,8 +4,8 @@ import { getPrisma, databaseConfigured } from "@/lib/db";
 // Fixed-window rate limiter.
 //
 // Cost control: the AI (Groq) and Plaid endpoints cost real money per call, so
-// every user is capped to a burst budget per time window — on top of the
-// monthly AI-question quota. This stops a runaway client loop, a stuck retry,
+// every user is capped to a budget per time window (for the AI coach: per
+// minute, per hour and per day). This stops a runaway client loop, a stuck retry,
 // or an abusive user from driving up the bill.
 //
 // Backend: Postgres (the Neon DB the app already uses), via a self-provisioning
@@ -98,9 +98,14 @@ export async function rateLimit(key: string, limit: number, windowSec: number): 
 // Sensible per-user budgets for the money-costing endpoints. Generous enough
 // that no real human hits them, tight enough to bound runaway/abusive spend.
 export const LIMITS = {
-  ai: { limit: 12, windowSec: 60 },      // Groq LLM calls
+  // AI coach (Groq). No monthly quota: every user gets the coach, bounded by
+  // layered rate limits that stop bursts, loops and sustained abuse.
+  ai: {
+    minute: { limit: 8, windowSec: 60 },
+    hour: { limit: 60, windowSec: 3600 },
+    day: { limit: 200, windowSec: 86400 },
+  },
   plaid: { limit: 40, windowSec: 60 },   // Plaid API calls (accounts/transactions/link)
-  stripe: { limit: 8, windowSec: 60 },   // Checkout / portal session creation
 } as const;
 
 /**

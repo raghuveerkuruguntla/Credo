@@ -2,13 +2,11 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useFinancialData, signedBalance, isInvestment, prettyCategory, monthlyAverages } from "@/lib/useFinancialData";
-import { usePlan } from "@/lib/usePlan";
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import EmptyState, { LoadingState } from "@/components/EmptyState";
-import LockedFeature from "@/components/LockedFeature";
 import UpcomingBills from "@/components/UpcomingBills";
 import { healthInputsFrom } from "@/lib/health";
 import WhyExplanation, { ConfidenceBadge } from "@/components/WhyExplanation";
@@ -20,7 +18,6 @@ const MONTH_LABELS = ["Now", "M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9
 
 export default function ForecastPage() {
   const { accounts, transactions, loading, hasData } = useFinancialData();
-  const { ent, isLoaded } = usePlan();
 
   // Derive everything from the user's real connected data
   const base = useMemo(() => {
@@ -106,19 +103,7 @@ export default function ForecastPage() {
     selectTarget("ALL");
   }
 
-  if (loading || !isLoaded) return <div className="p-6"><LoadingState /></div>;
-  if (!ent.forecasting) {
-    return (
-      <div className="p-6">
-        <h1 className="text-xl font-bold text-stone-100 mb-1">Financial Forecast</h1>
-        <LockedFeature
-          feature="Financial forecasting"
-          requiredPlan="PLUS"
-          description="Model what-if scenarios and project your net worth 12 months out. Available on Plus and Pro."
-        />
-      </div>
-    );
-  }
+  if (loading) return <div className="p-6"><LoadingState /></div>;
   if (!hasData) return <div className="p-6"><EmptyState /></div>;
 
   return (

@@ -14,17 +14,12 @@ const isProtectedRoute = createRouteMatcher([
   "/investments(.*)",
   "/ai(.*)",
   "/settings(.*)",
-  "/billing(.*)",
   "/onboarding(.*)",
   "/api/onboarding(.*)",
   "/api/settings(.*)",
   "/api/budget(.*)",
   "/api/plaid(.*)",
   "/api/ai(.*)",
-  "/api/stripe/checkout(.*)",
-  "/api/stripe/portal(.*)",
-  // NOTE: /api/stripe/webhook is intentionally NOT protected — it is called
-  // by Stripe's servers and authenticated via signature verification instead.
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

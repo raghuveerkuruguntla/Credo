@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { useFinancialData } from "@/lib/useFinancialData";
-import { usePlan } from "@/lib/usePlan";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -24,7 +23,6 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
 export default function SettingsPage() {
   const { user } = useUser();
   const { openUserProfile } = useClerk();
-  const { plan } = usePlan();
   const { accounts } = useFinancialData();
   const institutions = Array.from(new Set(accounts.map((a) => a.institution)));
   const DEFAULT_PREFS = {
@@ -92,7 +90,6 @@ export default function SettingsPage() {
             <div>
               <p className="font-semibold text-stone-100">{user?.fullName ?? "—"}</p>
               <p className="text-sm text-stone-400">{user?.primaryEmailAddress?.emailAddress ?? "—"}</p>
-              <Badge variant={plan === "FREE" ? "muted" : "success"} className="mt-1 text-xs">{plan} plan</Badge>
             </div>
             <Button variant="outline" size="sm" className="ml-auto" onClick={() => openUserProfile()}>Edit profile</Button>
           </div>

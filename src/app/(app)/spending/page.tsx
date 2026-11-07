@@ -2,8 +2,6 @@
 
 import { useState, useMemo } from "react";
 import { useFinancialData, prettyCategory, categoryColor } from "@/lib/useFinancialData";
-import { usePlan } from "@/lib/usePlan";
-import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import EmptyState, { LoadingState } from "@/components/EmptyState";
@@ -53,7 +51,6 @@ function renderLabel({ cx, cy, midAngle, innerRadius, outerRadius, percent }: an
 
 export default function SpendingPage() {
   const { transactions, loading, hasData } = useFinancialData();
-  const { ent } = usePlan();
   const [range, setRange] = useState<RangeKey>("this-month");
   const minDate = iso(new Date(Date.now() - 90 * 864e5));
   const today = iso(new Date());
@@ -110,8 +107,7 @@ export default function SpendingPage() {
             onChange={(e) => setRange(e.target.value as RangeKey)}
             className="text-sm border border-[#ffffff14] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
           >
-            {RANGES.filter((r) => ent.advancedAnalytics || r.key === "this-month" || r.key === "last-month")
-              .map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
+            {RANGES.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
           </select>
           {range === "custom" && (
             <div className="flex items-center gap-2">
@@ -158,10 +154,9 @@ export default function SpendingPage() {
             </Card>
 
             <Card>
-              <CardHeader><CardTitle>Weekly Spending {!ent.advancedAnalytics && <span className="text-xs font-normal text-orange-400">· Plus</span>}</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Weekly Spending</CardTitle></CardHeader>
               <CardContent>
-                {ent.advancedAnalytics ? (
-                  <ResponsiveContainer width="100%" height={220}>
+                <ResponsiveContainer width="100%" height={220}>
                     <BarChart data={weekly}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                       <XAxis dataKey="week" tick={{ fontSize: 10, fill: "#64748b" }} axisLine={false} tickLine={false} />
@@ -170,13 +165,6 @@ export default function SpendingPage() {
                       <Bar dataKey="amount" fill="#6366f1" radius={[4, 4, 0, 0]} name="Spent" />
                     </BarChart>
                   </ResponsiveContainer>
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-center" style={{ height: 220 }}>
-                    <p className="text-sm text-stone-400 mb-1">Weekly trends & custom date ranges</p>
-                    <p className="text-xs text-stone-500 mb-3">Advanced analytics is a Plus feature.</p>
-                    <Link href="/billing" className="text-xs font-semibold bg-stone-100 text-stone-900 hover:bg-white px-4 py-2 rounded-full transition-colors">Upgrade to Plus</Link>
-                  </div>
-                )}
               </CardContent>
             </Card>
           </div>

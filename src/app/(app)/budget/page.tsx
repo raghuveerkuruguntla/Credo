@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useUser } from "@clerk/nextjs";
+import { askCoachOnce } from "@/lib/coachClient";
+import ChatMarkdown, { splitFollowups } from "@/components/ChatMarkdown";
 import { useFinancialData, prettyCategory, categoryColor, monthlyAverages } from "@/lib/useFinancialData";
-import { usePlan } from "@/lib/usePlan";
-import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -17,7 +17,6 @@ type Budget = Record<string, number>;
 export default function BudgetPage() {
   const { user } = useUser();
   const { transactions, loading, hasData } = useFinancialData();
-  const { ent } = usePlan();
 
   const savedBudget = (user?.publicMetadata?.budget as Budget | undefined) ?? {};
   const hasBudget = Object.keys(savedBudget).length > 0;
@@ -121,21 +120,11 @@ export default function BudgetPage() {
       .map(([c, v]) => `${c}: averaging ${formatCurrency(v)}/mo`)
       .join("; ");
     try {
-      const res = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [{
-            role: "user",
-            content: `My average monthly take-home income is approximately ${formatCurrency(income)}. My average monthly spending by category is: ${summary}.
+      const { text, error } = await askCoachOnce(`My average monthly take-home income is approximately ${formatCurrency(income)}. My average monthly spending by category is: ${summary}.
 
-Please: (1) identify the specific categories where my budgeting should be improved and explain why, comparing against common guidelines like the 50/30/20 rule; (2) at the end, give a clear recommended monthly budget amount for EACH category based on established personal-finance best practices for my income level. Format the recommended budget as a simple list. Keep it concise.`,
-          }],
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) setAiError(data.error ?? "Failed to get AI suggestions");
-      else setAiSuggestions(data.reply);
+Please: (1) identify the specific categories where my budgeting should be improved and explain why, comparing against common guidelines like the 50/30/20 rule; (2) at the end, give a clear recommended monthly budget amount for EACH category based on established personal-finance best practices for my income level. Format the recommended budget as a simple list. Keep it concise.`);
+      if (error || !text) setAiError(error ?? "Failed to get AI suggestions");
+      else setAiSuggestions(splitFollowups(text).body);
     } catch {
       setAiError("Network error — could not reach the server");
     } finally {
@@ -268,16 +257,10 @@ Please: (1) identify the specific categories where my budgeting should be improv
           <p className="text-sm text-stone-400">Your monthly plan · spending shown for {new Date().toLocaleDateString("en-US", { month: "long" })}</p>
         </div>
         <div className="flex items-center gap-2">
-          {ent.aiBudgetSuggestions ? (
-            <Button variant="outline" size="sm" onClick={getAiSuggestions} disabled={aiLoading}>
-              {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              AI Suggestions
-            </Button>
-          ) : (
-            <Link href="/billing">
-              <Button variant="outline" size="sm"><Sparkles className="w-4 h-4" /> AI Suggestions (Plus)</Button>
-            </Link>
-          )}
+          <Button variant="outline" size="sm" onClick={getAiSuggestions} disabled={aiLoading}>
+            {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            AI Suggestions
+          </Button>
           <Button size="sm" onClick={startEdit}><Pencil className="w-4 h-4" /> Edit budget</Button>
         </div>
       </div>
@@ -292,8 +275,8 @@ Please: (1) identify the specific categories where my budgeting should be improv
             <button onClick={() => setAiSuggestions(null)} className="p-1 text-stone-500 hover:text-stone-300 hover:bg-[#ffffff12] rounded-md transition-colors"><X className="w-4 h-4" /></button>
           </CardHeader>
           <CardContent>
-            <div className="text-sm text-stone-300 whitespace-pre-wrap leading-relaxed">
-              {aiSuggestions.split("**").map((part, i) => i % 2 === 1 ? <strong key={i} className="text-stone-100">{part}</strong> : <span key={i}>{part}</span>)}
+            <div className="text-sm text-stone-300 leading-relaxed">
+              <ChatMarkdown text={aiSuggestions} />
             </div>
             <div className="mt-4 flex items-start gap-2 bg-[#ffffff08] border border-[#ffffff0f] rounded-lg p-3">
               <Info className="w-3.5 h-3.5 text-stone-500 mt-0.5 flex-shrink-0" />

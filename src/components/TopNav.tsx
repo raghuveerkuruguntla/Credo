@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { UserButton, useUser } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
 
@@ -24,8 +24,6 @@ const navItems = [
 // Mobile / tablet header. Desktop navigation lives in the Sidebar (lg+).
 export default function TopNav() {
   const pathname = usePathname();
-  const { user } = useUser();
-  const plan = ((user?.publicMetadata?.plan as string) ?? "FREE").toUpperCase();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -77,12 +75,6 @@ export default function TopNav() {
                 </Link>
               );
             })}
-            <Link
-              href="/billing"
-              className="col-span-2 mt-1 px-3 py-2.5 rounded-xl text-sm font-semibold text-center bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-[0_0_20px_rgba(99,102,241,0.3)]"
-            >
-              {plan === "FREE" ? "Upgrade plan" : `Manage ${plan === "PRO" ? "Pro" : "Plus"} plan`}
-            </Link>
           </nav>
         </div>
       )}

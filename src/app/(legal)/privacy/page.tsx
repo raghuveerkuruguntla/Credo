@@ -30,7 +30,6 @@ export default function PrivacyPage() {
         <Section title="2. How We Use Your Information">
           <ul className="list-disc pl-5 space-y-1">
             <li>To provide and personalize the Service, including dashboards, budgets, forecasts, and AI insights.</li>
-            <li>To process subscription payments through our payment processor.</li>
             <li>To maintain the security and integrity of the Service.</li>
           </ul>
         </Section>
@@ -44,7 +43,7 @@ export default function PrivacyPage() {
 
         <Section title="4. Third-Party Service Providers">
           We rely on trusted providers to operate Credo: Plaid (bank connections), our
-          authentication provider (sign-in and account management), Stripe (payment processing), and
+          authentication provider (sign-in and account management), Groq (AI coach responses), and
           our database and hosting providers. Each processes your data only as needed to provide their
           service and under their own privacy commitments.
         </Section>

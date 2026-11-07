@@ -6,7 +6,7 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Landmark, ArrowLeftRight, PieChart, Wallet,
-  TrendingUp, BarChart3, LineChart, Bot, Settings, Sparkles, Lightbulb, HeartPulse,
+  TrendingUp, BarChart3, LineChart, Bot, Settings, Lightbulb, HeartPulse,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -42,7 +42,6 @@ const groups: { heading: string; items: { href: string; label: string; icon: Luc
 export default function Sidebar() {
   const pathname = usePathname();
   const { user } = useUser();
-  const plan = ((user?.publicMetadata?.plan as string) ?? "FREE").toUpperCase();
 
   return (
     <aside className="relative z-10 hidden lg:flex flex-col w-60 shrink-0 h-full border-r border-white/[0.06] bg-[#0a0b0f]/70 backdrop-blur-xl">
@@ -84,23 +83,8 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Footer: upgrade + account */}
+      {/* Footer: account */}
       <div className="shrink-0 border-t border-white/[0.06] p-3 space-y-2">
-        {plan === "FREE" ? (
-          <Link
-            href="/billing"
-            className="flex items-center justify-center gap-1.5 w-full px-3 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:from-indigo-400 hover:to-violet-500 transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)]"
-          >
-            <Sparkles className="w-4 h-4" /> Upgrade plan
-          </Link>
-        ) : (
-          <Link
-            href="/billing"
-            className="flex items-center justify-center gap-1.5 w-full px-3 py-2.5 rounded-xl text-sm font-semibold text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 hover:bg-indigo-500/15 transition-colors"
-          >
-            <Sparkles className="w-4 h-4" /> {plan === "PRO" ? "Pro" : "Plus"} plan
-          </Link>
-        )}
         <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-xl">
           <UserButton />
           <div className="min-w-0">

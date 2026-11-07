@@ -32,20 +32,20 @@ const FAQS = [
     a: "Yes. Because Credo connects through Plaid, your bank login never touches our servers, and connections are read-only. The access tokens we store are encrypted with AES-256, all traffic is encrypted in transit over TLS, and we never sell your data. You can disconnect any institution and delete your data at any time.",
   },
   {
-    q: "Is there really a free plan?",
-    a: "Free forever, no credit card required. You get your full dashboard, net worth, your financial health score with your next best move, and 10 AI coach questions a month. Upgrade when you want forecasting and what-if scenarios, more institutions, or more coach questions.",
+    q: "What does it cost?",
+    a: "Nothing, and there are no paid tiers. Every feature is included for everyone: your dashboard, financial health score and insights, next best move, forecasting and what-if scenarios, investments, CSV export and the AI coach.",
   },
   {
     q: "What can the AI coach actually do?",
-    a: "It answers questions grounded in your real accounts and health score — like \"Can I afford a trip in March?\" or \"Should I pay down my card or save?\" — using your actual data instead of generic advice, and ends with one specific next step. On paid plans it can also suggest budgets from your spending patterns.",
+    a: "It answers questions grounded in your real accounts and health score — like \"Can I afford a trip in March?\" or \"Should I pay down my card or save?\" — using your actual data instead of generic advice, and ends with one specific next step. It can also suggest budgets from your spending patterns. There's no monthly question limit, just a sensible rate limit to keep the service fast for everyone.",
   },
   {
     q: "Which accounts can I track?",
-    a: "Checking, savings, CDs, IRAs and other investment accounts, credit cards, auto and personal loans, and mortgages across 11,000+ institutions — with balances, transactions, and budgets in one dashboard. Investment balances and allocation are available on the Pro plan.",
+    a: "Checking, savings, CDs, IRAs and other investment accounts, credit cards, auto and personal loans, and mortgages across 11,000+ institutions — with balances, transactions, budgets and investments in one dashboard.",
   },
   {
-    q: "Can I cancel anytime?",
-    a: "Anytime, in two clicks, no retention hoops. Paid plans stay active until the end of your billing period, then you drop back to Free — your data stays intact.",
+    q: "Can I disconnect or delete my data?",
+    a: "Yes. You can disconnect any institution from Accounts at any time, and delete your account from Settings.",
   },
 ];
 

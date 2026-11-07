@@ -23,7 +23,6 @@ const LINKS = [
   { href: "#features", label: "Features" },
   { href: "#how", label: "How it works" },
   { href: "#faq", label: "FAQ" },
-  { href: "#pricing", label: "Pricing" },
 ];
 
 export default function LandingNav() {

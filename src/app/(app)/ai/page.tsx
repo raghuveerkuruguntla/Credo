@@ -1,18 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useRef, useEffect, useCallback, type KeyboardEvent } from "react";
 import { useUser } from "@clerk/nextjs";
-import { usePlan } from "@/lib/usePlan";
-import { Badge } from "@/components/ui/Badge";
+import { splitSignature, takeQueuedQuestion } from "@/lib/coachClient";
 import ChatMarkdown, { splitFollowups } from "@/components/ChatMarkdown";
 import { cn } from "@/lib/utils";
 import {
-  ArrowUp, Square, Sparkles, Lock, Wallet, Target, HeartPulse, TrendingUp, Copy, Check, RotateCcw,
+  ArrowUp, Square, Sparkles, Wallet, Target, HeartPulse, TrendingUp, Copy, Check, RotateCcw,
   SquarePen, AlertTriangle, CornerDownRight,
 } from "lucide-react";
 
-type Message = { id: string; role: "user" | "assistant"; content: string; error?: boolean };
+type Message = { id: string; role: "user" | "assistant"; content: string; error?: boolean; sig?: string | null };
 
 const QUICK_PROMPTS = [
   { icon: HeartPulse, title: "Why is my score this number?", sub: "walk me through each category", text: "Why is my financial health score this number?" },
@@ -62,26 +60,11 @@ export default function AIPage() {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [waitingFirstToken, setWaitingFirstToken] = useState(false);
-  // Usage is tracked server-side (per user, per month) so it can't be reset
-  // by switching tabs or reloading. null = unlimited (Pro).
-  const [usage, setUsage] = useState<{ used: number; limit: number | null }>({ used: 0, limit: null });
-  const [usageLoaded, setUsageLoaded] = useState(false);
-  const { plan, limits } = usePlan();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const stickToBottom = useRef(true);
 
-  useEffect(() => {
-    fetch("/api/ai/usage")
-      .then((r) => r.json())
-      .then((d) => setUsage({ used: d.used ?? 0, limit: d.limit ?? null }))
-      .catch(() => {})
-      .finally(() => setUsageLoaded(true));
-  }, []);
-
-  const maxQuestions = usage.limit;
-  const atLimit = maxQuestions !== null && usage.used >= maxQuestions;
 
   // Keep the newest text in view while streaming, unless the user scrolled up.
   useEffect(() => {
@@ -110,8 +93,8 @@ export default function AIPage() {
     stickToBottom.current = true;
     const controller = new AbortController();
     abortRef.current = controller;
-    const update = (content: string, error = false) =>
-      setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content, error } : m)));
+    const update = (content: string, error = false, sig: string | null = null) =>
+      setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content, error, sig } : m)));
 
     try {
       const res = await fetch("/api/ai/chat", {
@@ -119,21 +102,19 @@ export default function AIPage() {
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
         body: JSON.stringify({
-          messages: history.filter((m) => !m.error).map(({ role, content }) => ({ role, content: role === "assistant" ? splitFollowups(content).body : content })),
+          // Assistant turns go back exactly as received, with the server's
+          // signature; unsigned ones (errors, stopped answers) are left out.
+          messages: history.filter((m) => !m.error && (m.role === "user" || m.sig)).map(({ role, content, sig }) => (role === "assistant" ? { role, content, sig } : { role, content })),
         }),
       });
 
       if (!res.ok || !res.body) {
         const data = await res.json().catch(() => ({}));
-        if (data.usage) setUsage({ used: data.usage.used, limit: data.usage.limit });
         setWaitingFirstToken(false);
-        update(data.error ?? "Something went wrong. Please try again.", true);
+        const wait = res.status === 429 && data.retryAfterSec ? ` You can ask again in about ${Math.ceil(data.retryAfterSec / 60) > 1 ? `${Math.ceil(data.retryAfterSec / 60)} minutes` : "a minute"}.` : "";
+        update((res.status === 429 ? "You're asking questions faster than the coach can keep up." : data.error ?? "Something went wrong. Please try again.") + wait, true);
         return;
       }
-
-      const usedHdr = res.headers.get("X-AI-Usage-Used");
-      const limitHdr = res.headers.get("X-AI-Usage-Limit");
-      if (usedHdr) setUsage({ used: Number(usedHdr), limit: limitHdr && limitHdr !== "unlimited" ? Number(limitHdr) : null });
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -142,11 +123,14 @@ export default function AIPage() {
         const { value, done } = await reader.read();
         if (done) break;
         text += decoder.decode(value, { stream: true });
-        if (text) setWaitingFirstToken(false);
-        update(text);
+        const { text: visible } = splitSignature(text);
+        if (visible) setWaitingFirstToken(false);
+        update(visible);
       }
       setWaitingFirstToken(false);
-      if (!text.trim()) update("Sorry, I couldn't generate a response. Please try again.", true);
+      const { text: finalText, sig } = splitSignature(text);
+      if (!finalText.trim()) update("Sorry, I couldn't generate a response. Please try again.", true);
+      else update(finalText, false, sig);
     } catch (err) {
       setWaitingFirstToken(false);
       if ((err as Error)?.name === "AbortError") {
@@ -163,10 +147,10 @@ export default function AIPage() {
 
   const send = useCallback((text?: string) => {
     const msg = (text ?? input).trim();
-    if (!msg || streaming || atLimit) return;
+    if (!msg || streaming) return;
     setInput("");
     ask([...messages, { id: `u${Date.now()}`, role: "user", content: msg }]);
-  }, [input, streaming, atLimit, messages, ask]);
+  }, [input, streaming, messages, ask]);
 
   const regenerate = () => {
     if (streaming) return;
@@ -182,19 +166,23 @@ export default function AIPage() {
     inputRef.current?.focus();
   };
 
-  // Deep link from a Blind Spot ("Ask the coach"): /ai?ask=<question>. The user
-  // clicked to ask, so send it once usage has loaded, then clean the URL so a
-  // refresh doesn't ask again.
+  // "Ask the coach" buttons inside the app queue their question in session
+  // storage, and only those are sent automatically. A /ai?ask= link (which
+  // anyone could craft) just pre-fills the box so the user sees it first.
   const askedRef = useRef(false);
   useEffect(() => {
-    if (!usageLoaded || askedRef.current) return;
-    const q = new URLSearchParams(window.location.search).get("ask");
-    if (!q) return;
+    if (askedRef.current) return;
     askedRef.current = true;
-    window.history.replaceState(null, "", window.location.pathname);
-    send(q.slice(0, 1500));
+    const queued = takeQueuedQuestion();
+    if (queued) { send(queued); return; }
+    const q = new URLSearchParams(window.location.search).get("ask");
+    if (q) {
+      window.history.replaceState(null, "", window.location.pathname);
+      setInput(q.slice(0, 1500));
+      inputRef.current?.focus();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usageLoaded]);
+  }, []);
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
@@ -203,10 +191,6 @@ export default function AIPage() {
     }
   };
 
-  const nextResetLabel = (() => {
-    const d = new Date();
-    return new Date(d.getFullYear(), d.getMonth() + 1, 1).toLocaleDateString("en-US", { month: "long", day: "numeric" });
-  })();
   const lastAssistantId = [...messages].reverse().find((m) => m.role === "assistant")?.id;
   const empty = messages.length === 0;
 
@@ -224,15 +208,6 @@ export default function AIPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {maxQuestions !== null ? (
-            <span className="text-xs text-stone-400 hidden sm:flex items-center gap-2">
-              {usage.used}/{maxQuestions} questions
-              <span className="w-16 h-1.5 bg-white/[0.08] rounded-full overflow-hidden"><span className="block h-full bg-indigo-500 rounded-full" style={{ width: `${Math.min(100, (usage.used / maxQuestions) * 100)}%` }} /></span>
-            </span>
-          ) : (
-            <span className="text-xs text-stone-400 hidden sm:inline">Unlimited questions</span>
-          )}
-          <Badge variant={plan === "FREE" ? "muted" : "success"}>{limits.label}</Badge>
           {!empty && (
             <button type="button" onClick={newChat} className="inline-flex items-center gap-1.5 text-xs text-stone-300 px-2.5 py-1.5 rounded-lg border border-white/10 hover:bg-white/[0.06] cursor-pointer">
               <SquarePen className="w-3.5 h-3.5" /> New chat
@@ -259,7 +234,7 @@ export default function AIPage() {
                     key={text}
                     type="button"
                     onClick={() => send(text)}
-                    disabled={atLimit || !usageLoaded}
+                    disabled={streaming}
                     className="group text-left rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-indigo-500/30 p-4 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Icon className="w-5 h-5 text-indigo-400 mb-2.5" />
@@ -321,7 +296,7 @@ export default function AIPage() {
                         </button>
                       )}
 
-                      {isLast && !streaming && followups.length > 0 && !atLimit && (
+                      {isLast && !streaming && followups.length > 0 && (
                         <div className="mt-4 flex flex-col items-start gap-2">
                           {followups.map((q) => (
                             <button key={q} type="button" onClick={() => send(q)} className="inline-flex items-center gap-2 text-left text-sm text-stone-300 rounded-xl border border-white/[0.08] px-3 py-2 hover:bg-white/[0.05] hover:border-indigo-500/30 hover:text-white transition-colors cursor-pointer">
@@ -342,16 +317,6 @@ export default function AIPage() {
       {/* Composer */}
       <div className="px-4 sm:px-6 pb-4 pt-2">
         <div className="max-w-3xl mx-auto">
-          {atLimit ? (
-            <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 p-4 flex flex-wrap items-center gap-3">
-              <Lock className="w-5 h-5 text-amber-400 shrink-0" />
-              <div className="flex-1 min-w-[200px]">
-                <p className="text-sm font-semibold text-amber-200">Monthly question limit reached</p>
-                <p className="text-xs text-amber-300/90">You&apos;ve used all {maxQuestions} questions this month. Your limit resets on {nextResetLabel}. Plus gives you 50 a month, Pro is unlimited.</p>
-              </div>
-              <Link href="/billing" className="text-sm font-medium px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white">Upgrade</Link>
-            </div>
-          ) : (
             <div className="relative rounded-2xl border border-white/[0.1] bg-white/[0.03] focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-colors">
               <label htmlFor="coach-input" className="sr-only">Message Credo Coach</label>
               <textarea
@@ -378,7 +343,6 @@ export default function AIPage() {
                 )}
               </div>
             </div>
-          )}
           <p className="text-[11px] text-stone-500 text-center mt-2">Based on your connected data. Coaching, not licensed financial advice. Credo never moves money for you.</p>
         </div>
       </div>

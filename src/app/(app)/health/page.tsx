@@ -5,7 +5,7 @@
 //   2. What am I overlooking?                  → insights inside each category
 //   3. What can I do to improve my position?   → next best move, what-if, progress
 
-import Link from "next/link";
+import AskCoachLink from "@/components/AskCoachLink";
 import { useEffect, useMemo, useState } from "react";
 import { useFinancialHealth } from "@/lib/useFinancialHealth";
 import { useFinancialData } from "@/lib/useFinancialData";
@@ -252,7 +252,7 @@ export default function HealthPage() {
             <p className="text-[11px] font-semibold text-stone-400 uppercase tracking-wide mb-2 flex items-center gap-1.5"><MessageCircle className="w-3.5 h-3.5" /> Ask the coach</p>
             <div className="flex flex-wrap gap-2">
               {COACH_QUESTIONS.map((q) => (
-                <Link key={q} href={`/ai?ask=${encodeURIComponent(q)}`} className="text-xs text-stone-300 rounded-full border border-white/[0.08] px-3 py-1.5 hover:border-indigo-400/40 hover:text-white hover:bg-indigo-500/[0.06] transition-colors">{q}</Link>
+                <AskCoachLink key={q} question={q} className="text-xs text-stone-300 rounded-full border border-white/[0.08] px-3 py-1.5 hover:border-indigo-400/40 hover:text-white hover:bg-indigo-500/[0.06] transition-colors">{q}</AskCoachLink>
               ))}
             </div>
           </div>
