@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Shield, Bot, TrendingUp, Wallet, ArrowRight, Check, Sparkles, Star, Lock, Gift, Crown, PieChart, Target, HeartPulse, CalendarClock, Sliders, Compass, Landmark } from "lucide-react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import LandingNav from "@/components/LandingNav";
-import LogoMarquee from "@/components/LogoMarquee";
+import AccountMarquee from "@/components/AccountMarquee";
 import { Reveal, Stagger, StaggerItem } from "@/components/motion/Reveal";
 import { HeroReveal, HeroItem } from "@/components/motion/HeroReveal";
 import { Counter } from "@/components/motion/Counter";
@@ -70,69 +70,13 @@ const tiers = [
   { name: "Pro",   icon: Crown, price: "$19.99",note: "/mo",     features: ["Unlimited institutions","Investment analytics","Data export (CSV)","Unlimited AI coach questions","Priority support"],cta: "Go Pro",         highlight: false },
 ];
 
-// Circle-grid geometry for the hero. Banks sit on integer grid cells (i,j)
+// Circle-grid geometry for the hero. Rings sit on integer grid cells (i,j)
 // measured from the centre; empty cells render as glowing rings. Large rings
 // on a tight pitch read as a faint futuristic grid; only the centre 3x3 glows.
 const RING = 268;   // circle diameter, px
 const PITCH = 292;  // centre-to-centre spacing, px
 const COLS = 9;     // grid columns (i = -4..4)
 const ROWS = 7;     // grid rows    (j = -3..3)
-
-type Bank = { i:number; j:number; key:string };
-const banks: Bank[] = [
-  { i:-1, j:-1, key:"chase"      },
-  { i: 0, j:-1, key:"wells"      },
-  { i: 1, j:-1, key:"bofa"       },
-  { i:-1, j: 0, key:"pnc"        },
-  { i: 1, j: 0, key:"capitalone" },
-  { i:-1, j: 1, key:"amex"       },
-  { i: 0, j: 1, key:"truist"     },
-  { i: 1, j: 1, key:"citi"       },
-];
-
-const LOGO_FILE: Record<string,string> = {
-  chase:      "Chase_Logo.png",
-  wells:      "Wells_Fargo.png",
-  bofa:       "BOFA.png",
-  pnc:        "PNC.png",
-  capitalone: "CAPITALONE.png",
-  amex:       "AMEX.png",
-  truist:     "TRUIST.png",
-  citi:       "CITI.png",
-};
-// Per-logo treatment. "white" recolours the solid full-colour logo to a solid
-// white fill (brightness(0) makes it black, invert(1) flips it to white) so it
-// reads cleanly on black — unlike the "mono" assets which are hollow outlines.
-// "color" keeps the original solid colour (red/blue box logos pop as-is).
-const LOGO_TREATMENT: Record<string,"white"|"color"> = {
-  chase: "white", wells: "color", bofa: "white", pnc: "white",
-  capitalone: "white", amex: "color", truist: "white", citi: "white",
-};
-const bankCells = new Set(banks.map(b => `${b.i},${b.j}`));
-
-// Logo floats directly inside its glowing circle — no card, no white plate.
-function BankMark({ k }:{ k:string }) {
-  const file = LOGO_FILE[k];
-  if (!file) return null;
-  const treatment = LOGO_TREATMENT[k] ?? "white";
-  const shadow = "drop-shadow(0 1px 6px rgba(0,0,0,0.55))";
-  return (
-    <span className="flex items-center justify-center" style={{ width: 132, height: 60 }}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={`/logos/cut/${file}`}
-        alt=""
-        loading="lazy"
-        decoding="async"
-        className="object-contain"
-        style={{
-          maxWidth: "100%", maxHeight: "100%", width: "auto", height: "auto",
-          filter: treatment === "white" ? `brightness(0) invert(1) ${shadow}` : shadow,
-        }}
-      />
-    </span>
-  );
-}
 
 export default function LandingPage() {
   return (
@@ -163,13 +107,12 @@ export default function LandingPage() {
             }} />
           </div>
 
-          {/* circle grid + bank logos — large, thin, soft; centre 3x3 glows, edges fade to black */}
+          {/* circle grid — large, thin, soft; centre glows, edges fade to black */}
           <div className="pointer-events-none absolute inset-0 overflow-hidden hidden md:block">
             {/* empty glowing rings */}
             {Array.from({ length: COLS * ROWS }).map((_, idx) => {
               const i = (idx % COLS) - (COLS - 1) / 2;
               const j = Math.floor(idx / COLS) - (ROWS - 1) / 2;
-              if (bankCells.has(`${i},${j}`)) return null;
               const dist = Math.hypot(i, j);
               const op = Math.max(0.14, 0.95 - dist * 0.26);
               return (
@@ -181,22 +124,6 @@ export default function LandingPage() {
                   boxShadow: `0 0 ${op * 44}px rgba(140,108,236,${op * 0.4}),inset 0 0 ${op * 30}px rgba(120,92,220,${op * 0.08})`,
                   background: "#000000",
                 }} />
-              );
-            })}
-            {/* bank-logo circles — logos float directly inside, no card */}
-            {banks.map(b => {
-              const op = Math.max(0.5, 0.92 - Math.hypot(b.i, b.j) * 0.30);
-              return (
-                <div key={b.key} className="absolute rounded-full flex items-center justify-center" style={{
-                  width: RING, height: RING,
-                  left: `calc(50% + ${b.i * PITCH}px)`, top: `calc(50% + ${b.j * PITCH}px)`,
-                  transform: "translate(-50%,-50%)",
-                  border: `1px solid rgba(196,182,255,${op})`,
-                  boxShadow: `0 0 ${op * 54}px rgba(150,116,244,${op * 0.55}),inset 0 0 ${op * 34}px rgba(120,92,220,${op * 0.1})`,
-                  background: "#000000",
-                }}>
-                  <BankMark k={b.key} />
-                </div>
               );
             })}
           </div>
@@ -270,17 +197,17 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION 1.5: TRUST — partner-bank marquee + honest product stats */}
+        {/* SECTION 1.5: TRUST — account-type marquee + honest product stats */}
         <section className="relative pt-4 pb-14 sm:pb-20">
           <div className="max-w-5xl mx-auto px-6">
             <Reveal className="text-center mb-8">
               <p className="text-[12px] sm:text-[13px] font-medium tracking-[0.16em] uppercase" style={{ color: "rgba(170,164,200,0.7)" }}>
-                Securely connects with 11,000+ banks &amp; institutions
+                Every kind of account, one picture · Read-only via Plaid · 11,000+ institutions
               </p>
             </Reveal>
           </div>
           <Reveal y={16}>
-            <LogoMarquee />
+            <AccountMarquee />
           </Reveal>
           <div className="max-w-5xl mx-auto px-6">
             <Stagger className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-px rounded-2xl overflow-hidden" >

@@ -6,11 +6,13 @@ import { useUser } from "@clerk/nextjs";
 import { cn, formatCurrency, formatShortDate } from "@/lib/utils";
 import { useFinancialData, refreshFinancialData, signedBalance, isInvestment, isDebt, prettyCategory, categoryColor } from "@/lib/useFinancialData";
 import { buildIntelligence } from "@/lib/intelligence";
+import { computeHealth, healthInputsFrom } from "@/lib/health";
+import { pickNextMove } from "@/lib/navigator";
 import WhyExplanation from "@/components/WhyExplanation";
 import PlaidLinkButton from "@/components/PlaidLinkButton";
 import EmptyState, { LoadingState } from "@/components/EmptyState";
 import {
-  TrendingUp, TrendingDown, RefreshCw, ArrowRight, Lightbulb, Sparkles,
+  TrendingUp, TrendingDown, RefreshCw, ArrowRight, Lightbulb, HeartPulse,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -134,7 +136,9 @@ export default function DashboardPage() {
     [accounts, transactions]
   );
   const topInsights = insights.slice(0, 3);
-  const leadRec = recommendations[0];
+  const health = useMemo(() => computeHealth(healthInputsFrom(accounts, transactions)), [accounts, transactions]);
+  const next = pickNextMove(recommendations, health.weakest);
+  const leadRec = next?.move;
 
   const recentTxns = transactions.slice(0, 6);
   const acctName = (id: string) => accounts.find((a) => a.id === id)?.name ?? "";
@@ -261,19 +265,29 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* ── Lead recommendation (decisions, not dashboards) ─────────── */}
-            {leadRec && (
-              <Link href="/insights" className={`${card} p-4 sm:p-5 flex items-center gap-4 group hover:border-white/[0.12] transition-colors`}>
-                <span className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-5 h-5 text-indigo-400" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-indigo-300/90">Recommended for you</p>
-                  <p className="text-sm font-semibold text-white truncate mt-0.5">{leadRec.title}</p>
-                  <p className="text-xs text-slate-400 truncate">{leadRec.impactLabel}</p>
-                </div>
-                <span className="hidden sm:inline-flex items-center gap-1 text-xs font-medium text-indigo-300 group-hover:text-indigo-200 shrink-0">
-                  Review <ArrowRight className="w-3.5 h-3.5" />
+            {/* ── Health score + next best move (decisions, not dashboards) ── */}
+            {(health.indicators.length > 0 || leadRec) && (
+              <Link href="/health" className={`${card} p-4 sm:p-5 flex flex-wrap sm:flex-nowrap items-center gap-4 group hover:border-white/[0.12] transition-colors`}>
+                {health.indicators.length > 0 && (
+                  <span className="flex items-center gap-3 shrink-0 pr-4 sm:border-r border-white/[0.06]">
+                    <span className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
+                      <HeartPulse className="w-5 h-5 text-indigo-400" />
+                    </span>
+                    <span>
+                      <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-indigo-300/90">Health score</span>
+                      <span className="block text-2xl font-semibold text-white leading-tight">{health.score}<span className="text-sm text-slate-500 font-normal"> / 100 · {health.label}</span></span>
+                    </span>
+                  </span>
+                )}
+                {leadRec && (
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-indigo-300/90">Your next best move</span>
+                    <span className="block text-sm font-semibold text-white truncate mt-0.5">{leadRec.title}</span>
+                    <span className="block text-xs text-slate-400 truncate">{leadRec.impactLabel}{next?.targets ? ` · lifts your ${next.targets.name.toLowerCase()}` : ""}</span>
+                  </span>
+                )}
+                <span className="hidden sm:inline-flex items-center gap-1 text-xs font-medium text-indigo-300 group-hover:text-indigo-200 shrink-0 ml-auto">
+                  See your health <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </Link>
             )}

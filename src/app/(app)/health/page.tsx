@@ -3,36 +3,24 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useFinancialData } from "@/lib/useFinancialData";
-import { buildIntelligence, detectRecurring, type Confidence, type Recommendation } from "@/lib/intelligence";
+import { buildIntelligence, type Confidence } from "@/lib/intelligence";
+import { pickNextMove } from "@/lib/navigator";
 import {
   computeHealth, healthInputsFrom, projectHealth, STATUS_LABEL,
-  HEALTH_VERSION, type IndicatorId, type IndicatorStatus,
+  HEALTH_VERSION, type IndicatorStatus,
 } from "@/lib/health";
 import { cn, formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import UpcomingBills from "@/components/UpcomingBills";
 import EmptyState, { LoadingState } from "@/components/EmptyState";
 import WhyExplanation, { ConfidenceBadge } from "@/components/WhyExplanation";
-import { HeartPulse, ArrowRight, CalendarClock, Sliders, Bot, Info } from "lucide-react";
+import { HeartPulse, ArrowRight, Sliders, Bot, Info } from "lucide-react";
 
 const STATUS_STYLE: Record<IndicatorStatus, { text: string; bar: string; chip: string }> = {
   strong: { text: "text-emerald-300", bar: "bg-emerald-400", chip: "bg-emerald-500/15 text-emerald-300" },
   "on-track": { text: "text-indigo-300", bar: "bg-indigo-400", chip: "bg-indigo-500/15 text-indigo-300" },
   "needs-work": { text: "text-amber-300", bar: "bg-amber-400", chip: "bg-amber-500/15 text-amber-300" },
 };
-
-// Which recommendation moves which indicator fastest.
-const MOVES_FOR: Record<IndicatorId, string[]> = {
-  utilization: ["rec_debt", "rec_trim", "rec_subs"],
-  dti: ["rec_debt", "rec_trim", "rec_subs"],
-  cushion: ["rec_savings", "rec_trim", "rec_subs"],
-  savingsRate: ["rec_savings", "rec_trim", "rec_subs"],
-};
-
-function addMonth(date: string): Date {
-  const d = new Date(date + "T00:00:00");
-  d.setMonth(d.getMonth() + 1);
-  return d;
-}
 
 function Bar({ points, status }: { points: number; status: IndicatorStatus }) {
   return (
@@ -54,30 +42,8 @@ export default function HealthPage() {
   const confidence: Confidence = inputs.historyMonths >= 3 ? "high" : inputs.historyMonths >= 2 ? "medium" : "low";
 
   // Next best move: the recommendation that lifts the weakest indicator.
-  const nextMove: Recommendation | undefined = useMemo(() => {
-    const recs = intel.recommendations;
-    if (!health.weakest) return recs[0];
-    for (const id of MOVES_FOR[health.weakest.id]) {
-      const r = recs.find((x) => x.id === id);
-      if (r) return r;
-    }
-    return recs[0];
-  }, [intel.recommendations, health.weakest]);
-
-  // Upcoming bills: each recurring charge's next expected date (last seen + 1 month).
-  const upcoming = useMemo(() => {
-    const now = new Date();
-    const horizon = new Date(now.getTime() + 30 * 86400000);
-    return detectRecurring(transactions)
-      .map((r) => {
-        let next = addMonth(r.sample[0].date);
-        while (next < now) next = new Date(next.getFullYear(), next.getMonth() + 1, next.getDate());
-        return { ...r, next };
-      })
-      .filter((r) => r.next <= horizon)
-      .sort((a, b) => a.next.getTime() - b.next.getTime());
-  }, [transactions]);
-  const upcomingTotal = upcoming.reduce((s, r) => s + r.amount, 0);
+  const next = useMemo(() => pickNextMove(intel.recommendations, health.weakest), [intel.recommendations, health.weakest]);
+  const nextMove = next?.move;
 
   // What-if: slider ranges scale to the user's own numbers.
   const spendMax = Math.max(100, Math.round(inputs.monthlyExpenses * 0.3 / 25) * 25);
@@ -146,10 +112,12 @@ export default function HealthPage() {
               <>
                 <h2 className="text-lg font-semibold text-white mt-2">{nextMove.title}</h2>
                 <p className="text-sm text-stone-400 mt-1">{nextMove.body}</p>
-                {health.weakest && (
+                {next?.targets ? (
                   <p className="text-sm text-stone-300 mt-3">
-                    Why this one: your weakest indicator is <span className="font-semibold text-white">{health.weakest.name.toLowerCase()}</span> ({health.weakest.display}, target {health.weakest.target.toLowerCase()}). This move lifts it fastest.
+                    Why this one: your weakest indicator is <span className="font-semibold text-white">{next.targets.name.toLowerCase()}</span> ({next.targets.display}, target {next.targets.target.toLowerCase()}). This move lifts it fastest.
                   </p>
+                ) : (
+                  <p className="text-sm text-stone-300 mt-3">Why this one: it&apos;s the highest-impact move in your current data.</p>
                 )}
                 <div className="mt-auto pt-4 flex flex-wrap items-center gap-3">
                   <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300">{nextMove.impactLabel}</span>
@@ -251,33 +219,7 @@ export default function HealthPage() {
         </Card>
 
         {/* Upcoming bills */}
-        <Card className="lg:col-span-2">
-          <CardHeader><CardTitle className="flex items-center gap-2"><CalendarClock className="w-4 h-4" /> Coming up in the next 30 days</CardTitle></CardHeader>
-          <CardContent>
-            {upcoming.length === 0 ? (
-              <p className="text-sm text-stone-400">No recurring bills detected yet. They appear once a charge repeats across two months.</p>
-            ) : (
-              <>
-                <ul className="divide-y divide-white/[0.05]">
-                  {upcoming.slice(0, 8).map((r, idx) => (
-                    <li key={`${r.merchant}-${idx}`}className="flex items-center justify-between gap-3 py-2.5">
-                      <div className="min-w-0">
-                        <p className="text-sm text-stone-200 truncate">{r.merchant}</p>
-                        <p className="text-xs text-stone-500">{r.next.toLocaleDateString("en-US", { month: "short", day: "numeric" })} · {r.category}</p>
-                      </div>
-                      <span className="text-sm font-semibold text-stone-200 shrink-0">{formatCurrency(-r.amount)}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-1 text-sm">
-                  <div className="flex justify-between"><span className="text-stone-400">Total due</span><span className="text-stone-100 font-semibold">{formatCurrency(-upcomingTotal)}</span></div>
-                  <div className="flex justify-between"><span className="text-stone-400">Cash after these bills</span><span className={cn("font-semibold", inputs.cash - upcomingTotal < 0 ? "text-amber-300" : "text-emerald-300")}>{formatCurrency(inputs.cash - upcomingTotal)}</span></div>
-                </div>
-                <p className="text-[11px] text-stone-500 mt-3">Dates are projected from each bill&apos;s last charge. <Link href="/forecast" className="text-indigo-300 hover:text-indigo-200">Full forecast</Link></p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+        <UpcomingBills transactions={transactions} cash={inputs.cash} className="lg:col-span-2" forecastLink />
       </div>
     </div>
   );

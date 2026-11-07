@@ -5,15 +5,15 @@ import { usePlan } from "@/lib/usePlan";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { Send, Bot, Sparkles, Lock, TrendingUp, Wallet, Target, BarChart3 } from "lucide-react";
+import { Send, Bot, Sparkles, Lock, Wallet, Target, HeartPulse, Plane } from "lucide-react";
 
 type Message = { role: "user" | "assistant"; content: string; id: string };
 
 const QUICK_PROMPTS = [
-  { icon: TrendingUp, text: "How is my net worth trending?" },
-  { icon: Wallet, text: "Where am I overspending this month?" },
-  { icon: Target, text: "Am I on track to hit my savings goal?" },
-  { icon: BarChart3, text: "Summarize my spending this month" },
+  { icon: HeartPulse, text: "Explain my health score. What should I fix first?" },
+  { icon: Target, text: "What's my next best move this week?" },
+  { icon: Plane, text: "Can I afford a $1,500 trip next month?" },
+  { icon: Wallet, text: "Should I pay down my card or build savings?" },
 ];
 
 function escapeHtml(s: string): string {
@@ -56,7 +56,7 @@ export default function AIPage() {
     {
       id: "intro",
       role: "assistant",
-      content: `Hi there! 👋 I'm your Credo AI Assistant. I have access to your accounts, transactions, budgets, and investments — so I can give you personalized financial insights.\n\nWhat would you like to know about your finances today?`,
+      content: `Hi there! 👋 I'm your Credo coach. I can see your accounts, recent transactions and health score, so my answers are about your money, not money in general.\n\nAsk me anything, like whether you can afford something or what to do next.`,
     },
   ]);
   const [input, setInput] = useState("");
@@ -133,7 +133,7 @@ export default function AIPage() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-xl font-bold text-stone-100 flex items-center gap-2">
-            <Bot className="w-5 h-5 text-orange-400" /> AI Assistant
+            <Bot className="w-5 h-5 text-orange-400" /> AI Coach
           </h1>
           <p className="text-sm text-stone-400">Powered by your real financial data</p>
         </div>

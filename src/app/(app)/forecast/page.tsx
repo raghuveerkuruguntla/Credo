@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import EmptyState, { LoadingState } from "@/components/EmptyState";
 import LockedFeature from "@/components/LockedFeature";
+import UpcomingBills from "@/components/UpcomingBills";
+import { healthInputsFrom } from "@/lib/health";
 import WhyExplanation, { ConfidenceBadge } from "@/components/WhyExplanation";
 import type { Confidence, ExplanationPayload } from "@/lib/intelligence";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
@@ -27,7 +29,8 @@ export default function ForecastPage() {
     const avg = monthlyAverages(transactions);
     const byCat: Record<string, number> = {};
     for (const [c, v] of Object.entries(avg.byCategory)) byCat[prettyCategory(c)] = v;
-    return { netWorth, investments, income: avg.income, expenses: avg.expenses, byCategory: byCat };
+    const cash = healthInputsFrom(accounts, transactions).cash;
+    return { netWorth, investments, cash, income: avg.income, expenses: avg.expenses, byCategory: byCat };
   }, [accounts, transactions]);
 
   const [income, setIncome] = useState(0);
@@ -123,7 +126,7 @@ export default function ForecastPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-stone-100">Financial Forecast</h1>
-          <p className="text-sm text-stone-400">Sliders are scaled to your actual income and balances</p>
+          <p className="text-sm text-stone-400">Your net worth 12 months out, plus the bills coming up next. Sliders are scaled to your real numbers.</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={reset}><RotateCcw className="w-4 h-4" /> Reset</Button>
@@ -237,6 +240,8 @@ export default function ForecastPage() {
           </div>
         </CardContent>
       </Card>
+
+      <UpcomingBills transactions={transactions} cash={base.cash} className="mt-4" />
 
       <div className="mt-4 bg-sky-500/10 border border-sky-500/20 rounded-xl p-4 flex items-start gap-3">
         <Info className="w-4 h-4 text-sky-400 mt-0.5 flex-shrink-0" />
