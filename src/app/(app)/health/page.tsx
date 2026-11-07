@@ -5,8 +5,10 @@ import { useMemo, useState } from "react";
 import { useFinancialData } from "@/lib/useFinancialData";
 import { buildIntelligence, type Confidence } from "@/lib/intelligence";
 import { pickNextMove } from "@/lib/navigator";
+import { useBlindSpots } from "@/lib/useBlindSpots";
+import { BLINDSPOT_PENALTY_CAP, penaltyOf } from "@/lib/blindspots";
 import {
-  computeHealth, healthInputsFrom, projectHealth, STATUS_LABEL,
+  computeHealth, healthInputsFrom, projectHealth, STATUS_LABEL, statusFor,
   HEALTH_VERSION, type IndicatorStatus,
 } from "@/lib/health";
 import { cn, formatCurrency } from "@/lib/utils";
@@ -14,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import UpcomingBills from "@/components/UpcomingBills";
 import EmptyState, { LoadingState } from "@/components/EmptyState";
 import WhyExplanation, { ConfidenceBadge } from "@/components/WhyExplanation";
-import { HeartPulse, ArrowRight, Sliders, Bot, Info } from "lucide-react";
+import { HeartPulse, ArrowRight, Sliders, Bot, Info, Radar } from "lucide-react";
 
 const STATUS_STYLE: Record<IndicatorStatus, { text: string; bar: string; chip: string }> = {
   strong: { text: "text-emerald-300", bar: "bg-emerald-400", chip: "bg-emerald-500/15 text-emerald-300" },
@@ -34,6 +36,8 @@ export default function HealthPage() {
   const { accounts, transactions, loading, hasData } = useFinancialData();
   const [spendLess, setSpendLess] = useState(0);
   const [extraToCards, setExtraToCards] = useState(0);
+  const [fixBlindSpots, setFixBlindSpots] = useState(false);
+  const bs = useBlindSpots();
 
   const inputs = useMemo(() => healthInputsFrom(accounts, transactions), [accounts, transactions]);
   const health = useMemo(() => computeHealth(inputs), [inputs]);
@@ -49,8 +53,14 @@ export default function HealthPage() {
   const spendMax = Math.max(100, Math.round(inputs.monthlyExpenses * 0.3 / 25) * 25);
   const cardsMax = Math.max(0, Math.ceil(inputs.revolvingBalance / 6 / 25) * 25);
   const baseline = useMemo(() => projectHealth(inputs, { spendLess: 0, extraToCards: 0 }), [inputs]);
-  const scenario = useMemo(() => projectHealth(inputs, { spendLess, extraToCards }), [inputs, spendLess, extraToCards]);
-  const delta = scenario.health.score - health.score;
+  // Blind spots feed the score: unresolved ones deduct points (shown as their
+  // own line), and fixing them in the what-if frees money and removes the deduction.
+  const todayScore = Math.max(0, health.score - bs.penalty);
+  const extraFromFixes = fixBlindSpots ? bs.fixableMonthly : 0;
+  const scenario = useMemo(() => projectHealth(inputs, { spendLess: spendLess + extraFromFixes, extraToCards }), [inputs, spendLess, extraFromFixes, extraToCards]);
+  const scenarioScore = Math.max(0, scenario.health.score - (fixBlindSpots ? 0 : bs.penalty));
+  const baselineScore = Math.max(0, baseline.health.score - bs.penalty);
+  const delta = scenarioScore - todayScore;
 
   if (loading) return <div className="p-6"><LoadingState /></div>;
   if (!hasData) {
@@ -69,7 +79,7 @@ export default function HealthPage() {
     );
   }
 
-  const st = STATUS_STYLE[health.status];
+  const st = STATUS_STYLE[statusFor(todayScore)];
 
   return (
     <div className="p-4 sm:p-6 max-w-6xl mx-auto w-full space-y-4">
@@ -87,18 +97,28 @@ export default function HealthPage() {
           <CardContent className="pt-6 pb-6">
             <p className="text-xs text-stone-400 uppercase tracking-wide">Health score</p>
             <div className="flex items-baseline gap-2 mt-2">
-              <span className="text-6xl font-bold text-white tracking-tight">{health.score}</span>
+              <span className="text-6xl font-bold text-white tracking-tight">{todayScore}</span>
               <span className="text-stone-500 text-lg">/ 100</span>
-              <span className={cn("ml-auto px-2.5 py-0.5 rounded-full text-xs font-medium", st.chip)}>{health.label}</span>
+              <span className={cn("ml-auto px-2.5 py-0.5 rounded-full text-xs font-medium", st.chip)}>{STATUS_LABEL[statusFor(todayScore)]}</span>
             </div>
-            <div className="mt-4"><Bar points={health.score} status={health.status} /></div>
-            <p className="text-xs text-stone-500 mt-3">
-              Average of {health.indicators.length} indicators, from {inputs.historyMonths} month{inputs.historyMonths === 1 ? "" : "s"} of connected history.
+            <div className="mt-4"><Bar points={todayScore} status={statusFor(todayScore)} /></div>
+            <div className="mt-3 space-y-1 text-xs">
+              <div className="flex justify-between text-stone-400"><span>Four indicators (average)</span><span className="text-stone-200">{health.score}</span></div>
+              <Link href="/blindspots" className="flex justify-between text-stone-400 hover:text-stone-200">
+                <span className="inline-flex items-center gap-1"><Radar className="w-3 h-3" /> Open blind spots ({bs.active.filter((f) => penaltyOf(f) > 0).length})</span>
+                <span className={bs.penalty > 0 ? "text-amber-300" : "text-stone-200"}>{bs.penalty > 0 ? `−${bs.penalty}` : "0"}</span>
+              </Link>
+            </div>
+            <p className="text-xs text-stone-500 mt-2">
+              From {inputs.historyMonths} month{inputs.historyMonths === 1 ? "" : "s"} of connected history.
             </p>
             <div className="mt-2">
               <WhyExplanation explanation={{
-                sourceFacts: health.indicators.map((x) => ({ label: `${x.name}: ${x.display}`, detail: `${x.points}/100 · target ${x.target}` })),
-                reasoningSummary: `Formula v${HEALTH_VERSION}: each indicator is scored 0–100 against its target, then averaged. Indicators without data (for example, no credit cards) are left out instead of guessed.`,
+                sourceFacts: [
+                  ...health.indicators.map((x) => ({ label: `${x.name}: ${x.display}`, detail: `${x.points}/100 · target ${x.target}` })),
+                  ...bs.active.filter((f) => penaltyOf(f) > 0).map((f) => ({ label: `Blind spot: ${f.title}`, detail: `−${penaltyOf(f)} (${f.severity === "critical" ? "critical" : "needs attention"})`, href: "/blindspots" })),
+                ],
+                reasoningSummary: `Formula v${HEALTH_VERSION}: each indicator is scored 0–100 against its target, then averaged. Indicators without data (for example, no credit cards) are left out instead of guessed. Then each unresolved blind spot deducts points (critical −5, needs attention −2, opportunities 0), up to −${BLINDSPOT_PENALTY_CAP}.`,
                 confidence,
               }} />
             </div>
@@ -125,6 +145,11 @@ export default function HealthPage() {
                   <Link href="/ai" className="text-sm text-indigo-300 hover:text-indigo-200 inline-flex items-center gap-1"><Bot className="w-3.5 h-3.5" /> Ask the coach</Link>
                 </div>
                 <div className="mt-2"><WhyExplanation explanation={nextMove.explanation} /></div>
+                {bs.active[0]?.severity === "critical" && (
+                  <Link href="/blindspots" className="mt-3 flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200 hover:bg-rose-500/15">
+                    <Radar className="w-4 h-4 shrink-0" /> <span className="min-w-0 truncate">Urgent blind spot: {bs.active[0].title}</span> <ArrowRight className="w-3.5 h-3.5 ml-auto shrink-0" />
+                  </Link>
+                )}
               </>
             ) : (
               <p className="text-sm text-stone-400 mt-2">Nothing urgent. Keep doing what you&apos;re doing, and check back as more history comes in.</p>
@@ -160,7 +185,7 @@ export default function HealthPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* What-if */}
-        <Card className="lg:col-span-3">
+        <Card className="lg:col-span-3 scroll-mt-20" id="whatif">
           <CardHeader><CardTitle className="flex items-center gap-2"><Sliders className="w-4 h-4" /> What if… (6 months from now)</CardTitle></CardHeader>
           <CardContent className="space-y-5">
             <div>
@@ -184,11 +209,23 @@ export default function HealthPage() {
               </div>
             )}
 
+            {bs.active.length > 0 && (
+              <label htmlFor="wi-fix" className="flex items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 cursor-pointer hover:bg-white/[0.04]">
+                <input id="wi-fix" type="checkbox" checked={fixBlindSpots} onChange={(e) => setFixBlindSpots(e.target.checked)} className="mt-1 w-4 h-4 accent-indigo-500" />
+                <span className="text-sm">
+                  <span className="text-stone-200 font-medium">Fix my {bs.active.length} open blind spot{bs.active.length > 1 ? "s" : ""}</span>
+                  <span className="block text-xs text-stone-400 mt-0.5">
+                    Removes the −{bs.penalty} deduction{bs.fixableMonthly > 0 ? ` and frees about ${formatCurrency(Math.round(bs.fixableMonthly))}/mo from fees, interest, price increases and overspending` : ""}. <Link href="/blindspots" className="text-indigo-300 hover:text-indigo-200">Review them</Link>
+                  </span>
+                </span>
+              </label>
+            )}
+
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div className="rounded-xl bg-indigo-500/10 border border-indigo-500/20 p-3 col-span-2 sm:col-span-1">
                 <p className="text-[11px] text-indigo-300 uppercase tracking-wide">Score in 6 mo</p>
-                <p className="text-3xl font-bold text-white mt-1">{scenario.health.score}</p>
-                <p className="text-xs text-stone-400">{delta >= 0 ? "+" : ""}{delta} vs today · {baseline.health.score} if nothing changes</p>
+                <p className="text-3xl font-bold text-white mt-1">{scenarioScore}</p>
+                <p className="text-xs text-stone-400">{delta >= 0 ? "+" : ""}{delta} vs today · {baselineScore} if nothing changes</p>
               </div>
               <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-3">
                 <p className="text-[11px] text-stone-400 uppercase tracking-wide">Cash in 6 mo</p>

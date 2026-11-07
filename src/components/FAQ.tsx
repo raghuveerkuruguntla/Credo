@@ -24,6 +24,10 @@ const FAQS = [
     a: "Your score is the average of four indicators, each scored 0–100 against a clear target: emergency cushion (cash ÷ monthly spending, target 6 months), debt payments (loan and card payments ÷ income, target under 20%), credit utilization (card balances ÷ limits, target under 10%), and savings rate (target 20%). Every number links back to the accounts and transactions it came from, and indicators without data are left out rather than guessed.",
   },
   {
+    q: "What is the Blind Spot Detector?",
+    a: "It scans your accounts and transactions for problems that are easy to miss: possible double charges, bills that quietly went up, subscriptions adding up, fees and interest, upcoming bills that could overdraw your checking, thin emergency savings, high credit utilization, and spending patterns like payday splurges. Each finding shows the data behind it, an annual cost estimate, whether it's verified or just worth checking, and the step to fix it. Unresolved blind spots lower your health score, so fixing them shows up in your score. Credo never moves money or cancels anything for you.",
+  },
+  {
     q: "Is my financial data safe?",
     a: "Yes. Because Credo connects through Plaid, your bank login never touches our servers, and connections are read-only. The access tokens we store are encrypted with AES-256, all traffic is encrypted in transit over TLS, and we never sell your data. You can disconnect any institution and delete your data at any time.",
   },
