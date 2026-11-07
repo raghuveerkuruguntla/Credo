@@ -20,20 +20,24 @@ const FAQS = [
     a: "Through Plaid, the bank-connection service trusted by thousands of finance apps. You log in at your own bank — Credo never sees or stores your bank username or password, only a read-only token that can view balances and transactions but can't move money.",
   },
   {
+    q: "How is my financial health score calculated?",
+    a: "Your score is the average of four indicators, each scored 0–100 against a clear target: emergency cushion (cash ÷ monthly spending, target 6 months), debt payments (loan and card payments ÷ income, target under 20%), credit utilization (card balances ÷ limits, target under 10%), and savings rate (target 20%). Every number links back to the accounts and transactions it came from, and indicators without data are left out rather than guessed.",
+  },
+  {
     q: "Is my financial data safe?",
     a: "Yes. Because Credo connects through Plaid, your bank login never touches our servers, and connections are read-only. The access tokens we store are encrypted with AES-256, all traffic is encrypted in transit over TLS, and we never sell your data. You can disconnect any institution and delete your data at any time.",
   },
   {
     q: "Is there really a free plan?",
-    a: "Free forever, no credit card required. You get your full dashboard, net worth, this- and last-month spending, and 10 AI questions a month. Upgrade only when you want forecasting, more institutions, or unlimited AI.",
+    a: "Free forever, no credit card required. You get your full dashboard, net worth, your financial health score with your next best move, and 10 AI coach questions a month. Upgrade when you want forecasting and what-if scenarios, more institutions, or more coach questions.",
   },
   {
-    q: "What can the AI assistant actually do?",
-    a: "It answers questions grounded in your real accounts — like \"How much did I spend on dining last month?\" or \"What's my savings rate?\" — using your actual data instead of generic advice. On paid plans it can also suggest budgets from your spending patterns and run forecasts.",
+    q: "What can the AI coach actually do?",
+    a: "It answers questions grounded in your real accounts and health score — like \"Can I afford a trip in March?\" or \"Should I pay down my card or save?\" — using your actual data instead of generic advice, and ends with one specific next step. On paid plans it can also suggest budgets from your spending patterns.",
   },
   {
     q: "Which accounts can I track?",
-    a: "Checking, savings, credit cards, loans, and investment accounts across 11,000+ institutions — with balances, transactions, and budgets in one dashboard. Investment balances and allocation are available on the Pro plan.",
+    a: "Checking, savings, CDs, IRAs and other investment accounts, credit cards, auto and personal loans, and mortgages across 11,000+ institutions — with balances, transactions, and budgets in one dashboard. Investment balances and allocation are available on the Pro plan.",
   },
   {
     q: "Can I cancel anytime?",

@@ -1,5 +1,6 @@
 import { plaidClient, plaidConfigured } from "@/lib/plaid";
 import { getItemsForUser } from "@/lib/store";
+import { computeHealth, healthInputsFrom, healthSummaryText, type HealthAccount, type HealthTxn } from "@/lib/health";
 
 // Builds a plain-text snapshot of the user's finances for the AI assistant
 // from their live Plaid-connected accounts. If the user has no connections,
@@ -13,6 +14,8 @@ export async function buildFinancialContext(userId: string): Promise<{ context: 
 
     const lines: string[] = ["LIVE DATA from the user's connected bank accounts (via Plaid):", ""];
     let totalBalance = 0;
+    const healthAccounts: HealthAccount[] = [];
+    const healthTxns: HealthTxn[] = [];
 
     for (const item of items) {
       const accountsRes = await plaidClient.accountsGet({ access_token: item.accessToken });
@@ -21,6 +24,12 @@ export async function buildFinancialContext(userId: string): Promise<{ context: 
         const bal = a.balances.current ?? 0;
         const signed = a.type === "credit" || a.type === "loan" ? -bal : bal;
         totalBalance += signed;
+        healthAccounts.push({
+          type: a.subtype ?? a.type,
+          balance: a.type === "depository" && a.balances.available != null ? a.balances.available : a.balances.current,
+          current: a.balances.current,
+          available: a.balances.available,
+        });
         lines.push(
           `  - ${a.name} (${a.subtype ?? a.type}${a.mask ? `, ····${a.mask}` : ""}): balance $${bal.toFixed(2)}${a.balances.available != null ? `, available $${a.balances.available.toFixed(2)}` : ""}`
         );
@@ -46,9 +55,13 @@ export async function buildFinancialContext(userId: string): Promise<{ context: 
         const cat = t.personal_finance_category?.primary ?? "OTHER";
         if (t.amount > 0) categoryTotals[cat] = (categoryTotals[cat] ?? 0) + t.amount;
         else totalIncome += Math.abs(t.amount);
+        healthTxns.push({ date: t.date, amount: -t.amount, category: cat }); // app convention: negative = money out
         txnLines.push(`  ${t.date} | ${t.merchant_name ?? t.name} | $${t.amount.toFixed(2)} | ${cat}${t.pending ? " (pending)" : ""}`);
       }
     }
+
+    const healthText = healthSummaryText(computeHealth(healthInputsFrom(healthAccounts, healthTxns)));
+    if (healthText) lines.push(healthText, "");
 
     lines.push(`Total income (money in) over last 90 days: $${totalIncome.toFixed(2)}`);
     lines.push("", "Spending by category (last 90 days, money out):");
