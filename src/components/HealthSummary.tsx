@@ -17,12 +17,55 @@ const TONE: Record<IndicatorStatus, { text: string; bar: string; stroke: string 
   "needs-work": { text: "text-amber-300", bar: "bg-amber-400", stroke: "#fbbf24" },
 };
 
-export default function HealthSummary() {
+const SHORT: Record<string, string> = { cashflow: "Cash flow", debt: "Debt", savings: "Savings", spending: "Spending", obligations: "Bills" };
+
+export default function HealthSummary({ compact = false }: { compact?: boolean }) {
   const fh = useFinancialHealth();
-  if (fh.loading) return <div className="rounded-2xl border border-white/[0.07] h-40 animate-pulse" aria-busy="true" />;
+  if (fh.loading) return <div className={cn("rounded-2xl border border-white/[0.07] animate-pulse", compact ? "h-full min-h-[180px]" : "h-40")} aria-busy="true" />;
   if (!fh.hasData) return null;
   const { health } = fh;
   const r = 34, c = 2 * Math.PI * r;
+
+  // Compact: just the score and a few details; the full breakdown lives on /health.
+  if (compact) {
+    return (
+      <section aria-labelledby="hs-title" className="h-full rounded-2xl border border-white/[0.06] bg-gradient-to-b from-[#171a21] to-[#0f1117] p-5 flex flex-col">
+        <div className="flex items-center justify-between mb-4">
+          <h2 id="hs-title" className="text-sm font-semibold text-slate-100 flex items-center gap-1.5"><HeartPulse className="w-4 h-4 text-indigo-400" /> Financial health</h2>
+          <Link href="/health" className="text-xs text-indigo-400 font-medium hover:text-indigo-300 inline-flex items-center gap-1">Details <ArrowRight className="w-3 h-3" /></Link>
+        </div>
+        <div className="flex items-center gap-4">
+          {health.score != null && health.status ? (
+            <svg viewBox="0 0 84 84" className="w-[72px] h-[72px] shrink-0" role="img" aria-label={`Financial health score ${health.score} out of 100`}>
+              <circle cx="42" cy="42" r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="8" />
+              <circle cx="42" cy="42" r={r} fill="none" stroke={TONE[health.status].stroke} strokeWidth="8" strokeLinecap="round" strokeDasharray={`${(health.score / 100) * c} ${c}`} transform="rotate(-90 42 42)" />
+              <text x="42" y="49" textAnchor="middle" fill="#fff" fontSize="24" fontWeight="700" fontFamily="inherit">{health.score}</text>
+            </svg>
+          ) : (
+            <div className="w-[72px] h-[72px] rounded-full border-[6px] border-white/[0.07] flex items-center justify-center text-center text-[9px] text-slate-400 px-1 shrink-0">Not enough data</div>
+          )}
+          <div className="min-w-0">
+            <p className={cn("text-base font-semibold", health.status ? TONE[health.status].text : "text-slate-200")}>{health.label}</p>
+            {health.weakest && health.score != null && (
+              <p className="text-xs text-slate-400 mt-0.5">Weakest: {health.weakest.name.toLowerCase()} ({health.weakest.score})</p>
+            )}
+            <p className="text-xs text-slate-500 mt-0.5">{fh.meaningful} insight{fh.meaningful === 1 ? "" : "s"} detected</p>
+          </div>
+        </div>
+        <ul className="mt-auto pt-4 grid grid-cols-5 gap-2">
+          {health.categories.map((cat) => (
+            <li key={cat.id} title={`${cat.name}: ${cat.score ?? "not enough data"}`}>
+              <span className="block text-[10px] text-slate-500 truncate">{SHORT[cat.id]}</span>
+              <span className={cn("block text-sm font-semibold", cat.status ? TONE[cat.status].text : "text-slate-500")}>{cat.score ?? "—"}</span>
+              <span className="block h-1 rounded-full bg-white/[0.06] mt-1 overflow-hidden" aria-hidden>
+                {cat.score != null && cat.status && <span className={cn("block h-full rounded-full", TONE[cat.status].bar)} style={{ width: `${cat.score}%` }} />}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    );
+  }
   const first = fh.history[0];
   const delta = fh.history.length >= 2 && health.score != null ? health.score - first.s : null;
 
