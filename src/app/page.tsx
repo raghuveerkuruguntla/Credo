@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Shield, Bot, TrendingUp, BarChart3, Wallet, ArrowRight, Check, Sparkles, Star, Globe, Share2, AtSign, Send, Mail, Lock, Gift, Crown, PieChart, Target, ChevronDown } from "lucide-react";
+import { Shield, Bot, TrendingUp, Wallet, ArrowRight, Check, Sparkles, Star, Lock, Gift, Crown, PieChart, Target, HeartPulse, CalendarClock, Sliders, Compass, Landmark } from "lucide-react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import LandingNav from "@/components/LandingNav";
 import LogoMarquee from "@/components/LogoMarquee";
@@ -7,16 +7,19 @@ import { Reveal, Stagger, StaggerItem } from "@/components/motion/Reveal";
 import { HeroReveal, HeroItem } from "@/components/motion/HeroReveal";
 import { Counter } from "@/components/motion/Counter";
 import { Spotlight } from "@/components/motion/Spotlight";
-import Testimonials from "@/components/Testimonials";
+import HealthDemo from "@/components/HealthDemo";
 import FAQ from "@/components/FAQ";
 
+// Mapped one-to-one to what a 360° financial health navigator needs: the whole
+// picture, a clear assessment, a view of what's coming, a way to test choices,
+// a coach to talk it through, and one confident next move.
 const features = [
-  { icon: BarChart3, title: "Unified Dashboard", desc: "Every account, balance, and your full net worth in one clean view." },
-  { icon: Wallet, title: "Smart Budgeting", desc: "Set monthly limits per category and track them against real spending." },
-  { icon: TrendingUp, title: "Future Forecasting", desc: "Run what-if scenarios to see how today's choices shape tomorrow." },
-  { icon: Bot, title: "AI Financial Assistant", desc: "Ask anything about your money — answers grounded in your real data." },
-  { icon: Shield, title: "Bank-Level Security", desc: "Read-only Plaid connections, AES-256 encryption, and we never store your bank login." },
-  { icon: Sparkles, title: "Investment Tracking", desc: "Track your investment accounts, balances, and allocation in one view." },
+  { icon: Landmark, title: "Your Whole Picture", desc: "Checking, savings, CDs, IRAs, cards, auto and personal loans, and your mortgage — with net worth in one view." },
+  { icon: HeartPulse, title: "Financial Health Score", desc: "One score from four indicators — emergency cushion, debt load, credit utilization, savings rate — each with a clear target." },
+  { icon: CalendarClock, title: "Forecast & Upcoming Bills", desc: "See recurring bills before they hit and project your balances and net worth months ahead." },
+  { icon: Sliders, title: "What-If Simulator", desc: "Pay down a card, cut spending, change income — see your score and cash six months out before you commit." },
+  { icon: Bot, title: "Conversational Coach", desc: "Ask \"Can I afford this?\" and get an answer built on your balances, bills, and score — ending in one clear step." },
+  { icon: Compass, title: "Next Best Move", desc: "Credo finds your weakest indicator and hands you the single action that lifts it fastest. Every insight shows its math." },
 ];
 
 // Liquid-glass surface (Higgsfield render) mapped as one continuous image across
@@ -62,9 +65,9 @@ function CardRibbon({ index }: { index: number }) {
 }
 
 const tiers = [
-  { name: "Free",  icon: Gift,  price: "$0",    note: "forever", features: ["2 institutions","Dashboard & net worth","This/last month spending","10 AI questions/mo"],                     cta: "Get started",    highlight: false },
-  { name: "Plus",  icon: Star,  price: "$9.99", note: "/mo",     features: ["5 institutions","Advanced analytics","Forecasting","AI budget suggestions","50 AI questions/mo"],              cta: "Start with Plus",highlight: true  },
-  { name: "Pro",   icon: Crown, price: "$19.99",note: "/mo",     features: ["Unlimited institutions","Investment analytics","Data export (CSV)","Unlimited AI questions","Priority support"],cta: "Go Pro",         highlight: false },
+  { name: "Free",  icon: Gift,  price: "$0",    note: "forever", features: ["2 institutions","Dashboard & net worth","Financial health score","Next best move","10 AI coach questions/mo"],                     cta: "Get started",    highlight: false },
+  { name: "Plus",  icon: Star,  price: "$9.99", note: "/mo",     features: ["5 institutions","Forecasting & what-if scenarios","Advanced analytics","AI budget suggestions","50 AI coach questions/mo"],              cta: "Start with Plus",highlight: true  },
+  { name: "Pro",   icon: Crown, price: "$19.99",note: "/mo",     features: ["Unlimited institutions","Investment analytics","Data export (CSV)","Unlimited AI coach questions","Priority support"],cta: "Go Pro",         highlight: false },
 ];
 
 // Circle-grid geometry for the hero. Banks sit on integer grid cells (i,j)
@@ -240,16 +243,22 @@ export default function LandingPage() {
                 </span>
               </HeroItem>
               <HeroItem as="p">
-                <span className="block text-[14px] sm:text-[16px] mb-8 leading-relaxed mx-auto max-w-[22rem]" style={{ color: "rgba(206,204,224,0.88)", textShadow: "0 1px 10px rgba(0,0,0,0.8)" }}>Every account in one place — with AI that actually gets your money.</span>
+                <span className="block text-[14px] sm:text-[16px] mb-8 leading-relaxed mx-auto max-w-[30rem]" style={{ color: "rgba(206,204,224,0.88)", textShadow: "0 1px 10px rgba(0,0,0,0.8)" }}>See every account in one picture, know your financial health score, and get your next best move — from an AI coach that knows your real numbers.</span>
               </HeroItem>
-              <HeroItem className="flex items-center justify-center">
+              <HeroItem className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link href="/signup" className="group inline-flex items-center justify-center gap-2 font-semibold px-9 py-3.5 rounded-full transition-all text-[15px] w-full sm:w-auto text-white hover:-translate-y-0.5" style={{
                   background: "linear-gradient(90deg,#6366F1,#8B5CF6)",
                   boxShadow: "0 0 36px rgba(124,92,224,0.55), inset 0 1px 0 rgba(255,255,255,0.22)",
                 }}>
-                  Get Started
+                  Get my health score
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </Link>
+                <a href="#how" className="inline-flex items-center justify-center gap-2 font-semibold px-7 py-3.5 rounded-full transition-colors text-[15px] w-full sm:w-auto text-slate-100 hover:bg-white/[0.08]" style={{
+                  background: "rgba(12,10,22,0.55)",
+                  border: "1px solid rgba(184,170,255,0.28)",
+                }}>
+                  Try the simulator
+                </a>
               </HeroItem>
               <HeroItem className="mt-7 flex items-center justify-center gap-2 text-[12px]" >
                 <span className="inline-flex items-center gap-2" style={{ color: "rgba(180,176,204,0.78)" }}>
@@ -301,10 +310,10 @@ export default function LandingPage() {
                 boxShadow: "0 0 22px rgba(140,110,240,0.18)",
               }}>
                 <Sparkles className="w-3 h-3" style={{ color: "#C9BEFF" }} />
-                ALL-IN-ONE FINANCE
+                YOUR 360° FINANCIAL NAVIGATOR
               </div>
-              <h2 className="text-4xl sm:text-5xl lg:text-[3.25rem] lg:whitespace-nowrap font-bold tracking-[-0.02em] leading-[1.06] mb-4 text-balance" style={{ color: "#DCD8E6", textShadow: "0 0 50px rgba(120,92,220,0.18)" }}>Everything you need to master your money</h2>
-              <p className="text-slate-400 text-base sm:text-lg max-w-xl mx-auto">One calm, secure place for every account, decision, and dollar.</p>
+              <h2 className="text-4xl sm:text-5xl lg:text-[3.25rem] lg:whitespace-nowrap font-bold tracking-[-0.02em] leading-[1.06] mb-4 text-balance" style={{ color: "#DCD8E6", textShadow: "0 0 50px rgba(120,92,220,0.18)" }}>See it. Understand it. Know what to do next.</h2>
+              <p className="text-slate-400 text-base sm:text-lg max-w-xl mx-auto">Most people keep money in many places but have no clear view of how they&apos;re doing. Credo gives you one.</p>
             </Reveal>
             <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-[28px] gap-y-[22px]">
               {features.map(({ icon:Icon, title, desc }, i)=>{
@@ -381,6 +390,67 @@ export default function LandingPage() {
                 <Lock className="w-3.5 h-3.5" style={{ color: "#C9BEFF" }} />
                 Secure. Private. Built for you.
               </span>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* SECTION 2.5: HOW IT WORKS — three steps, then the live health-score demo and a coach exchange */}
+        <section id="how" className="relative py-16 sm:py-24 scroll-mt-20">
+          <div className="max-w-6xl mx-auto px-6">
+            <Reveal className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 mb-5 px-4 py-1.5 rounded-full text-[11px] font-semibold tracking-[0.18em]" style={{
+                color: "rgba(208,198,255,0.9)",
+                background: "rgba(12,10,22,0.6)",
+                border: "1px solid rgba(184,170,255,0.22)",
+                boxShadow: "0 0 22px rgba(140,110,240,0.18)",
+              }}>
+                <Sparkles className="w-3 h-3" style={{ color: "#C9BEFF" }} />
+                HOW IT WORKS
+              </div>
+              <h2 className="text-3xl sm:text-5xl font-bold text-white tracking-tight mb-4 text-balance">From scattered accounts to a confident next move</h2>
+              <p className="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto">Try it below with a sample household. In the app, it runs on your own connected accounts.</p>
+            </Reveal>
+
+            <Stagger className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+              {[
+                { n: "1", title: "Connect everything", desc: "Link banks, cards, loans and investment accounts read-only through Plaid. Credo builds your whole picture and net worth." },
+                { n: "2", title: "Get your health score", desc: "Four indicators scored against clear targets show exactly where you're strong and where you're exposed." },
+                { n: "3", title: "Make your next move", desc: "Test choices in the simulator, talk them through with the coach, and act on the one move that helps most." },
+              ].map((step) => (
+                <StaggerItem key={step.n} className="rounded-[22px] p-6" style={{ background: "rgba(14,12,26,0.55)", border: "1px solid rgba(184,170,255,0.16)" }}>
+                  <span className="inline-flex w-9 h-9 items-center justify-center rounded-full text-sm font-bold text-white" style={{ background: "linear-gradient(150deg, rgba(126,94,228,0.6), rgba(80,60,180,0.3))", border: "1px solid rgba(190,176,255,0.4)" }}>{step.n}</span>
+                  <h3 className="text-white font-semibold text-lg mt-4">{step.title}</h3>
+                  <p className="text-[14px] mt-1.5 leading-relaxed" style={{ color: "rgba(180,174,204,0.92)" }}>{step.desc}</p>
+                </StaggerItem>
+              ))}
+            </Stagger>
+
+            <Reveal y={20}>
+              <HealthDemo />
+            </Reveal>
+
+            {/* Coach — an example exchange on the same sample household */}
+            <Reveal y={20} className="mt-6">
+              <div className="rounded-[26px] p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-5 gap-8 items-center" style={{
+                background: "linear-gradient(160deg, rgba(40,35,60,0.45) 0%, rgba(16,14,26,0.55) 100%)",
+                border: "1px solid rgba(186,164,250,0.22)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), 0 28px 60px rgba(0,0,0,0.45)",
+              }}>
+                <div className="lg:col-span-2">
+                  <p className="text-[12px] font-semibold tracking-[0.14em] uppercase" style={{ color: "rgba(208,198,255,0.9)" }}>Conversational coach</p>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white mt-2 tracking-tight">Ask anything. Get an answer built on your numbers.</h3>
+                  <p className="text-[15px] mt-3 leading-relaxed" style={{ color: "rgba(180,174,204,0.92)" }}>The coach sees your balances, upcoming bills and health score, shows its math, and ends with one specific step.</p>
+                </div>
+                <div className="lg:col-span-3 flex flex-col gap-3">
+                  <div className="self-end max-w-[85%] rounded-2xl rounded-br-md px-4 py-3 text-[15px] text-white" style={{ background: "linear-gradient(90deg,#6366F1,#8B5CF6)" }}>Can I afford an $1,800 trip in March?</div>
+                  <div className="self-start max-w-[92%] rounded-2xl rounded-bl-md px-4 py-3 text-[15px] leading-relaxed text-slate-200" style={{ background: "rgba(10,8,18,0.6)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    <p>You can, but paying from savings today drops your emergency cushion from <b className="text-white">1.7 to 1.4 months</b> — and that&apos;s already your weakest indicator.</p>
+                    <p className="mt-2">You keep about <b className="text-white">$700/mo</b> after spending. Setting aside <b className="text-white">$450/mo</b> covers the trip by March and leaves your cushion untouched.</p>
+                    <p className="mt-2 font-medium" style={{ color: "#C4B5FD" }}>Next step: start a $450 monthly transfer to a &ldquo;March trip&rdquo; goal this week.</p>
+                  </div>
+                  <p className="text-[11px] text-slate-500">Example conversation with the sample household above.</p>
+                </div>
+              </div>
             </Reveal>
           </div>
         </section>
@@ -555,26 +625,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* SECTION 4.5: TESTIMONIALS — glass quote cards, masonry columns */}
-        <section className="relative py-20 sm:py-28">
-          <div className="max-w-6xl mx-auto px-6">
-            <Reveal className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 mb-5 px-4 py-1.5 rounded-full text-[11px] font-semibold tracking-[0.18em]" style={{
-                color: "rgba(208,198,255,0.9)",
-                background: "rgba(12,10,22,0.6)",
-                border: "1px solid rgba(184,170,255,0.22)",
-                boxShadow: "0 0 22px rgba(140,110,240,0.18)",
-              }}>
-                <Star className="w-3 h-3" style={{ color: "#C9BEFF" }} />
-                LOVED BY EARLY MEMBERS
-              </div>
-              <h2 className="text-3xl sm:text-5xl font-bold text-white tracking-tight mb-4 text-balance">People who took control of their money</h2>
-              <p className="text-slate-400 text-base sm:text-lg max-w-xl mx-auto">Real reasons members switched to one calm, secure place for everything.</p>
-            </Reveal>
-            <Testimonials />
-          </div>
-        </section>
-
         {/* SECTION 4.6: FAQ — glass accordion */}
         <section id="faq" className="relative py-16 sm:py-24">
           <div className="max-w-3xl mx-auto px-6">
@@ -589,7 +639,7 @@ export default function LandingPage() {
                 QUESTIONS, ANSWERED
               </div>
               <h2 className="text-3xl sm:text-5xl font-bold text-white tracking-tight mb-4 text-balance">Everything you might be wondering</h2>
-              <p className="text-slate-400 text-base sm:text-lg max-w-lg mx-auto">Still curious? <a href="#" className="text-indigo-300 hover:text-indigo-200 underline underline-offset-4 transition-colors">Talk to our team</a>.</p>
+              <p className="text-slate-400 text-base sm:text-lg max-w-lg mx-auto">How Credo works, how your score is calculated, and how your data is protected.</p>
             </Reveal>
             <Reveal y={16}>
               <FAQ />
@@ -661,9 +711,9 @@ export default function LandingPage() {
                   <Sparkles className="w-3 h-3" style={{ color: "#C9BEFF" }} /> Take Control. Build Freedom. <Sparkles className="w-3 h-3" style={{ color: "#C9BEFF" }} />
                 </div>
                 <h2 className="text-5xl sm:text-[4rem] font-extrabold leading-[1.0] tracking-[-0.02em] mb-5" style={{ color: "#F1EFF8", textShadow: "0 2px 22px rgba(0,0,0,0.6), 0 0 60px rgba(120,92,220,0.3)" }}>
-                  Join and track<br />your <span style={{ color: "#A5B4FC" }}>finances</span>
+                  Know where you<br />stand. <span style={{ color: "#A5B4FC" }}>Know what&apos;s next.</span>
                 </h2>
-                <p className="text-base sm:text-lg max-w-md mx-auto mb-9" style={{ color: "rgba(200,198,220,0.82)" }}>Create your account in seconds and start making smarter financial decisions today.</p>
+                <p className="text-base sm:text-lg max-w-md mx-auto mb-9" style={{ color: "rgba(200,198,220,0.82)" }}>Connect your accounts and get your health score and first next best move in minutes.</p>
 
                 {/* feature strip — one long glass bar with four columns */}
                 <div className="mx-auto max-w-4xl mb-9 rounded-2xl overflow-hidden grid grid-cols-2 lg:grid-cols-4 divide-y divide-white/[0.07] lg:divide-y-0 lg:divide-x lg:divide-white/[0.08]" style={{
@@ -672,10 +722,10 @@ export default function LandingPage() {
                   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), 0 0 40px rgba(124,92,224,0.12)",
                 }}>
                   {[
-                    { icon:Wallet,    label:"Track Expenses",  sub:"See where your money goes" },
-                    { icon:PieChart,  label:"Smart Insights",  sub:"Understand your spending patterns" },
-                    { icon:Target,    label:"Set Goals",       sub:"Plan and achieve your financial goals" },
-                    { icon:Shield,    label:"Secure & Private", sub:"Your data is always protected" },
+                    { icon:Wallet,    label:"Whole Picture",   sub:"Every account and your net worth" },
+                    { icon:PieChart,  label:"Health Score",    sub:"Four indicators, clear targets" },
+                    { icon:Target,    label:"Next Best Move",  sub:"One clear action at a time" },
+                    { icon:Shield,    label:"Secure & Private", sub:"Read-only, encrypted connections" },
                   ].map(({ icon:Icon, label, sub })=>(
                     <div key={label} className="flex items-start gap-2.5 px-4 py-4 text-left">
                       <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{
@@ -698,7 +748,7 @@ export default function LandingPage() {
                   boxShadow: "0 0 44px rgba(124,92,224,0.55), inset 0 1px 0 rgba(255,255,255,0.22)",
                 }}>
                   <Sparkles className="w-4 h-4" />
-                  Get Started
+                  Get my health score
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <div className="mt-5 flex items-center justify-center gap-1.5 text-xs" style={{ color: "rgba(180,176,204,0.8)" }}>
@@ -726,37 +776,27 @@ export default function LandingPage() {
                   <span className="text-lg font-bold text-white tracking-tight">Credo</span>
                 </div>
                 <p className="text-slate-500 text-sm leading-relaxed mb-4 max-w-[15rem]">Your all-in-one finance companion. Track, analyze, and grow your money with confidence.</p>
-                <div className="flex items-center gap-3">
-                  {([Share2,AtSign,Send,Mail] as const).map((Icon,i)=>(
-                    <a key={i} href="#" aria-label="Social link" className="w-9 h-9 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-colors" style={{
-                      border: "1px solid rgba(150,120,240,0.32)",
-                      boxShadow: "0 0 14px rgba(124,92,224,0.18)",
-                    }}>
-                      <Icon className="w-4 h-4" />
-                    </a>
-                  ))}
-                </div>
               </div>
               <div>
                 <h4 className="text-white text-sm font-semibold mb-4">Product</h4>
                 <ul className="space-y-2.5">
-                  {["Features","How It Works","Pricing"].map(item=>(
-                    <li key={item}><a href="#" className="text-slate-500 text-sm hover:text-slate-300 transition-colors">{item}</a></li>
+                  {[{label:"Features",href:"#features"},{label:"How It Works",href:"#how"},{label:"Pricing",href:"#pricing"}].map(item=>(
+                    <li key={item.label}><a href={item.href} className="text-slate-500 text-sm hover:text-slate-300 transition-colors">{item.label}</a></li>
                   ))}
                 </ul>
               </div>
               <div>
                 <h4 className="text-white text-sm font-semibold mb-4">Support</h4>
                 <ul className="space-y-2.5">
-                  {["FAQs","Contact Support","Contact Us"].map(item=>(
-                    <li key={item}><a href="#" className="text-slate-500 text-sm hover:text-slate-300 transition-colors">{item}</a></li>
+                  {[{label:"FAQs",href:"#faq"},{label:"Sign in",href:"/login"},{label:"Create account",href:"/signup"}].map(item=>(
+                    <li key={item.label}><Link href={item.href} className="text-slate-500 text-sm hover:text-slate-300 transition-colors">{item.label}</Link></li>
                   ))}
                 </ul>
               </div>
               <div>
                 <h4 className="text-white text-sm font-semibold mb-4">Legal</h4>
                 <ul className="space-y-2.5">
-                  {[{label:"Terms & Conditions",href:"/terms"},{label:"Privacy Policy",href:"/privacy"},{label:"Cookie Policy",href:"#"},{label:"Refund Policy",href:"#"},{label:"Data Protection",href:"#"}].map(item=>(
+                  {[{label:"Terms & Conditions",href:"/terms"},{label:"Privacy Policy",href:"/privacy"}].map(item=>(
                     <li key={item.label}><Link href={item.href} className="text-slate-500 text-sm hover:text-slate-300 transition-colors">{item.label}</Link></li>
                   ))}
                 </ul>
@@ -764,11 +804,6 @@ export default function LandingPage() {
             </div>
             <div className="pt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
               <p className="text-xs text-slate-600">&copy; 2026 Credo. All rights reserved.</p>
-              <button className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors rounded-full px-4 py-2 border border-white/[0.08] flex-shrink-0" style={{ background: "rgba(16,14,28,0.6)" }}>
-                <Globe className="w-4 h-4" />
-                English
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
             </div>
           </div>
         </footer>

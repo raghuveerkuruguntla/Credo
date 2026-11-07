@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Lightbulb, ArrowLeftRight, Landmark, Bot } from "lucide-react";
+import { LayoutDashboard, HeartPulse, Lightbulb, ArrowLeftRight, Landmark, Bot } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const tabs: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+  { href: "/health", label: "Health", icon: HeartPulse },
   { href: "/insights", label: "Insights", icon: Lightbulb },
   { href: "/transactions", label: "Activity", icon: ArrowLeftRight },
   { href: "/accounts", label: "Accounts", icon: Landmark },
@@ -22,7 +23,7 @@ export default function MobileTabBar() {
       aria-label="Primary"
       className="lg:hidden shrink-0 border-t border-white/[0.06] bg-[#0a0b0f]/95 backdrop-blur-xl pb-safe"
     >
-      <ul className="grid grid-cols-5">
+      <ul className="grid grid-cols-6">
         {tabs.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);
           return (
