@@ -20,8 +20,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <Sidebar />
       <div className="relative z-10 flex flex-col flex-1 min-w-0 h-full">
         <TopNav />
-        <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
-          <div className="max-w-[1400px] mx-auto w-full h-full animate-in">{children}</div>
+        {/* main is a size container so full-height pages (AI Coach) can use
+            100cqh; other pages grow with their content so the footer always
+            sits below them instead of behind them. */}
+        <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden [container-type:size]">
+          <div className="max-w-[1400px] mx-auto w-full min-h-full animate-in">{children}</div>
           {/* Footer scrolls with content; hidden on mobile where the tab bar lives */}
           <div className="hidden lg:block">
             <Footer />
