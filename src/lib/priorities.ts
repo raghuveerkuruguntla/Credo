@@ -18,7 +18,7 @@
 
 import type { BlindSpot } from "@/lib/blindspots";
 import type { Recommendation } from "@/lib/intelligence";
-import type { HealthScore, IndicatorId } from "@/lib/health";
+import type { HealthScore } from "@/lib/health";
 
 export const PRIORITY_VERSION = "1.0.0";
 
@@ -44,7 +44,8 @@ export interface PriorityItem {
   cta: { label: string; href: string };
   score: number;                 // ranking score (higher first)
   factors: PriorityFactor[];     // the reasoning behind the rank, shown to users
-  healthGain: number;            // est. health-score points from resolving it
+  scoreCost: number;             // overall health points the underlying metric costs now (model-derived; 0 if none)
+  costText: string | null;       // the same, explained
   fingerprint: string;           // changes when the situation materially changes
   coachContext: string;          // facts handed to the AI coach
 }
@@ -79,7 +80,7 @@ function impactText(b: BlindSpot): string | null {
   return b.impact.kind === "loss" ? `${whole(b.impact.amount)}/yr at risk` : `up to ${whole(b.impact.amount)}/yr`;
 }
 
-function fromBlindSpot(b: BlindSpot, health: HealthScore | null, gain: number): PriorityItem {
+function fromBlindSpot(b: BlindSpot, health: HealthScore | null, cost: { overall: number; text: string } | null): PriorityItem {
   const level = levelFor(b);
   const annual = b.impact?.amount ?? 0;
   const factors: PriorityFactor[] = [];
@@ -96,12 +97,12 @@ function fromBlindSpot(b: BlindSpot, health: HealthScore | null, gain: number): 
   const cons = b.severity === "critical" ? 25 : b.group === "risk" ? 15 : b.severity === "attention" ? 10 : 3;
   factors.push({ label: "Consequence", detail: b.consequence, points: cons });
 
-  // 4. Relevance (0–12): touches the weakest health indicator or a budget you set.
-  const weakest: IndicatorId | undefined = health?.weakest?.id;
-  const rel = (b.id.startsWith("budget:") ? 12 : 0) + (weakest && b.affects.includes(weakest) ? 8 : 0);
+  // 4. Relevance (0–12): in your weakest health category, costs score points, or conflicts with a budget you set.
+  const inWeakest = !!health?.weakest && health.weakest.id === b.category;
+  const rel = (b.id.startsWith("budget:") ? 12 : 0) + (inWeakest ? 8 : 0) + Math.min(4, cost?.overall ?? 0);
   factors.push({
     label: "Relevance",
-    detail: b.id.startsWith("budget:") ? "Conflicts with a budget you set" : weakest && b.affects.includes(weakest) ? `Affects your weakest indicator (${health?.weakest?.name.toLowerCase()})` : "Not tied to your weakest area",
+    detail: b.id.startsWith("budget:") ? "Conflicts with a budget you set" : inWeakest ? `In your weakest health category (${health?.weakest?.name.toLowerCase()})` : cost ? cost.text : "Not in your weakest area",
     points: Math.min(12, rel),
   });
 
@@ -122,10 +123,11 @@ function fromBlindSpot(b: BlindSpot, health: HealthScore | null, gain: number): 
     why: b.summary,
     impact: impactText(b),
     action: b.actions[0] ?? "Review the details.",
-    cta: { label: "View details", href: b.links[0]?.href ?? "/blindspots" },
+    cta: { label: "View details", href: b.links[0]?.href ?? "/health#insights" },
     score: Math.round(score),
     factors,
-    healthGain: gain,
+    scoreCost: cost?.overall ?? 0,
+    costText: cost?.text ?? null,
     fingerprint: `${b.severity}|${b.certainty}|${bucket(annual)}|${b.urgencyDays != null && b.urgencyDays <= 7 ? "soon" : "later"}`,
     coachContext: `${b.title}. ${b.summary} If ignored: ${b.consequence} Suggested first step: ${b.actions[0] ?? ""}`,
   };
@@ -154,7 +156,8 @@ function fromRecommendation(r: Recommendation): PriorityItem {
     cta: { label: "Explore action", href: "/insights" },
     score: Math.round(imp + 3 + act),
     factors,
-    healthGain: 0,
+    scoreCost: 0,
+    costText: null,
     fingerprint: `rec|${bucket(annual)}`,
     coachContext: `${r.title}. ${r.body} Expected payoff: ${r.impactLabel}.`,
   };
@@ -162,16 +165,17 @@ function fromRecommendation(r: Recommendation): PriorityItem {
 
 export interface PriorityInput {
   hasData: boolean;
-  blindSpots: BlindSpot[];          // active (not resolved/dismissed in Blind Spots)
+  findings: BlindSpot[];            // open findings from the Financial Intelligence Engine
   recommendations: Recommendation[];
   health: HealthScore | null;
-  gainFor?: (b: BlindSpot) => number;
+  contribution?: (b: BlindSpot) => { overall: number; text: string } | null;
 }
 
 /** All candidates, ranked, one per theme. */
 export function rankPriorities(input: PriorityInput): PriorityItem[] {
   const items = [
-    ...input.blindSpots.map((b) => fromBlindSpot(b, input.health, input.gainFor?.(b) ?? 0)),
+    // Informational insights are interesting, not tasks: they never become priorities.
+    ...input.findings.filter((b) => b.kind !== "info").map((b) => fromBlindSpot(b, input.health, input.contribution?.(b) ?? null)),
     ...input.recommendations.map(fromRecommendation),
   ].sort((a, b) => b.score - a.score);
 
@@ -222,8 +226,8 @@ export const COACH_QUESTIONS = [
   "Can you walk me through fixing this?",
 ] as const;
 
-export function coachQuestion(item: PriorityItem, question: string, healthScore?: number): string {
+export function coachQuestion(item: PriorityItem, question: string, healthScore?: number | null): string {
   const rank = item.factors.map((f) => `${f.label}: ${f.detail}`).join("; ");
-  const gain = item.healthGain > 0 ? ` Resolving it is estimated to add about ${item.healthGain} points to my health score${healthScore != null ? ` (currently ${healthScore})` : ""}.` : "";
-  return `${question}\n\nContext from Credo's priority engine — priority: ${item.level}. ${item.coachContext}${gain} Ranking factors: ${rank}.`;
+  const score = item.costText ? ` From the scoring model: ${item.costText}` : "";
+  return `${question}\n\nContext from Credo's priority engine — priority: ${item.level}. ${item.coachContext}${score}${healthScore != null ? ` My overall health score is ${healthScore}.` : ""} Ranking factors: ${rank}.`;
 }

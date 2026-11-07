@@ -12,9 +12,17 @@ const SAMPLE: HealthInputs = {
   monthlyIncome: 6200,
   monthlyExpenses: 5500,
   monthlyDebtPayments: 1500,
+  monthlyDiscretionary: 1500,
   revolvingBalance: 4200,
   revolvingLimit: 14000,
   historyMonths: 6,
+  historyDays: 180,
+  incomeVariation: 0.02,
+  spendingWindows: [5600, 5450, 5500],
+  costCreepMonthly: 24,
+  checkingCash: 2600,
+  billsNext30: 2300,
+  paymentIncidents: 0,
 };
 
 const TONE: Record<IndicatorStatus, { text: string; bar: string }> = {
@@ -39,7 +47,7 @@ export default function HealthDemo() {
 
   const today = useMemo(() => computeHealth(SAMPLE), []);
   const future = useMemo(() => projectHealth(SAMPLE, { spendLess, extraToCards }), [spendLess, extraToCards]);
-  const delta = future.health.score - today.score;
+  const delta = (future.health.score ?? 0) - (today.score ?? 0);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -50,26 +58,25 @@ export default function HealthDemo() {
           <span className="text-[11px] text-slate-400">Sample household</span>
         </div>
         <div className="flex items-baseline gap-2 mt-3">
-          <span className="text-6xl font-bold text-white tracking-tight">{today.score}</span>
+          <span className="text-6xl font-bold text-white tracking-tight">{today.score ?? "—"}</span>
           <span className="text-slate-400 text-lg">/ 100</span>
           <span className="ml-auto text-xs px-2.5 py-1 rounded-full" style={{ background: "rgba(124,92,224,0.18)", color: "#DDD6FE" }}>{today.label}</span>
         </div>
-        <ul className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {today.indicators.map((x) => (
-            <li key={x.id} className="rounded-2xl p-4" style={{ background: "rgba(10,8,18,0.5)", border: "1px solid rgba(255,255,255,0.06)" }}>
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="text-[13px] text-slate-300">{x.name}</span>
-                <span className="text-[12px]" style={{ color: TONE[x.status].text }}>{x.points} pts</span>
+        <ul className="mt-6 space-y-3">
+          {today.categories.map((c) => (
+            <li key={c.id}>
+              <div className="flex items-baseline justify-between gap-2 text-[13px]">
+                <span className="text-slate-300">{c.name}</span>
+                <span className="font-semibold" style={{ color: c.status ? TONE[c.status].text : "#94a3b8" }}>{c.score ?? "—"}</span>
               </div>
-              <p className="text-2xl font-bold text-white mt-1">{x.display}</p>
-              <div className="h-1.5 rounded-full mt-2 overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }} aria-hidden>
-                <div className="h-full rounded-full" style={{ width: `${x.points}%`, background: TONE[x.status].bar }} />
+              <div className="h-1.5 rounded-full mt-1.5 overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }} aria-hidden>
+                <div className="h-full rounded-full" style={{ width: `${c.score ?? 0}%`, background: c.status ? TONE[c.status].bar : "transparent" }} />
               </div>
-              <p className="text-[11px] text-slate-400 mt-2">Target: {x.target}</p>
+              <p className="text-[11px] text-slate-400 mt-1">{c.summary}</p>
             </li>
           ))}
         </ul>
-        <p className="text-[12px] text-slate-400 mt-4">Each indicator is scored 0–100 against a published target, and the score is their average. No black box.</p>
+        <p className="text-[12px] text-slate-400 mt-4">Five categories, each built from metrics scored against published targets. The score is their average. No black box.</p>
       </div>
 
       {/* What-if */}
@@ -97,8 +104,8 @@ export default function HealthDemo() {
         <div className="rounded-2xl p-5" style={{ background: "rgba(124,92,224,0.14)", border: "1px solid rgba(167,139,250,0.35)" }}>
           <p className="text-[13px]" style={{ color: "#DDD6FE" }}>Health score in 6 months</p>
           <p className="mt-1 flex items-baseline gap-3">
-            <span className="text-5xl font-bold text-white" aria-live="polite">{future.health.score}</span>
-            <span className="text-slate-300 text-sm">{delta >= 0 ? "+" : ""}{delta} from {today.score} today</span>
+            <span className="text-5xl font-bold text-white" aria-live="polite">{future.health.score ?? "—"}</span>
+            <span className="text-slate-300 text-sm">{delta >= 0 ? "+" : ""}{delta} from {today.score ?? "—"} today</span>
           </p>
         </div>
 

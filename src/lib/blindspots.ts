@@ -19,7 +19,8 @@
 
 import type { LiveAccount, LiveTxn } from "@/lib/useFinancialData";
 import type { ExplanationPayload, SourceFact } from "@/lib/intelligence";
-import type { IndicatorId } from "@/lib/health";
+import type { CategoryId, MetricId } from "@/lib/health";
+import { internalTransferIds } from "@/lib/health";
 
 export const BLINDSPOT_VERSION = "1.0.0";
 
@@ -33,6 +34,7 @@ export type BlindSpotGroup = "hidden-spending" | "risk" | "opportunity" | "behav
 export type Severity = "critical" | "attention" | "opportunity";
 export type Certainty = "verified" | "likely" | "possible";
 export type Ease = "easy" | "medium" | "hard";
+export type FindingKind = "risk" | "opportunity" | "info";
 
 export interface Impact {
   amount: number;                 // dollars, always positive
@@ -53,17 +55,28 @@ export interface BlindSpot {
   actions: string[];              // specific steps; none move money automatically
   ease: Ease;
   urgencyDays: number | null;     // days until the consequence lands, if known
-  affects: IndicatorId[];         // health-score indicators this touches
+  category: CategoryId;           // health category this finding belongs to
+  kind: FindingKind;              // risk (can lower the score) / opportunity / informational
+  metric: MetricId | null;        // the score metric this finding explains, if any
   links: { href: string; label: string }[];
   explanation: ExplanationPayload;
   priority: number;               // higher = address sooner
   priorityReason: string;         // why it ranks where it does
 }
 
+export interface BlindSpotMetrics {
+  costCreepMonthly: number;       // $/mo added by recurring price increases
+  checkingCash: number;           // checking balances
+  billsNext30: number | null;     // recurring bills expected in the next 30 days
+  paymentIncidents: number;       // overdraft/NSF/late fees + overdrawn accounts
+  incomeVariation: number | null; // variation (std ÷ mean) of the regular paycheck; null if none detected
+}
+
 export interface BlindSpotReport {
   findings: BlindSpot[];          // sorted by priority, highest first
   historyDays: number;
   txnCount: number;
+  metrics: BlindSpotMetrics;      // handed to the health score (computed once, here)
   cannotCheck: { title: string; detail: string }[];
 }
 
@@ -173,11 +186,13 @@ function buildCtx(accounts: BSAccount[], txns: BSTxn[], budgets: Record<string, 
   const historyDays = Math.max(1, Math.round((now.getTime() - new Date(oldest + "T00:00:00").getTime()) / DAY));
   const months = Math.max(1, historyDays / 30.4);
 
+  const internal = internalTransferIds(accounts, txns);
   let inc = 0, exp = 0;
   for (const t of posted) {
+    if (internal.has(t.id)) continue;
     const c = cat(t);
     if (t.amount > 0 && c === "INCOME") inc += t.amount;
-    if (t.amount < 0 && !c.startsWith("TRANSFER")) exp += -t.amount;
+    if (t.amount < 0 && !c.startsWith("TRANSFER")) exp += -t.amount; // same definition as the health score
   }
 
   // Income sources: INCOME-category deposits grouped by payer.
@@ -210,7 +225,7 @@ function buildCtx(accounts: BSAccount[], txns: BSTxn[], budgets: Record<string, 
   };
 }
 
-type Draft = Omit<BlindSpot, "priority" | "priorityReason">;
+type Draft = Omit<BlindSpot, "priority" | "priorityReason" | "category" | "kind" | "metric">;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A. HIDDEN SPENDING
@@ -250,7 +265,6 @@ function duplicates(ctx: Ctx): Draft[] {
         ],
         ease: "easy",
         urgencyDays: Math.max(0, 60 - Math.round(daysAgo(ctx, t.date))),
-        affects: [],
         links: [{ href: "/transactions", label: "View transactions" }],
         explanation: {
           sourceFacts: ts.map(txnFact),
@@ -291,8 +305,7 @@ function priceIncreases(ctx: Ctx): Draft[] {
       ],
       ease: "easy",
       urgencyDays: null,
-      affects: ["savingsRate", "cushion"],
-      links: [{ href: "/health", label: "See the effect in what-if" }],
+      links: [{ href: "/health#whatif", label: "See the effect in what-if" }],
       explanation: {
         sourceFacts: m.map(txnFact),
         reasoningSummary: fixedRate
@@ -331,7 +344,6 @@ function subscriptions(ctx: Ctx, exclude: Set<string>): Draft[] {
     ],
     ease: "easy",
     urgencyDays: null,
-    affects: ["savingsRate"],
     links: [{ href: "/transactions", label: "View transactions" }],
     explanation: {
       sourceFacts: subs.map((x) => ({ label: `${x.s.merchant} — ${money(-x.r.amount)}/mo`, detail: `${x.s.months.length} months · ${pretty(x.s.category)}`, amount: -x.r.amount, href: "/transactions" })),
@@ -370,7 +382,6 @@ function smallPurchases(ctx: Ctx, exclude: Set<string>): Draft[] {
       ],
       ease: "medium",
       urgencyDays: null,
-      affects: ["savingsRate"],
       links: [{ href: "/budget", label: "Set a budget" }],
       explanation: {
         sourceFacts: small.slice(-5).reverse().map(txnFact),
@@ -414,7 +425,6 @@ function categorySpikes(ctx: Ctx): Draft[] {
       ],
       ease: "medium",
       urgencyDays: null,
-      affects: ["savingsRate", "cushion"],
       links: [{ href: "/spending", label: "View spending" }, { href: "/budget", label: "Set a budget" }],
       explanation: {
         sourceFacts: (recent[c] ?? []).sort((a, b) => a.amount - b.amount).slice(0, 4).map(txnFact),
@@ -472,7 +482,6 @@ function lowBalance(ctx: Ctx): Draft[] {
       actions: [`Bring ${a.name} above $0 as soon as you can, by moving at least ${whole(-amt)} from another account (you do this; Credo never moves money).`, "Ask your bank to waive any fees already charged. Many will for a first occurrence."],
       ease: "easy",
       urgencyDays: 0,
-      affects: ["cushion"],
       links: [{ href: "/accounts", label: "View accounts" }],
       explanation: { sourceFacts: [{ label: `${a.name}${a.mask ? ` ••${a.mask}` : ""}`, detail: "Available balance", amount: amt, href: "/accounts" }], reasoningSummary: `Rule v${BLINDSPOT_VERSION}: a checking account's available balance is below $0.`, confidence: "high" },
     });
@@ -506,7 +515,6 @@ function lowBalance(ctx: Ctx): Draft[] {
     ],
     ease: "easy",
     urgencyDays: Math.max(0, Math.round((bills[0].next.getTime() - ctx.now.getTime()) / DAY)),
-    affects: ["cushion"],
     links: [{ href: "/forecast", label: "Open forecast" }],
     explanation: {
       sourceFacts: [
@@ -525,7 +533,7 @@ function feesAndInterest(ctx: Ctx): Draft[] {
   if (!fees.length) return [];
   const annualize = (sum: number) => sum * (365 / Math.max(30, ctx.historyDays));
   const isInterest = (t: BSTxn) => /interest|finance charge/i.test(t.merchant);
-  const isOverdraft = (t: BSTxn) => /overdraft|nsf|insufficient|returned item|od fee/i.test(t.merchant);
+  const isOverdraft = (t: BSTxn) => /overdraft|nsf|insufficient|returned item|od fee|late fee|late charge|late payment/i.test(t.merchant);
   const out: Draft[] = [];
 
   const od = fees.filter(isOverdraft);
@@ -536,17 +544,16 @@ function feesAndInterest(ctx: Ctx): Draft[] {
       group: "risk",
       severity: "critical",
       certainty: "verified",
-      title: `You've paid ${money(sum)} in overdraft fees`,
-      summary: `${od.length} overdraft or insufficient-funds fee${od.length > 1 ? "s" : ""} hit your accounts in the last ${Math.round(ctx.historyDays)} days, ${money(sum)} in total. At this pace that's ${whole(annualize(sum))} a year.`,
+      title: `You've paid ${money(sum)} in overdraft or late fees`,
+      summary: `${od.length} overdraft, insufficient-funds or late fee${od.length > 1 ? "s" : ""} hit your accounts in the last ${Math.round(ctx.historyDays)} days, ${money(sum)} in total. At this pace that's ${whole(annualize(sum))} a year.`,
       consequence: "Overdrafts tend to repeat when the balance is regularly close to zero, and each one costs a fee.",
       impact: { amount: annualize(sum), period: "annual", kind: "loss" },
       monthlySaving: annualize(sum) / 12,
       actions: ["Ask your bank to refund the fees. Many will, especially the first time.", "Turn on low-balance alerts, or link savings as overdraft protection.", "Consider a bank with no overdraft fees."],
       ease: "easy",
       urgencyDays: null,
-      affects: ["cushion", "savingsRate"],
       links: [{ href: "/forecast", label: "Open forecast" }],
-      explanation: { sourceFacts: od.map(txnFact), reasoningSummary: `Rule v${BLINDSPOT_VERSION}: bank-fee transactions whose description mentions overdraft or insufficient funds. Annual = total × 365 ÷ ${Math.round(ctx.historyDays)} days of history.`, confidence: "high" },
+      explanation: { sourceFacts: od.map(txnFact), reasoningSummary: `Rule v${BLINDSPOT_VERSION}: bank-fee transactions whose description mentions overdraft, insufficient funds or a late payment. Annual = total × 365 ÷ ${Math.round(ctx.historyDays)} days of history.`, confidence: "high" },
     });
   }
 
@@ -571,8 +578,7 @@ function feesAndInterest(ctx: Ctx): Draft[] {
       ],
       ease: "medium",
       urgencyDays: 30,
-      affects: ["utilization", "dti", "savingsRate"],
-      links: [{ href: "/health", label: "Try paying it down in what-if" }],
+      links: [{ href: "/health#whatif", label: "Try paying it down in what-if" }],
       explanation: { sourceFacts: int.map(txnFact), reasoningSummary: `Rule v${BLINDSPOT_VERSION}: bank-fee transactions described as interest or finance charges. Annual = total × 365 ÷ ${Math.round(ctx.historyDays)} days of history.`, confidence: "high" },
     });
   }
@@ -594,7 +600,6 @@ function feesAndInterest(ctx: Ctx): Draft[] {
       actions: ["Ask your bank what it takes to waive the monthly fee (often a minimum balance or direct deposit).", "Use in-network ATMs, or get cash back at checkout.", "Compare no-fee checking accounts."],
       ease: "easy",
       urgencyDays: null,
-      affects: ["savingsRate"],
       links: [{ href: "/transactions", label: "View transactions" }],
       explanation: { sourceFacts: other.map(txnFact), reasoningSummary: `Rule v${BLINDSPOT_VERSION}: bank-fee transactions that aren't interest or overdraft. Annual = total × 365 ÷ ${Math.round(ctx.historyDays)} days.`, confidence: "high" },
     });
@@ -625,8 +630,7 @@ function emergencyCushion(ctx: Ctx): Draft[] {
     ],
     ease: "medium",
     urgencyDays: null,
-    affects: ["cushion"],
-    links: [{ href: "/health", label: "Model it in what-if" }],
+    links: [{ href: "/health#whatif", label: "Model it in what-if" }],
     explanation: {
       sourceFacts: [
         { label: "Cash in checking and savings", amount: ctx.cash, href: "/accounts" },
@@ -666,8 +670,7 @@ function creditUtilization(ctx: Ctx): Draft[] {
     ],
     ease: "medium",
     urgencyDays: 30,
-    affects: ["utilization"],
-    links: [{ href: "/health", label: "Try extra payments in what-if" }],
+    links: [{ href: "/health#whatif", label: "Try extra payments in what-if" }],
     explanation: {
       sourceFacts: rows.map((r) => ({ label: `${r.a.name}${r.a.mask ? ` ••${r.a.mask}` : ""}`, detail: `${whole(r.owed)} of ${whole(r.limit)} (${Math.round(r.pct)}%)`, amount: -r.owed, href: "/accounts" })),
       reasoningSummary: `Same formula as the health score: card balances ÷ (balance + available credit). Flagged at 30%+, critical at 70%+ or any single card at 90%+.`,
@@ -693,7 +696,6 @@ function incomeConcentration(ctx: Ctx): Draft[] {
     actions: ["Building your emergency cushion toward 3 months is the main fix.", "If it fits your life, even a small second income stream lowers this risk."],
     ease: "hard",
     urgencyDays: null,
-    affects: ["cushion"],
     links: [{ href: "/health", label: "See your cushion" }],
     explanation: {
       sourceFacts: ctx.income.dates.slice(-4).map((d, i) => ({ label: `${ctx.income!.source}`, detail: shortDate(d), amount: ctx.income!.amounts[ctx.income!.amounts.length - Math.min(4, ctx.income!.dates.length) + i] })),
@@ -726,8 +728,7 @@ function growingCardDebt(ctx: Ctx): Draft[] {
     actions: ["Aim to pay at least your new charges each month so the balance stops growing.", "Move recurring bills to your debit card while you pay the cards down."],
     ease: "medium",
     urgencyDays: 30,
-    affects: ["utilization", "dti"],
-    links: [{ href: "/health", label: "Model payoff in what-if" }],
+    links: [{ href: "/health#whatif", label: "Model payoff in what-if" }],
     explanation: {
       sourceFacts: [
         { label: "Last 30 days", detail: `Charges ${whole(charges[0])} · payments ${whole(pays[0])}`, amount: -net[0] },
@@ -767,7 +768,6 @@ function idleCash(ctx: Ctx): Draft[] {
     ],
     ease: "easy",
     urgencyDays: null,
-    affects: [],
     links: [{ href: "/accounts", label: "View accounts" }],
     explanation: {
       sourceFacts: checking.map((a) => ({ label: a.name, detail: "Checking balance", amount: a.balance ?? 0, href: "/accounts" })),
@@ -799,7 +799,6 @@ function negotiableBills(ctx: Ctx, exclude: Set<string>): Draft[] {
     actions: ["Call each provider and ask for current promotions or a loyalty discount.", "Compare plans with other providers in your area before calling, so you have a number to quote.", "Remove add-ons you don't use."],
     ease: "medium",
     urgencyDays: null,
-    affects: ["savingsRate"],
     links: [{ href: "/transactions", label: "View transactions" }],
     explanation: {
       sourceFacts: bills.map((x) => ({ label: `${x.s.merchant} — ${money(-x.r.amount)}/mo`, detail: `${x.s.months.length} months · ${pretty(x.s.category)}`, amount: -x.r.amount, href: "/transactions" })),
@@ -845,7 +844,6 @@ function paydaySpikes(ctx: Ctx): Draft[] {
     ],
     ease: "easy",
     urgencyDays: null,
-    affects: ["savingsRate", "cushion"],
     links: [{ href: "/spending", label: "View spending" }],
     explanation: {
       sourceFacts: [
@@ -882,7 +880,6 @@ function lifestyleInflation(ctx: Ctx): Draft[] {
     actions: [`Pick a monthly discretionary target, for example ${whole(w[2])}, where you were three months ago.`, "Set budgets for dining and shopping so you see it before month-end."],
     ease: "medium",
     urgencyDays: null,
-    affects: ["savingsRate", "cushion"],
     links: [{ href: "/budget", label: "Set budgets" }],
     explanation: {
       sourceFacts: [
@@ -914,7 +911,6 @@ function impulsePurchases(ctx: Ctx, exclude: Set<string>): Draft[] {
     actions: ["Try a 48-hour wait list: add it to a list, buy it only if you still want it in two days.", "Remove saved cards from shopping apps to add a little friction."],
     ease: "medium",
     urgencyDays: null,
-    affects: ["savingsRate"],
     links: [{ href: "/transactions", label: "View transactions" }],
     explanation: {
       sourceFacts: recent.slice(0, 6).map(txnFact),
@@ -954,7 +950,6 @@ function budgetConflicts(ctx: Ctx): Draft[] {
       actions: over ? [`Pause ${category.toLowerCase()} spending for the rest of the month if you can.`, "If the budget was unrealistic, adjust it so it stays useful."] : [`To stay on budget, keep ${category.toLowerCase()} spending to about ${whole(Math.max(0, limit - s) / Math.max(1, daysIn - day))} a day for the rest of the month.`],
       ease: "medium",
       urgencyDays: daysIn - day,
-      affects: ["savingsRate"],
       links: [{ href: "/budget", label: "Open budget" }],
       explanation: {
         sourceFacts: [{ label: `${category} budget`, amount: -limit, href: "/budget" }, ...ts.sort((a, b) => a.amount - b.amount).slice(0, 4).map(txnFact)],
@@ -978,7 +973,7 @@ const CERT_W: Record<Certainty, number> = { verified: 8, likely: 4, possible: 0 
 // Future consequences: risks compound (fees, credit damage), habits are optional.
 const GROUP_W: Record<BlindSpotGroup, number> = { risk: 10, "hidden-spending": 5, opportunity: 3, behavior: 0 };
 
-function prioritize(d: Draft): BlindSpot {
+function prioritize(d: Draft): Omit<BlindSpot, "category" | "kind" | "metric"> {
   const annual = d.impact ? d.impact.amount : 0;
   const impactPts = Math.min(25, Math.log10(annual + 1) * 8);
   const urgencyPts = d.urgencyDays == null ? 0 : d.urgencyDays <= 7 ? 30 : d.urgencyDays <= 30 ? 10 : 0;
@@ -1010,7 +1005,7 @@ export function detectBlindSpots(
     { title: "Whether you use your subscriptions", detail: "We only see charges, not usage, so we never label a subscription as unused." },
     { title: "Interest rates on each debt", detail: "Banks don't share APRs through account links. We use the interest charges that actually appear in your transactions." },
   ];
-  if (!txns.length && !accounts.length) return { findings: [], historyDays: 0, txnCount: 0, cannotCheck };
+  if (!txns.length && !accounts.length) return { findings: [], historyDays: 0, txnCount: 0, cannotCheck, metrics: { costCreepMonthly: 0, checkingCash: 0, billsNext30: null, paymentIncidents: 0, incomeVariation: null } };
 
   const ctx = buildCtx(accounts, txns, opts.budgets ?? {}, now);
   const increases = priceIncreases(ctx);
@@ -1060,50 +1055,85 @@ function dedupe(drafts: Draft[]): Draft[] {
   return out;
 }
 
-function finalize(drafts: Draft[], ctx: Ctx, cannotCheck: BlindSpotReport["cannotCheck"]): BlindSpotReport {
-  return {
-    findings: drafts.map(prioritize).sort((a, b) => b.priority - a.priority),
-    historyDays: ctx.historyDays,
-    txnCount: ctx.txns.length,
-    cannotCheck,
-  };
-}
-
-// ── Scores ──────────────────────────────────────────────────────────────────
-
-/** 0–100, 100 = no blind spots. Visual summary of how many and how severe. */
-export function blindSpotScore(active: BlindSpot[]): number {
-  const w: Record<Severity, number> = { critical: 20, attention: 8, opportunity: 3 };
-  return Math.max(0, 100 - active.reduce((s, f) => s + w[f.severity], 0));
+// Where each finding lives in the health score. One table, so nothing is
+// counted twice: a finding either explains one metric, or affects none.
+const CLASSIFY: [RegExp, CategoryId, FindingKind, MetricId | null][] = [
+  [/^dup:/, "spending", "risk", null],
+  [/^increase:/, "spending", "risk", "costCreep"],
+  [/^subscriptions$/, "spending", "opportunity", null],
+  [/^small:/, "spending", "info", null],
+  [/^impulse:/, "spending", "info", null],
+  [/^payday-spikes$/, "spending", "info", null],
+  [/^lifestyle-inflation$/, "spending", "risk", "discretionaryShare"],
+  [/^budget:/, "spending", "risk", null],
+  [/^negotiable-bills$/, "spending", "opportunity", null],
+  [/^fees:other$/, "spending", "opportunity", null],
+  [/^spike:/, "cashflow", "risk", "spendingTrend"],
+  [/^income-concentration$/, "cashflow", "risk", null],
+  [/^cushion$/, "savings", "risk", "cushion"],
+  [/^idle-cash$/, "savings", "opportunity", null],
+  [/^utilization$/, "debt", "risk", "utilization"],
+  [/^fees:interest$/, "debt", "risk", null],
+  [/^card-debt-growing$/, "debt", "risk", null],
+  [/^lowbalance:/, "obligations", "risk", "billCoverage"],
+  [/^overdrawn:/, "obligations", "risk", "paymentIncidents"],
+  [/^fees:overdraft$/, "obligations", "risk", "paymentIncidents"],
+];
+function classify(d: Draft): Pick<BlindSpot, "category" | "kind" | "metric"> {
+  const row = CLASSIFY.find(([re]) => re.test(d.id));
+  return row ? { category: row[1], kind: row[2], metric: row[3] } : { category: "spending", kind: d.severity === "opportunity" ? "opportunity" : "risk", metric: null };
 }
 
 /**
- * Points taken off the Financial Health Score for unresolved blind spots, so a
- * newly found problem changes your score, not just your alerts. Opportunities
- * don't lower the score. Capped so the four core indicators stay dominant.
+ * Income stability from the paychecks themselves: with a regular paycheck
+ * (3+ deposits on a steady schedule) the variation of its amounts, scaled up
+ * when it makes up less of total income. Avoids calendar artefacts like
+ * biweekly pay landing 2 or 3 times in a month.
  */
-export const BLINDSPOT_PENALTY_CAP = 15;
-export function healthPenalty(active: BlindSpot[]): number {
-  const w: Record<Severity, number> = { critical: 5, attention: 2, opportunity: 0 };
-  return Math.min(BLINDSPOT_PENALTY_CAP, active.reduce((s, f) => s + w[f.severity], 0));
+function paycheckVariation(ctx: Ctx): number | null {
+  const inc = ctx.income;
+  if (!inc || !ctx.payInterval || inc.amounts.length < 3) return null;
+  const mean = inc.amounts.reduce((a, b) => a + b, 0) / inc.amounts.length;
+  if (mean <= 0) return null;
+  const sd = Math.sqrt(inc.amounts.reduce((a, b) => a + (b - mean) ** 2, 0) / inc.amounts.length);
+  return sd / mean + (1 - inc.share) * 0.5;
 }
-export function penaltyOf(f: BlindSpot): number {
-  return f.severity === "critical" ? 5 : f.severity === "attention" ? 2 : 0;
+
+function finalize(drafts: Draft[], ctx: Ctx, cannotCheck: BlindSpotReport["cannotCheck"]): BlindSpotReport {
+  // Measurements the health score uses — computed here once, not re-derived.
+  const costCreepMonthly = drafts.filter((d) => d.id.startsWith("increase:")).reduce((s, d) => s + d.monthlySaving, 0);
+  const checking = ctx.accounts.filter(isChecking);
+  const checkingCash = (checking.length ? checking : ctx.accounts.filter(isCash)).reduce((s, a) => s + (a.balance ?? 0), 0);
+  const bills = upcomingBills(ctx, 30);
+  const feeIncidents = ctx.posted.filter((t) => t.amount < 0 && cat(t) === "BANK_FEES" && /overdraft|nsf|insufficient|returned item|od fee|late fee|late charge|late payment/i.test(t.merchant)).length;
+  const overdrawn = (checking.length ? checking : ctx.accounts.filter(isCash)).filter((a) => (a.available ?? a.balance ?? 0) < 0).length;
+  return {
+    findings: drafts.map((d) => ({ ...prioritize(d), ...classify(d) })).sort((a, b) => b.priority - a.priority),
+    historyDays: ctx.historyDays,
+    txnCount: ctx.txns.length,
+    cannotCheck,
+    metrics: {
+      costCreepMonthly,
+      checkingCash,
+      billsNext30: bills.length ? bills.reduce((s, b) => s + b.amount, 0) : null,
+      paymentIncidents: feeIncidents + overdrawn,
+      incomeVariation: paycheckVariation(ctx),
+    },
+  };
 }
 
 /** Coach prompt with the finding's own numbers, so answers are grounded. */
-export function coachPrompt(f: BlindSpot, healthGain?: number): string {
-  const gain = healthGain && healthGain > 0 ? ` Resolving it is estimated to raise my health score by about ${healthGain} points.` : "";
-  return `Credo flagged a blind spot: "${f.title}". Details: ${f.summary}${gain} Explain this in simple terms, what happens if I ignore it, and the single best next step for me.`;
+export function coachPrompt(f: BlindSpot, contribution?: string): string {
+  return `Credo flagged this in my ${f.category} health category (${f.kind === "risk" ? "a risk" : f.kind === "opportunity" ? "an opportunity" : "an informational insight"}, ${f.certainty}): "${f.title}". Details: ${f.summary}${contribution ? ` ${contribution}` : ""} Explain this in simple terms, what happens if I ignore it, and the single best next step for me.`;
 }
 
 /** Compact text for the AI assistant's server-side context. */
-export function blindSpotsSummaryText(findings: BlindSpot[], limit = 6): string {
-  if (!findings.length) return "FINANCIAL BLIND SPOTS: none detected.";
-  const lines = [`FINANCIAL BLIND SPOTS (Credo detector v${BLINDSPOT_VERSION}, highest priority first; the user may have dismissed some in the app):`];
+export function blindSpotsSummaryText(findings: BlindSpot[], limit = 8): string {
+  if (!findings.length) return "FINANCIAL INSIGHTS (blind spots): none detected.";
+  const lines = [`FINANCIAL INSIGHTS (blind-spot detector v${BLINDSPOT_VERSION}, highest priority first; each belongs to a health category; only risks tied to a metric affect the score; the user may have resolved or dismissed some in the app):`];
   for (const f of findings.slice(0, limit)) {
     const imp = f.impact ? ` Impact: ${whole(f.impact.amount)} ${f.impact.period === "annual" ? "per year" : "one-time"} ${f.impact.kind === "loss" ? "lost" : "potential saving"}.` : "";
-    lines.push(`  - [${f.severity}, ${f.certainty}] ${f.title}. ${f.summary}${imp}`);
+    lines.push(`  - [${f.category} · ${f.kind} · ${f.severity} · ${f.certainty}${f.metric ? ` · explains metric ${f.metric}` : ""}] ${f.title}. ${f.summary}${imp}`);
   }
   return lines.join("\n");
 }

@@ -43,7 +43,7 @@ function Controls({ item, onDecide, compact }: { item: PriorityItem; onDecide: (
   );
 }
 
-function AskCoach({ item, healthScore }: { item: PriorityItem; healthScore: number }) {
+function AskCoach({ item, healthScore }: { item: PriorityItem; healthScore: number | null }) {
   return (
     <div className="flex flex-wrap gap-2">
       {COACH_QUESTIONS.map((q) => (
@@ -79,7 +79,7 @@ function WhyRanked({ item, rankLabel }: { item: PriorityItem; rankLabel: string 
   );
 }
 
-function PrimaryCard({ item, onDecide, healthScore, isOpportunity }: { item: PriorityItem; onDecide: (s: "completed" | "dismissed" | "snoozed") => void; healthScore: number; isOpportunity?: boolean }) {
+function PrimaryCard({ item, onDecide, healthScore, isOpportunity }: { item: PriorityItem; onDecide: (s: "completed" | "dismissed" | "snoozed") => void; healthScore: number | null; isOpportunity?: boolean }) {
   const [panel, setPanel] = useState<"none" | "why" | "ask">("none");
   return (
     <article className={cn(shell, "p-5 sm:p-6 relative overflow-hidden")}>
@@ -88,7 +88,7 @@ function PrimaryCard({ item, onDecide, healthScore, isOpportunity }: { item: Pri
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <Level level={item.level} />
           {item.impact && <span className="text-[11px] text-slate-400">· {item.impact}</span>}
-          {item.healthGain > 0 && <span className="text-[11px] text-indigo-300/90 inline-flex items-center gap-1">· <HeartPulse className="w-3 h-3" /> +{item.healthGain} health pts</span>}
+          {item.scoreCost > 0 && <span className="text-[11px] text-indigo-300/90 inline-flex items-center gap-1" title={item.costText ?? undefined}>· <HeartPulse className="w-3 h-3" /> costing ~{item.scoreCost} health pts</span>}
         </div>
         <h3 className="text-lg sm:text-xl font-semibold text-white tracking-tight mt-2">{isOpportunity ? `Consider: ${item.title}` : item.title}</h3>
         <p className="text-sm text-slate-400 leading-relaxed mt-2 max-w-3xl">{item.why}</p>
@@ -121,7 +121,7 @@ function PrimaryCard({ item, onDecide, healthScore, isOpportunity }: { item: Pri
   );
 }
 
-function SecondaryRow({ item, onDecide, healthScore }: { item: PriorityItem; onDecide: (s: "completed" | "dismissed" | "snoozed") => void; healthScore: number }) {
+function SecondaryRow({ item, onDecide, healthScore }: { item: PriorityItem; onDecide: (s: "completed" | "dismissed" | "snoozed") => void; healthScore: number | null }) {
   const [open, setOpen] = useState(false);
   return (
     <div className={cn(shell, "px-4 py-3")}>
@@ -194,7 +194,7 @@ export default function NextBestMove() {
         </div>
         {p.state !== "getting-started" && (
           <Link href="/health" className="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-slate-200 rounded-full border border-white/[0.07] px-3 py-1.5">
-            <HeartPulse className="w-3.5 h-3.5 text-indigo-300" /> Health score <span className="text-white font-semibold">{p.healthScore}</span>
+            <HeartPulse className="w-3.5 h-3.5 text-indigo-300" /> Health score <span className="text-white font-semibold">{p.healthScore ?? "—"}</span>
           </Link>
         )}
       </div>
@@ -250,7 +250,7 @@ export default function NextBestMove() {
 
       {p.state !== "getting-started" && (
         <div className="flex justify-end">
-          <Link href="/blindspots" className="text-xs text-slate-500 hover:text-slate-300 inline-flex items-center gap-1">View all insights <ArrowRight className="w-3 h-3" /></Link>
+          <Link href="/health#insights" className="text-xs text-slate-500 hover:text-slate-300 inline-flex items-center gap-1">View all insights <ArrowRight className="w-3 h-3" /></Link>
         </div>
       )}
     </section>

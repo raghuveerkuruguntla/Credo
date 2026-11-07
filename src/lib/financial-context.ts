@@ -1,7 +1,7 @@
 import { plaidClient, plaidConfigured } from "@/lib/plaid";
 import { getItemsForUser } from "@/lib/store";
-import { computeHealth, healthInputsFrom, healthSummaryText } from "@/lib/health";
-import { detectBlindSpots, blindSpotsSummaryText, healthPenalty, type BSAccount, type BSTxn } from "@/lib/blindspots";
+import { analyzeFinances, intelligenceSummaryText } from "@/lib/financialIntelligence";
+import type { BSAccount, BSTxn } from "@/lib/blindspots";
 
 // Builds a plain-text snapshot of the user's finances for the AI assistant
 // from their live Plaid-connected accounts. If the user has no connections,
@@ -65,16 +65,9 @@ export async function buildFinancialContext(userId: string): Promise<{ context: 
       }
     }
 
-    const health = computeHealth(healthInputsFrom(healthAccounts, healthTxns));
-    const blind = detectBlindSpots(healthAccounts, healthTxns);
-    const healthText = healthSummaryText(health);
-    if (healthText) {
-      const penalty = healthPenalty(blind.findings);
-      lines.push(healthText);
-      if (penalty > 0) lines.push(`  Blind-spot deduction: −${penalty} (unresolved critical −5, needs-attention −2, capped at −15) → about ${Math.max(0, health.score - penalty)}/100 as shown in the app, unless the user has resolved or dismissed some.`);
-      lines.push("");
-    }
-    lines.push(blindSpotsSummaryText(blind.findings), "");
+    // Same Financial Intelligence Engine the app uses, so the coach explains
+    // exactly the score and insights the user sees.
+    lines.push(intelligenceSummaryText(analyzeFinances(healthAccounts, healthTxns)), "");
 
     lines.push(`Total income (money in) over last 90 days: $${totalIncome.toFixed(2)}`);
     lines.push("", "Spending by category (last 90 days, money out):");

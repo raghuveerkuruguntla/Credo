@@ -6,7 +6,7 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Landmark, ArrowLeftRight, PieChart, Wallet,
-  TrendingUp, BarChart3, LineChart, Bot, Settings, Sparkles, Lightbulb, HeartPulse, Radar,
+  TrendingUp, BarChart3, LineChart, Bot, Settings, Sparkles, Lightbulb, HeartPulse,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -15,8 +15,7 @@ const groups: { heading: string; items: { href: string; label: string; icon: Luc
     heading: "Overview",
     items: [
       { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/health", label: "Health Score", icon: HeartPulse },
-      { href: "/blindspots", label: "Blind Spots", icon: Radar },
+      { href: "/health", label: "Health & Insights", icon: HeartPulse },
       { href: "/insights", label: "Insights", icon: Lightbulb },
       { href: "/accounts", label: "Accounts", icon: Landmark },
       { href: "/transactions", label: "Transactions", icon: ArrowLeftRight },
