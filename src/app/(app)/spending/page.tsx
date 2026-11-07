@@ -6,7 +6,7 @@ import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import EmptyState, { LoadingState } from "@/components/EmptyState";
 import {
-  BarChart, Bar, PieChart, Pie, Cell,
+  PieChart, Pie, Cell, LineChart, Line, Legend,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
 
@@ -70,24 +70,31 @@ export default function SpendingPage() {
       .map(([category, amount]) => ({ category, amount: Math.round(amount * 100) / 100, color: categoryColor(category) }))
       .sort((a, b) => b.amount - a.amount);
 
-    const buckets: Record<string, number> = {};
-    for (const t of expenses) {
-      const d = new Date(t.date + "T00:00:00");
-      const weekStart = new Date(d);
-      weekStart.setDate(d.getDate() - d.getDay());
-      const key = iso(weekStart);
-      buckets[key] = (buckets[key] ?? 0) + Math.abs(t.amount);
+    // Weekly spending, one point per day: the 7 days ending on the range's end
+    // date (or today), with the 7 days before as a comparison line.
+    const daily: Record<string, number> = {};
+    for (const t of transactions) {
+      if (t.amount >= 0) continue;
+      daily[t.date] = (daily[t.date] ?? 0) + Math.abs(t.amount);
     }
-    const weekly = Object.entries(buckets)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([wk, amount]) => ({
-        week: new Date(wk + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-        amount: Math.round(amount),
-      }));
+    const localIso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const last = new Date((end < today ? end : today) + "T00:00:00");
+    const weekly = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(last);
+      d.setDate(last.getDate() - (6 - i));
+      const prev = new Date(d);
+      prev.setDate(d.getDate() - 7);
+      return {
+        day: d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
+        label: d.toLocaleDateString("en-US", { weekday: "short" }),
+        amount: Math.round((daily[localIso(d)] ?? 0) * 100) / 100,
+        previous: Math.round((daily[localIso(prev)] ?? 0) * 100) / 100,
+      };
+    });
 
     const totalSpent = expenses.reduce((s, t) => s + Math.abs(t.amount), 0);
     return { byCategory, weekly, totalSpent };
-  }, [transactions, start, end]);
+  }, [transactions, start, end, today]);
 
   if (loading) return <div className="p-6"><LoadingState /></div>;
   if (!hasData) return <div className="p-6"><EmptyState /></div>;
@@ -154,17 +161,29 @@ export default function SpendingPage() {
             </Card>
 
             <Card>
-              <CardHeader><CardTitle>Weekly Spending</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle>Weekly Spending</CardTitle>
+                <p className="text-xs text-stone-500 mt-1">
+                  {weekly[0].day} – {weekly[6].day} · {formatCurrency(weekly.reduce((s, d) => s + d.amount, 0))} this week vs {formatCurrency(weekly.reduce((s, d) => s + d.previous, 0))} the week before
+                </p>
+              </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={220}>
-                    <BarChart data={weekly}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                      <XAxis dataKey="week" tick={{ fontSize: 10, fill: "#64748b" }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
-                      <Tooltip formatter={(v) => formatCurrency(Number(v))} contentStyle={{ fontSize: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "#171a21", color: "#f8fafc" }} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
-                      <Bar dataKey="amount" fill="#6366f1" radius={[4, 4, 0, 0]} name="Spent" />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <LineChart data={weekly} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} width={52} />
+                    <Tooltip
+                      formatter={(v, name) => [formatCurrency(Number(v)), name]}
+                      labelFormatter={(_l, payload) => (payload?.[0]?.payload as { day?: string } | undefined)?.day ?? ""}
+                      contentStyle={{ fontSize: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", background: "#171a21", color: "#f8fafc" }}
+                      cursor={{ stroke: "rgba(255,255,255,0.15)" }}
+                    />
+                    <Legend iconType="plainline" wrapperStyle={{ fontSize: 11, color: "#94a3b8", paddingTop: 4 }} />
+                    <Line type="monotone" dataKey="previous" name="Week before" stroke="#64748b" strokeWidth={1.5} strokeDasharray="4 4" dot={false} activeDot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="amount" name="This week" stroke="#818cf8" strokeWidth={2.5} dot={{ r: 3, fill: "#818cf8", strokeWidth: 0 }} activeDot={{ r: 5 }} />
+                  </LineChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
           </div>
