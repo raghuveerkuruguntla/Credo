@@ -92,29 +92,37 @@ export async function POST(request: Request) {
   const firstName = user?.firstName ?? "there";
   const { context, live } = await buildFinancialContext(userId);
 
-  const systemPrompt = `You are the Credo AI Assistant — a personal finance copilot embedded in the Credo app. The user's name is ${firstName}.
+  const systemPrompt = `You are Credo Coach, a personal finance coach built into the Credo app. The user's name is ${firstName}.
 
 ${live
-    ? `You have access to the user's financial data below. Ground every answer in this data: cite specific numbers, merchants, categories, and dates. Do simple arithmetic carefully and show totals when useful.
+    ? `You have access to the user's financial data below. Ground every answer in this data: cite specific numbers, merchants, categories, and dates. Do arithmetic carefully and show totals when useful.
 
 === FINANCIAL DATA ===
 ${context}
 === END FINANCIAL DATA ===`
     : `The user has NOT connected any bank accounts yet, so you have no financial data about them. Answer general personal-finance questions helpfully, and when relevant, suggest they connect a bank account (via the "Connect Account" button) so you can give personalized insights. Never invent specific numbers about their finances.`}
 
-Guidelines:
-- Be concise, friendly, and practical. Use short paragraphs and bullet lists. Markdown formatting (bold, lists) is supported.
-- Give actionable recommendations (e.g., specific categories to cut, savings targets) when the user asks for advice.
+HOW TO ANSWER
+- Open with the direct answer in one or two sentences. No preamble like "Great question".
+- Then give the supporting detail, formatted in Markdown:
+  - Use short "### " section headings when the answer has more than one part.
+  - Use bullet lists for options, causes or steps; numbered lists for ordered steps.
+  - Put key numbers in **bold** (for example **$288/yr**).
+  - Use a Markdown table when comparing options, months or accounts side by side.
+  - Keep paragraphs to 1–3 sentences. Aim for under 250 words unless the user asks for more detail.
 - Act as a coach: when the data includes a FINANCIAL HEALTH SCORE, use it to explain where the user stands and which indicator matters most. For "can I afford…" or "what if…" questions, work through the effect on their cash, upcoming bills and score.
 - When the data includes FINANCIAL BLIND SPOTS, or the user asks about one: explain it simply, say what it will cost or risk if ignored (use the numbers given), recommend the single most appropriate next step, and say how resolving it would help their health score. Distinguish verified findings from "likely" or "possible" ones; never claim a subscription is unused.
-- Never say you have moved money, cancelled a service or contacted anyone. You can only suggest actions the user takes themselves.
-- End advice with one clear, specific next step the user can take this week.
-- You provide financial information and budgeting support, NOT licensed financial, legal, tax, or investment advice. For major decisions, suggest consulting a professional — briefly, without being preachy.
+- Finish advice with a line that starts with "**Next step:**" and one specific action the user can take this week.
+- Never say you have moved money, cancelled a service or contacted anyone. You only suggest actions the user takes themselves.
+- You provide financial information and coaching, NOT licensed financial, legal, tax, or investment advice. For major decisions, suggest consulting a professional, briefly and without being preachy.
 - If asked something unrelated to personal finance, politely steer back to the user's finances.
-- Never invent data that isn't in the snapshot above. If you don't have the data needed, say so.`;
+- Never invent data that isn't in the snapshot above. If you don't have the data needed, say so.
+- After everything else, on the very last line, write exactly "FOLLOWUPS:" followed by three short follow-up questions the user might ask next, separated by " | ". The app turns these into buttons and hides this line.`;
 
+  // Ask Groq for a streamed answer so the reply appears as it's written.
+  let upstream: Response;
   try {
-    const res = await fetch(GROQ_URL, {
+    upstream = await fetch(GROQ_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
@@ -131,34 +139,88 @@ Guidelines:
         // limit, so keep reasoning light and leave room for the answer.
         ...(MODEL.includes("gpt-oss") ? { reasoning_effort: "low" } : {}),
         max_completion_tokens: 2048,
+        stream: true,
       }),
     });
-
-    if (!res.ok) {
-      const errBody = await res.text();
-      console.error("Groq API error:", res.status, errBody);
-      return NextResponse.json(
-        { error: `AI request failed (${res.status}). Please try again.` },
-        { status: 502 }
-      );
-    }
-
-    const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content?.trim() || "Sorry, I couldn't generate a response. Please try asking again.";
-
-    // Count this question (only after a successful reply)
-    if (databaseConfigured()) {
-      await getPrisma().aiUsage.upsert({
-        where: { userId_month: { userId, month } },
-        update: { count: { increment: 1 } },
-        create: { userId, month, count: 1 },
-      });
-      used += 1;
-    }
-
-    return NextResponse.json({ reply, live, usage: { used, limit } });
   } catch (err: unknown) {
     console.error("AI chat error:", err instanceof Error ? err.message : err);
-    return NextResponse.json({ error: "The assistant is unavailable right now. Please try again." }, { status: 500 });
+    return NextResponse.json({ error: "The coach is unavailable right now. Please try again." }, { status: 500 });
   }
+
+  if (!upstream.ok || !upstream.body) {
+    const errBody = await upstream.text().catch(() => "");
+    console.error("Groq API error:", upstream.status, MODEL, errBody);
+    // Surface Groq's own message (never contains secrets) so problems like a
+    // retired model or invalid key are diagnosable from the UI.
+    let detail = "";
+    try { detail = (JSON.parse(errBody)?.error?.message as string | undefined)?.slice(0, 200) ?? ""; } catch {}
+    return NextResponse.json(
+      { error: `AI request failed (${upstream.status}${upstream.status === 404 ? `, model "${MODEL}"` : ""}).${detail ? ` ${detail}` : ""} Please try again.` },
+      { status: 502 }
+    );
+  }
+
+  // Re-stream only the answer text (Groq sends SSE; reasoning deltas are dropped).
+  // The question is counted once the answer has finished streaming.
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  const reader = upstream.body.getReader();
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      let buffer = "";
+      let wrote = false;
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+          for (const line of lines) {
+            const t = line.trim();
+            if (!t.startsWith("data:")) continue;
+            const payload = t.slice(5).trim();
+            if (payload === "[DONE]") continue;
+            try {
+              const delta = JSON.parse(payload)?.choices?.[0]?.delta?.content;
+              if (typeof delta === "string" && delta) {
+                controller.enqueue(encoder.encode(delta));
+                wrote = true;
+              }
+            } catch {
+              /* ignore keep-alives / partial frames */
+            }
+          }
+        }
+        if (!wrote) controller.enqueue(encoder.encode("Sorry, I couldn't generate a response. Please try asking again."));
+        else if (databaseConfigured()) {
+          await getPrisma().aiUsage.upsert({
+            where: { userId_month: { userId, month } },
+            update: { count: { increment: 1 } },
+            create: { userId, month, count: 1 },
+          });
+        }
+      } catch (err) {
+        console.error("AI stream error:", err instanceof Error ? err.message : err);
+        controller.enqueue(encoder.encode("\n\n_The answer was interrupted. Please try again._"));
+      } finally {
+        controller.close();
+      }
+    },
+    cancel() {
+      reader.cancel().catch(() => {});
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "no-cache, no-transform",
+      "X-Accel-Buffering": "no",
+      // Usage after this answer (the server is authoritative).
+      "X-AI-Usage-Used": String(limit !== null && databaseConfigured() ? used + 1 : used),
+      "X-AI-Usage-Limit": limit === null ? "unlimited" : String(limit),
+      "X-AI-Live": live ? "1" : "0",
+    },
+  });
 }
