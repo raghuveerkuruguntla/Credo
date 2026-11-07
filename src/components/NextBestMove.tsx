@@ -156,14 +156,50 @@ const STATE_CHIP = {
   "getting-started": { label: "Getting started", cls: "text-indigo-200/90 bg-indigo-400/10 border-indigo-400/20" },
 } as const;
 
-export default function NextBestMove() {
+function CompactNextBestMove({ p }: { p: ReturnType<typeof usePriorities> }) {
+  const item = p.primary;
+  const more = p.secondary.length;
+  return (
+    <section aria-labelledby="nbm-title" className="h-full rounded-2xl border border-white/[0.06] bg-gradient-to-b from-[#171a21] to-[#0f1117] p-5 flex flex-col">
+      <div className="flex items-center justify-between mb-4 gap-3">
+        <h2 id="nbm-title" className="text-sm font-semibold text-slate-100 flex items-center gap-1.5"><Compass className="w-4 h-4 text-indigo-400" /> Your next best move</h2>
+        <span className={cn("inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full border", STATE_CHIP[p.state].cls)}>{STATE_CHIP[p.state].label}</span>
+      </div>
+      {item ? (
+        <>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <Level level={item.level} />
+            {item.scoreCost > 0 && <span className="text-[11px] text-indigo-300/90">costing ~{item.scoreCost} health pts</span>}
+          </div>
+          <p className="text-[15px] font-semibold text-white mt-1.5">{p.state === "on-track" ? `Consider: ${item.title}` : item.title}</p>
+          <p className="text-xs text-slate-400 mt-1 line-clamp-2">{item.action}</p>
+          <div className="mt-auto pt-4 flex flex-wrap items-center gap-2">
+            <Link href={item.cta.href} className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-white text-[#0a0b0f] hover:bg-slate-200">{item.cta.label} <ArrowRight className="w-3.5 h-3.5" /></Link>
+            <Link href={`/ai?ask=${encodeURIComponent(coachQuestion(item, COACH_QUESTIONS[0], p.healthScore))}`} className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border border-white/[0.1] text-slate-300 hover:bg-white/[0.05]"><MessageCircle className="w-3.5 h-3.5" /> Ask the coach</Link>
+            <span className="flex-1" />
+            <Link href="/health#insights" className="text-xs text-slate-500 hover:text-slate-300">{more ? `+${more} more` : "View all"}</Link>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="text-[15px] font-semibold text-white">{p.state === "all-clear" ? "You're in a good position" : "You're doing well!"}</p>
+          <p className="text-xs text-slate-400 mt-1">No major financial actions need your attention right now.</p>
+          <div className="mt-auto pt-4"><Link href="/health#insights" className="text-xs text-indigo-400 hover:text-indigo-300 inline-flex items-center gap-1">View insights <ArrowRight className="w-3 h-3" /></Link></div>
+        </>
+      )}
+    </section>
+  );
+}
+
+export default function NextBestMove({ compact = false }: { compact?: boolean }) {
   const p = usePriorities();
   // One urgent issue stands alone: secondary items start collapsed behind it.
   const [secondaryToggle, setSecondaryToggle] = useState<boolean | null>(null);
 
   if (p.loading) {
-    return <section aria-busy="true" className={cn(shell, "h-48 animate-pulse")} aria-label="Your next best move" />;
+    return <section aria-busy="true" className={cn(shell, compact ? "h-full min-h-[180px]" : "h-48", "animate-pulse")} aria-label="Your next best move" />;
   }
+  if (compact && p.state !== "getting-started") return <CompactNextBestMove p={p} />;
 
   const showSecondary = secondaryToggle ?? p.primary?.level !== "high";
   const chip = STATE_CHIP[p.state];

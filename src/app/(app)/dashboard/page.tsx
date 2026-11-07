@@ -168,12 +168,6 @@ export default function DashboardPage() {
           <NextBestMove />
         ) : (
           <div className="space-y-4">
-            {/* ── Financial Health & Insights: score, standing, categories ── */}
-            <HealthSummary />
-
-            {/* ── Your Next Best Move: the one insight that needs attention ── */}
-            <NextBestMove />
-
             {/* ── HERO: net-worth focal panel + monthly pulse ─────────────── */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Net worth focal */}
@@ -254,6 +248,12 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* ── Health score + next best move, compact, side by side ─────── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <HealthSummary compact />
+              <NextBestMove compact />
             </div>
 
             {/* ── Interactive trend chart ─────────────────────────────────── */}
