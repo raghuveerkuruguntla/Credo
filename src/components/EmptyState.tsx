@@ -1,6 +1,7 @@
 "use client";
 
 import PlaidLinkButton from "@/components/PlaidLinkButton";
+import { TrySampleDataButton } from "@/components/SampleDataBanner";
 import { Landmark, Loader2 } from "lucide-react";
 
 export function LoadingState({ label = "Loading your financial data…" }: { label?: string }) {
@@ -27,6 +28,8 @@ export default function EmptyState({
         label="Connect your first account"
         className="bg-stone-100 text-stone-900 hover:bg-white rounded-full px-5 font-semibold shadow-[0_0_24px_rgba(99,102,241,0.15)]"
       />
+      <p className="text-xs text-stone-500 mt-5 mb-2">Just looking around?</p>
+      <TrySampleDataButton />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { useFinancialData, refreshFinancialData, signedBalance, isInvestment, is
 import HealthSummary from "@/components/HealthSummary";
 import NextBestMove from "@/components/NextBestMove";
 import PlaidLinkButton from "@/components/PlaidLinkButton";
+import { TrySampleDataButton } from "@/components/SampleDataBanner";
 import { LoadingState } from "@/components/EmptyState";
 import {
   TrendingUp, TrendingDown, RefreshCw, ArrowRight,
@@ -53,7 +54,7 @@ function Segmented<T extends string>({ options, value, onChange, ariaLabel }: {
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const { accounts, transactions, loading, hasData } = useFinancialData();
+  const { accounts, transactions, loading, hasData, demo } = useFinancialData();
 
   const [chartView, setChartView] = useState<"flow" | "net">("flow");
   const [catPeriod, setCatPeriod] = useState<"month" | "30d">("month");
@@ -154,6 +155,7 @@ export default function DashboardPage() {
             >
               <RefreshCw className="w-4 h-4" /> <span className="hidden sm:inline">Refresh</span>
             </button>
+            {!demo && <TrySampleDataButton label="Sample data" className="hidden sm:inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-100 px-3 py-2 rounded-xl hover:bg-white/[0.06] transition-colors disabled:opacity-60" />}
             <PlaidLinkButton
               size="sm"
               label="Connect"
@@ -165,7 +167,13 @@ export default function DashboardPage() {
         {loading ? (
           <LoadingState />
         ) : !hasData ? (
-          <NextBestMove />
+          <div className="space-y-4">
+            <NextBestMove />
+            <div className="flex flex-col items-center gap-2 py-6 text-center">
+              <p className="text-sm text-stone-400">Want to see everything Credo does first? Explore a sample household with cards, loans, a mortgage and investments.</p>
+              <TrySampleDataButton />
+            </div>
+          </div>
         ) : (
           <div className="space-y-4">
             {/* ── HERO: net-worth focal panel + monthly pulse ─────────────── */}

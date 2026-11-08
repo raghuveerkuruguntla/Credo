@@ -185,7 +185,7 @@ export default function HealthPage() {
     <div className="p-4 sm:p-6 max-w-6xl mx-auto w-full space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-stone-100 flex items-center gap-2"><HeartPulse className="w-5 h-5 text-indigo-400" /> Financial Health &amp; Insights</h1>
+          <h1 className="text-xl font-bold text-stone-100 flex items-center gap-2"><HeartPulse className="w-5 h-5 text-indigo-400" /> Financial Health</h1>
           <p className="text-sm text-stone-400">How healthy your finances are, what you might be missing, and how to improve.</p>
         </div>
         <p className="text-xs text-stone-500">From {Math.round(inputs.historyDays ?? 0)} days of connected history · score formula v{HEALTH_VERSION}</p>

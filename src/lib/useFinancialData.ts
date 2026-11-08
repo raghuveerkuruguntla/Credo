@@ -27,7 +27,7 @@ export interface LiveTxn {
   pending: boolean;
 }
 
-interface DataBundle { accounts: LiveAccount[]; transactions: LiveTxn[] }
+interface DataBundle { accounts: LiveAccount[]; transactions: LiveTxn[]; demo: boolean }
 
 // Module-level cache so navigating between pages doesn't refetch.
 let cache: DataBundle | null = null;
@@ -38,7 +38,35 @@ async function fetchAll(): Promise<DataBundle> {
     fetch("/api/plaid/accounts").then((r) => r.json()),
     fetch("/api/plaid/transactions").then((r) => r.json()),
   ]);
-  return { accounts: a.accounts ?? [], transactions: t.transactions ?? [] };
+  const demo = Boolean(a.demo);
+  // Keep the browser flag in step with the server cookie (e.g. if it expired).
+  try {
+    if (demo !== (localStorage.getItem(SAMPLE_FLAG) === "1")) {
+      if (demo) localStorage.setItem(SAMPLE_FLAG, "1"); else localStorage.removeItem(SAMPLE_FLAG);
+      window.location.reload();
+    }
+  } catch {}
+  return { accounts: a.accounts ?? [], transactions: t.transactions ?? [], demo };
+}
+
+/** localStorage flag mirroring the (httpOnly) sample-data cookie. */
+export const SAMPLE_FLAG = "credo.sampleData";
+
+/** Storage key for this browser's choices, kept separate while sample data is on. */
+export function sampleScoped(key: string): string {
+  try { return localStorage.getItem(SAMPLE_FLAG) === "1" ? `${key}.sample` : key; } catch { return key; }
+}
+
+/** Turn the sample household on or off, then reload so every page uses it. */
+export async function setSampleData(enabled: boolean): Promise<void> {
+  await fetch("/api/plaid/demo", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ enabled }),
+  });
+  try { if (enabled) localStorage.setItem(SAMPLE_FLAG, "1"); else localStorage.removeItem(SAMPLE_FLAG); } catch {}
+  refreshFinancialData();
+  window.location.assign(enabled ? "/dashboard" : window.location.pathname);
 }
 
 export function refreshFinancialData() {
@@ -85,13 +113,13 @@ export function useFinancialData() {
 
   const accounts = data?.accounts ?? [];
   const transactions = data?.transactions ?? [];
-  return { accounts, transactions, loading, error, hasData: accounts.length > 0 };
+  return { accounts, transactions, loading, error, hasData: accounts.length > 0, demo: data?.demo ?? false };
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
 const INVESTMENT_TYPES = ["investment", "brokerage", "401k", "403b", "ira", "roth", "hsa", "retirement", "529", "pension", "mutual fund"];
-const DEBT_TYPES = ["credit", "credit card", "loan", "mortgage", "student", "auto", "line of credit"];
+const DEBT_TYPES = ["credit", "credit card", "loan", "mortgage", "student", "auto", "line of credit", "consumer", "home equity", "business", "commercial", "construction", "overdraft"];
 
 export function isInvestment(a: LiveAccount): boolean {
   return INVESTMENT_TYPES.some((t) => (a.type ?? "").toLowerCase().includes(t));

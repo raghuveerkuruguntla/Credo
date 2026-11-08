@@ -201,7 +201,7 @@ export default function ForecastPage() {
                 <input id="wi-fix" type="checkbox" checked={applyFixes} onChange={(e) => setApplyFixes(e.target.checked)} className="mt-1 w-4 h-4 accent-indigo-500" />
                 <span className="text-sm">
                   <span className="text-stone-200 font-medium">Fix the insights with measurable savings</span>
-                  <span className="block text-xs text-stone-400 mt-0.5">Frees about {formatCurrency(Math.round(fh.fixableMonthly))}/mo from fees, interest, price increases and overspending flagged in Health &amp; Insights.</span>
+                  <span className="block text-xs text-stone-400 mt-0.5">Frees about {formatCurrency(Math.round(fh.fixableMonthly))}/mo from fees, interest, price increases and overspending flagged in Financial Health.</span>
                 </span>
               </label>
             )}

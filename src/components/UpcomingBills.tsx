@@ -10,7 +10,7 @@ import { cn, formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { upcomingObligations } from "@/lib/navigator";
 import { useFinancialData, useLiabilities, type LiveTxn } from "@/lib/useFinancialData";
-import { duePayments } from "@/lib/obligations";
+import { duePayments, cardPaymentHabits, isReportedCardPayment } from "@/lib/obligations";
 
 export default function UpcomingBills({
   transactions, cash, days = 30, className, forecastLink = false,
@@ -27,9 +27,16 @@ export default function UpcomingBills({
   // reports directly. When the bank reports them, repeating "loan payment"
   // charges are dropped so they aren't counted twice.
   const upcoming = useMemo(() => {
-    const debts = duePayments(liabilities, accounts, days);
+    const cardIds = new Set(liabilities.filter((l) => l.kind === "card").map((l) => l.accountId));
+    const habits = cardPaymentHabits(transactions, cardIds);
+    const debts = duePayments(liabilities, accounts, days, new Date(), habits);
+    // A repeating loan payment the bank also reports (same amount within 5%)
+    // is shown once, from the bank. Auto and personal loans aren't reported,
+    // so their repeating payments stay.
+    const reported = liabilities.map((l) => l.minimumPayment ?? 0).filter((v) => v > 0);
     const bills = upcomingObligations(transactions, days)
-      .filter((r) => !(debts.length > 0 && r.sample[0]?.category === "LOAN_PAYMENTS"))
+      .filter((r) => !(r.sample[0]?.category === "LOAN_PAYMENTS" && reported.some((v) => Math.abs(v - r.amount) <= v * 0.05)))
+      .filter((r) => !isReportedCardPayment(r.merchant, habits, liabilities))
       .map((r) => ({ merchant: r.merchant, next: r.next, category: r.category, amount: r.amount, fromBank: false }));
     return [...bills, ...debts].sort((a, b) => a.next.getTime() - b.next.getTime());
   }, [transactions, days, liabilities, accounts]);

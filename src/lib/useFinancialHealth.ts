@@ -11,7 +11,7 @@
 
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useFinancialData, useLiabilities } from "@/lib/useFinancialData";
+import { useFinancialData, useLiabilities, sampleScoped } from "@/lib/useFinancialData";
 import { analyzeFinances, contributionOf, type FinancialIntelligence } from "@/lib/financialIntelligence";
 import type { BlindSpot, FindingKind } from "@/lib/blindspots";
 import type { CategoryId, HealthScore, HealthInputs } from "@/lib/health";
@@ -47,6 +47,10 @@ export interface FinancialHealthState {
   history: ScoreSnapshot[];
 }
 
+// Sample data keeps its own decisions and score history (sampleScoped), so
+// exploring it never mixes with the user's real record.
+const scoped = sampleScoped;
+
 const readJSON = <T,>(k: string, fallback: T): T => {
   try { const v = JSON.parse(localStorage.getItem(k) ?? "null"); return v ?? fallback; } catch { return fallback; }
 };
@@ -58,16 +62,16 @@ let decisionsCache: Decisions | null = null;
 function getDecisions(): Decisions {
   if (typeof window === "undefined") return EMPTY;
   if (decisionsCache === null) {
-    const current = readJSON<Decisions>(DECISIONS_KEY, {});
+    const current = readJSON<Decisions>(scoped(DECISIONS_KEY), {});
     // Carry over choices made on the earlier Blind Spots page.
-    const legacy = readJSON<Record<string, { status: DecisionStatus; at: string }>>(LEGACY_DECISIONS_KEY, {});
+    const legacy = scoped(DECISIONS_KEY) === DECISIONS_KEY ? readJSON<Record<string, { status: DecisionStatus; at: string }>>(LEGACY_DECISIONS_KEY, {}) : {};
     decisionsCache = { ...Object.fromEntries(Object.entries(legacy).map(([k, v]) => [k, { ...v, title: k }])), ...current };
   }
   return decisionsCache;
 }
 function setDecisions(next: Decisions) {
   decisionsCache = next;
-  try { localStorage.setItem(DECISIONS_KEY, JSON.stringify(next)); } catch {}
+  try { localStorage.setItem(scoped(DECISIONS_KEY), JSON.stringify(next)); } catch {}
   listeners.forEach((l) => l());
 }
 function subscribe(l: () => void) {
@@ -89,7 +93,7 @@ export function useFinancialHealth(): FinancialHealthState {
 
   const decisions = useSyncExternalStore(subscribe, getDecisions, () => EMPTY);
   const [history, setHistory] = useState<ScoreSnapshot[]>([]);
-  useEffect(() => { setHistory(readJSON<ScoreSnapshot[]>(HISTORY_KEY, [])); }, []);
+  useEffect(() => { setHistory(readJSON<ScoreSnapshot[]>(scoped(HISTORY_KEY), [])); }, []);
 
   const fi = useMemo(() => analyzeFinances(accounts, transactions, { budgets, debts: liabilities }), [accounts, transactions, budgets, liabilities]);
   const { health, inputs, report } = fi;
@@ -124,7 +128,7 @@ export function useFinancialHealth(): FinancialHealthState {
       const last = prev[prev.length - 1];
       if (last && last.d === d && last.s === snap.s && JSON.stringify(last.c) === JSON.stringify(snap.c)) return prev;
       const next = [...prev.filter((x) => x.d !== d), snap].slice(-365);
-      try { localStorage.setItem(HISTORY_KEY, JSON.stringify(next)); } catch {}
+      try { localStorage.setItem(scoped(HISTORY_KEY), JSON.stringify(next)); } catch {}
       return next;
     });
   }, [loading, hasData, health]);

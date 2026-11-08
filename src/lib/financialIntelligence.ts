@@ -16,7 +16,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { computeHealth, healthInputsFrom, metricCost, healthSummaryText, type HealthScore, type HealthInputs, type HealthCategory } from "@/lib/health";
-import { duePayments, monthlyMinimums } from "@/lib/obligations";
+import { duePayments, monthlyMinimums, cardPaymentHabits } from "@/lib/obligations";
 import type { DebtObligation } from "@/lib/liabilities";
 import { detectBlindSpots, blindSpotsSummaryText, type BlindSpot, type BlindSpotReport, type BSAccount, type BSTxn } from "@/lib/blindspots";
 
@@ -26,6 +26,23 @@ export interface FinancialIntelligence {
   report: BlindSpotReport;
 }
 
+
+/** Typical amounts of loan payments that repeat across at least two months. */
+function repeatingLoanPayments(txns: BSTxn[]): number[] {
+  const byPayee = new Map<string, BSTxn[]>();
+  for (const t of txns) {
+    if (t.amount >= 0 || !(t.category ?? "").toUpperCase().startsWith("LOAN_PAYMENTS")) continue;
+    const k = t.merchant.toLowerCase().replace(/[^a-z]+/g, " ").trim();
+    (byPayee.get(k) ?? byPayee.set(k, []).get(k)!).push(t);
+  }
+  const out: number[] = [];
+  for (const list of byPayee.values()) {
+    if (new Set(list.map((t) => t.date.slice(0, 7))).size < 2) continue;
+    const amts = list.map((t) => -t.amount).sort((a, b) => a - b);
+    out.push(amts[Math.floor(amts.length / 2)]);
+  }
+  return out;
+}
 
 export function analyzeFinances(
   accounts: BSAccount[],
@@ -40,7 +57,15 @@ export function analyzeFinances(
   // days count toward the bills cash has to cover.
   if (opts.debts?.length) {
     inputs.monthlyDebtPayments = Math.max(inputs.monthlyDebtPayments, monthlyMinimums(opts.debts));
-    const due = duePayments(opts.debts, accounts, 30, now).reduce((s, p) => s + p.amount, 0);
+    // Skip payments already counted as a repeating bill (same amount within 5%).
+    const repeating = repeatingLoanPayments(txns);
+    // Cards the user already pays regularly are in the repeating bills; only
+    // add the bank's due payments that aren't.
+    const cardIds = new Set(opts.debts.filter((l) => l.kind === "card").map((l) => l.accountId));
+    const habits = cardPaymentHabits(txns, cardIds);
+    const due = duePayments(opts.debts.filter((l) => !(l.kind === "card" && (habits.get(l.accountId)?.months ?? 0) >= 2)), accounts, 30, now)
+      .filter((p) => !repeating.some((v) => Math.abs(v - p.amount) <= p.amount * 0.05))
+      .reduce((s, p) => s + p.amount, 0);
     if (due > 0) inputs.billsNext30 = (inputs.billsNext30 ?? 0) + due;
   }
   return { health: computeHealth(inputs), inputs, report };

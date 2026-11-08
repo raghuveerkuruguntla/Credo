@@ -15,7 +15,7 @@ const groups: { heading: string; items: { href: string; label: string; icon: Luc
     heading: "Overview",
     items: [
       { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/health", label: "Health & Insights", icon: HeartPulse },
+      { href: "/health", label: "Financial Health", icon: HeartPulse },
       { href: "/insights", label: "Insights", icon: Lightbulb },
       { href: "/accounts", label: "Accounts", icon: Landmark },
       { href: "/transactions", label: "Transactions", icon: ArrowLeftRight },
