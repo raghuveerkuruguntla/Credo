@@ -11,7 +11,7 @@
 
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useFinancialData } from "@/lib/useFinancialData";
+import { useFinancialData, useLiabilities } from "@/lib/useFinancialData";
 import { analyzeFinances, contributionOf, type FinancialIntelligence } from "@/lib/financialIntelligence";
 import type { BlindSpot, FindingKind } from "@/lib/blindspots";
 import type { CategoryId, HealthScore, HealthInputs } from "@/lib/health";
@@ -78,7 +78,9 @@ function subscribe(l: () => void) {
 const impactLabel = (f: BlindSpot) => (f.impact ? `$${Math.round(f.impact.amount).toLocaleString("en-US")}${f.impact.period === "annual" ? "/yr" : " one-time"}` : null);
 
 export function useFinancialHealth(): FinancialHealthState {
-  const { accounts, transactions, loading, hasData } = useFinancialData();
+  const { accounts, transactions, loading: dataLoading, hasData } = useFinancialData();
+  const { liabilities, loading: debtsLoading } = useLiabilities();
+  const loading = dataLoading || (hasData && debtsLoading);
   const { user } = useUser();
   const budgets = useMemo(
     () => ((user?.publicMetadata?.budget as Record<string, number> | undefined) ?? {}),
@@ -89,7 +91,7 @@ export function useFinancialHealth(): FinancialHealthState {
   const [history, setHistory] = useState<ScoreSnapshot[]>([]);
   useEffect(() => { setHistory(readJSON<ScoreSnapshot[]>(HISTORY_KEY, [])); }, []);
 
-  const fi = useMemo(() => analyzeFinances(accounts, transactions, { budgets }), [accounts, transactions, budgets]);
+  const fi = useMemo(() => analyzeFinances(accounts, transactions, { budgets, debts: liabilities }), [accounts, transactions, budgets, liabilities]);
   const { health, inputs, report } = fi;
 
   const decide = useCallback((f: BlindSpot, status: DecisionStatus) => {

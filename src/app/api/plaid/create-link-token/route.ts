@@ -31,13 +31,22 @@ export async function POST() {
   }
 
   try {
-    const response = await plaidClient.linkTokenCreate({
+    const base = {
       user: { client_user_id: userId },
       client_name: "Credo",
       products: [Products.Transactions],
       country_codes: [CountryCode.Us],
       language: "en",
-    });
+    };
+    // Ask for Liabilities (card/loan due dates, minimums, APRs, payoff dates)
+    // when the institution supports it. If the Plaid account doesn't have the
+    // product enabled, fall back to Transactions only.
+    let response;
+    try {
+      response = await plaidClient.linkTokenCreate({ ...base, optional_products: [Products.Liabilities] });
+    } catch {
+      response = await plaidClient.linkTokenCreate(base);
+    }
     return NextResponse.json({ link_token: response.data.link_token });
   } catch (err: unknown) {
     console.error("Plaid create-link-token error:", err instanceof Error ? err.message : err);

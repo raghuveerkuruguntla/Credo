@@ -1,4 +1,6 @@
 import { plaidClient, plaidConfigured } from "@/lib/plaid";
+import { fetchLiabilities } from "@/lib/liabilities";
+import { debtTermsLine } from "@/lib/obligations";
 import { getItemsForUser } from "@/lib/store";
 import { analyzeFinances, intelligenceSummaryText } from "@/lib/financialIntelligence";
 import type { BSAccount, BSTxn } from "@/lib/blindspots";
@@ -73,7 +75,19 @@ export async function buildFinancialContext(userId: string): Promise<{ context: 
 
     // Same Financial Intelligence Engine the app uses, so the coach explains
     // exactly the score and insights the user sees.
-    lines.push(intelligenceSummaryText(analyzeFinances(healthAccounts, healthTxns)), "");
+    // Card and loan terms reported by the bank (due dates, minimums, APRs, payoff).
+    const debts = await fetchLiabilities(items);
+    lines.push(intelligenceSummaryText(analyzeFinances(healthAccounts, healthTxns, { debts })), "");
+
+    if (debts.length) {
+      lines.push("Card and loan payment terms (reported by the bank):");
+      for (const d of debts) {
+        const acct = healthAccounts.find((a) => a.id === d.accountId);
+        const terms = debtTermsLine(d);
+        if (terms) lines.push(`  - ${acct ? clean(acct.name, 60) : d.kind}: ${terms}`);
+      }
+      lines.push("");
+    }
 
     lines.push(`Total income (money in) over last 90 days: $${totalIncome.toFixed(2)}`);
     lines.push("", "Spending by category (last 90 days, money out):");

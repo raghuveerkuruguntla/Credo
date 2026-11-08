@@ -9,7 +9,8 @@ import { CalendarClock } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { upcomingObligations } from "@/lib/navigator";
-import type { LiveTxn } from "@/lib/useFinancialData";
+import { useFinancialData, useLiabilities, type LiveTxn } from "@/lib/useFinancialData";
+import { duePayments } from "@/lib/obligations";
 
 export default function UpcomingBills({
   transactions, cash, days = 30, className, forecastLink = false,
@@ -20,7 +21,18 @@ export default function UpcomingBills({
   className?: string;
   forecastLink?: boolean;
 }) {
-  const upcoming = useMemo(() => upcomingObligations(transactions, days), [transactions, days]);
+  const { accounts } = useFinancialData();
+  const { liabilities } = useLiabilities();
+  // Bills detected from repeating charges, plus card and loan payments the bank
+  // reports directly. When the bank reports them, repeating "loan payment"
+  // charges are dropped so they aren't counted twice.
+  const upcoming = useMemo(() => {
+    const debts = duePayments(liabilities, accounts, days);
+    const bills = upcomingObligations(transactions, days)
+      .filter((r) => !(debts.length > 0 && r.sample[0]?.category === "LOAN_PAYMENTS"))
+      .map((r) => ({ merchant: r.merchant, next: r.next, category: r.category, amount: r.amount, fromBank: false }));
+    return [...bills, ...debts].sort((a, b) => a.next.getTime() - b.next.getTime());
+  }, [transactions, days, liabilities, accounts]);
   const total = upcoming.reduce((s, r) => s + r.amount, 0);
   const after = cash - total;
 
@@ -31,7 +43,7 @@ export default function UpcomingBills({
       </CardHeader>
       <CardContent>
         {upcoming.length === 0 ? (
-          <p className="text-sm text-stone-400">No recurring bills detected yet. They appear once a charge repeats across two months.</p>
+          <p className="text-sm text-stone-400">No bills or payments due yet. Bills appear once a charge repeats across two months; card and loan payments appear when your bank shares due dates.</p>
         ) : (
           <>
             <ul className="divide-y divide-white/[0.05]">
@@ -39,7 +51,7 @@ export default function UpcomingBills({
                 <li key={`${r.merchant}-${idx}`} className="flex items-center justify-between gap-3 py-2.5">
                   <div className="min-w-0">
                     <p className="text-sm text-stone-200 truncate">{r.merchant}</p>
-                    <p className="text-xs text-stone-500">{r.next.toLocaleDateString("en-US", { month: "short", day: "numeric" })} · {r.category}</p>
+                    <p className="text-xs text-stone-500">{r.next.toLocaleDateString("en-US", { month: "short", day: "numeric" })} · {r.category}{r.fromBank && <span className="text-indigo-300"> · from your bank</span>}</p>
                   </div>
                   <span className="text-sm font-semibold text-stone-200 shrink-0">{formatCurrency(-r.amount)}</span>
                 </li>
@@ -55,7 +67,7 @@ export default function UpcomingBills({
               {after < 0 && <p className="text-xs text-amber-300">Your cash doesn&apos;t cover these bills. Plan a transfer or income before the first due date.</p>}
             </div>
             <p className="text-[11px] text-stone-500 mt-3">
-              Dates are projected from each bill&apos;s last charge.
+              Bill dates are projected from each bill&apos;s last charge; card and loan due dates and minimums come from your bank when available.
               {forecastLink && <> <Link href="/forecast" className="text-indigo-300 hover:text-indigo-200">Full forecast</Link></>}
             </p>
           </>
