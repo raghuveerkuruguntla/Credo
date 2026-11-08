@@ -230,7 +230,7 @@ export function computeHealth(i: HealthInputs): HealthScore {
     m.obligations.push(metric({
       id: "billCoverage", category: "obligations", name: "Upcoming bill coverage", value: ratio, display: `${ratio.toFixed(1)}×`,
       points: clamp01((ratio - 0.5) / 1.5) * 100, target: "2× your next 30 days of bills",
-      formula: `Checking balance (${usd(i.checkingCash)}) ÷ recurring bills expected in the next 30 days (${usd(i.billsNext30)}). Full points at 2×, zero at 0.5×.`,
+      formula: `Checking balance (${usd(i.checkingCash)}) ÷ bills and card or loan payments expected in the next 30 days (${usd(i.billsNext30)}). Full points at 2×, zero at 0.5×.`,
       meaning: "Whether the money for bills is already there before they're due.",
     }));
   } else missing.obligations.push("no recurring bills detected yet");

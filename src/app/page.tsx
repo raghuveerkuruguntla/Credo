@@ -16,7 +16,7 @@ import FAQ from "@/components/FAQ";
 const features = [
   { icon: Landmark, title: "Your Whole Picture", desc: "Checking, savings, CDs, IRAs, cards, auto and personal loans, and your mortgage — with net worth in one view." },
   { icon: HeartPulse, title: "Financial Health Score", desc: "One score across five categories: cash flow, debt, savings, spending and bills. Every number shows its formula and target." },
-  { icon: CalendarClock, title: "Forecast & Upcoming Bills", desc: "See recurring bills before they hit and project your balances and net worth months ahead." },
+  { icon: CalendarClock, title: "Forecast & Upcoming Bills", desc: "See bills, card minimums and loan payments before they're due, and project your balances and net worth months ahead." },
   { icon: Sliders, title: "What-If Simulator", desc: "Pay down a card, cut spending, change income — see your score and cash six months out before you commit." },
   { icon: Bot, title: "Conversational Coach", desc: "Ask \"Can I afford this?\" and get an answer built on your balances, bills, and score — ending in one clear step." },
   { icon: Radar, title: "Insights Behind the Score", desc: "Uncovers what you might be missing (price hikes, double charges, fees, low-balance risks) inside the category it affects." },

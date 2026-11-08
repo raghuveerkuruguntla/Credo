@@ -16,6 +16,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { computeHealth, healthInputsFrom, metricCost, healthSummaryText, type HealthScore, type HealthInputs, type HealthCategory } from "@/lib/health";
+import { duePayments, monthlyMinimums } from "@/lib/obligations";
+import type { DebtObligation } from "@/lib/liabilities";
 import { detectBlindSpots, blindSpotsSummaryText, type BlindSpot, type BlindSpotReport, type BSAccount, type BSTxn } from "@/lib/blindspots";
 
 export interface FinancialIntelligence {
@@ -24,14 +26,23 @@ export interface FinancialIntelligence {
   report: BlindSpotReport;
 }
 
+
 export function analyzeFinances(
   accounts: BSAccount[],
   txns: BSTxn[],
-  opts: { budgets?: Record<string, number>; now?: Date } = {},
+  opts: { budgets?: Record<string, number>; now?: Date; debts?: DebtObligation[] } = {},
 ): FinancialIntelligence {
   const now = opts.now ?? new Date();
   const report = detectBlindSpots(accounts, txns, { budgets: opts.budgets, now });
   const inputs: HealthInputs = { ...healthInputsFrom(accounts, txns, now), ...report.metrics };
+  // When the bank reports card and loan terms, use the real minimum payments:
+  // debt payments are at least the minimums, and payments due in the next 30
+  // days count toward the bills cash has to cover.
+  if (opts.debts?.length) {
+    inputs.monthlyDebtPayments = Math.max(inputs.monthlyDebtPayments, monthlyMinimums(opts.debts));
+    const due = duePayments(opts.debts, accounts, 30, now).reduce((s, p) => s + p.amount, 0);
+    if (due > 0) inputs.billsNext30 = (inputs.billsNext30 ?? 0) + due;
+  }
   return { health: computeHealth(inputs), inputs, report };
 }
 

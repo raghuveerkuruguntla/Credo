@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { DebtObligation } from "@/lib/liabilities";
 
 export interface LiveAccount {
   id: string;
@@ -43,6 +44,29 @@ async function fetchAll(): Promise<DataBundle> {
 export function refreshFinancialData() {
   cache = null;
   inflight = null;
+  liabCache = null;
+  liabInflight = null;
+}
+
+// ── Card & loan details (Plaid Liabilities) ─────────────────────────
+// Due dates, minimum payments, APRs and payoff dates, when the bank shares them.
+let liabCache: DebtObligation[] | null = null;
+let liabInflight: Promise<DebtObligation[]> | null = null;
+const NO_DEBTS: DebtObligation[] = [];
+
+export function useLiabilities() {
+  const [data, setData] = useState<DebtObligation[]>(liabCache ?? NO_DEBTS);
+  const [loading, setLoading] = useState(!liabCache);
+  useEffect(() => {
+    if (liabCache) { setData(liabCache); setLoading(false); return; }
+    liabInflight = liabInflight ?? fetch("/api/plaid/liabilities")
+      .then((r) => (r.ok ? r.json() : { liabilities: [] }))
+      .then((d) => (Array.isArray(d.liabilities) ? d.liabilities as DebtObligation[] : []))
+      .catch(() => NO_DEBTS);
+    liabInflight.then((d) => { liabCache = d; setData(d); }).finally(() => setLoading(false));
+  }, []);
+  const byAccount = useMemo(() => new Map(data.map((l) => [l.accountId, l])), [data]);
+  return { liabilities: data, byAccount, loading };
 }
 
 export function useFinancialData() {

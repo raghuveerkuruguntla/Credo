@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useFinancialData, refreshFinancialData, signedBalance, isDebt } from "@/lib/useFinancialData";
+import { useFinancialData, useLiabilities, refreshFinancialData, signedBalance, isDebt } from "@/lib/useFinancialData";
+import { debtTermsLine } from "@/lib/obligations";
 import { cn, formatCurrency } from "@/lib/utils";
 import { groupAccounts } from "@/lib/accountGroups";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
@@ -17,6 +18,7 @@ const GROUP_ICON: Record<AccountGroupId, typeof Wallet> = {
 
 export default function AccountsPage() {
   const { accounts, loading, hasData } = useFinancialData();
+  const { byAccount: debtTerms } = useLiabilities();
   // Balances hidden by default for privacy — click to reveal
   const [showBalances, setShowBalances] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -137,6 +139,7 @@ export default function AccountsPage() {
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm text-stone-200 truncate">{acct.name}</p>
                                 <p className="text-xs text-stone-500 truncate">{acct.institution}{acct.mask ? ` · ····${acct.mask}` : ""} · {acct.type}</p>
+                                {debtTermsLine(debtTerms.get(acct.id)) && <p className={cn("text-xs truncate", debtTerms.get(acct.id)?.overdue ? "text-amber-300" : "text-indigo-300")}>{debtTermsLine(debtTerms.get(acct.id))}</p>}
                               </div>
                               <p className={cn("text-sm font-semibold", g.liability ? "text-red-400" : "text-stone-100")}>
                                 {showBalances ? (acct.balance != null ? formatCurrency(acct.balance) : "—") : masked}
@@ -200,6 +203,7 @@ export default function AccountsPage() {
                           <div className="flex-1">
                             <p className="text-sm font-medium text-stone-100">{acct.name}</p>
                             <p className="text-xs text-stone-500">{acct.mask ? `····${acct.mask}` : "—"}{acct.officialName ? ` · ${acct.officialName}` : ""}</p>
+                            {debtTermsLine(debtTerms.get(acct.id)) && <p className={cn("text-xs", debtTerms.get(acct.id)?.overdue ? "text-amber-300" : "text-indigo-300")}>{debtTermsLine(debtTerms.get(acct.id))}</p>}
                           </div>
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${isDebt(acct) ? "bg-red-500/15 text-red-300" : "bg-emerald-500/15 text-emerald-300"}`}>
                             {acct.type}
