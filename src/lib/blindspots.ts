@@ -97,7 +97,7 @@ const median = (xs: number[]) => {
 const shortDate = (d: string) => new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
 const has = (list: string[], t: string) => list.some((x) => (t ?? "").toLowerCase().includes(x));
 
-const DEBT_TYPES = ["credit", "loan", "mortgage", "student", "auto", "line of credit"];
+const DEBT_TYPES = ["credit", "loan", "mortgage", "student", "auto", "line of credit", "consumer", "home equity", "business", "commercial", "construction", "overdraft"];
 const CARD_TYPES = ["credit"];
 const INVEST_TYPES = ["investment", "brokerage", "401k", "403b", "ira", "roth", "hsa", "retirement", "529", "pension", "mutual fund"];
 const isCard = (a: BSAccount) => has(CARD_TYPES, a.type) && !has(["line of credit"], a.type);

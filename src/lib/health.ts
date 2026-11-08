@@ -337,7 +337,7 @@ export interface HealthAccount { id?: string; type: string; balance: number | nu
 export interface HealthTxn { id?: string; accountId?: string; date: string; amount: number; category: string } // amount < 0 = money out
 
 const CARD_TYPES = ["credit", "credit card"];
-const DEBT_TYPES = ["credit", "loan", "mortgage", "student", "auto", "line of credit"];
+const DEBT_TYPES = ["credit", "loan", "mortgage", "student", "auto", "line of credit", "consumer", "home equity", "business", "commercial", "construction", "overdraft"];
 const INVEST_TYPES = ["investment", "brokerage", "401k", "403b", "ira", "roth", "hsa", "retirement", "529", "pension", "mutual fund"];
 const DISCRETIONARY = ["FOOD_AND_DRINK", "ENTERTAINMENT", "GENERAL_MERCHANDISE", "PERSONAL_CARE", "TRAVEL"];
 const has = (list: string[], t: string) => list.some((x) => (t ?? "").toLowerCase().includes(x));

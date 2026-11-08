@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { buildFinancialContext } from "@/lib/financial-context";
+import { isDemoRequest } from "@/lib/demoData";
 import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 import { dataFence, sanitizeName, signAnswer, verifyAnswer, stripFollowups, canonicalAnswer, SIG_MARK } from "@/lib/promptSafety";
 
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
 
   const user = await currentUser();
   const firstName = sanitizeName(user?.firstName);
-  const { context, live } = await buildFinancialContext(userId);
+  const { context, live } = await buildFinancialContext(userId, { demo: isDemoRequest(request) });
   const fence = dataFence();
 
   const systemPrompt = `You are Credo Coach, a personal finance coach built into the Credo app. The user's name is ${firstName}.

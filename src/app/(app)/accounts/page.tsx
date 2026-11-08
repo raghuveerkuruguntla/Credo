@@ -8,6 +8,7 @@ import { groupAccounts } from "@/lib/accountGroups";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import PlaidLinkButton from "@/components/PlaidLinkButton";
+import { TrySampleDataButton } from "@/components/SampleDataBanner";
 import EmptyState, { LoadingState } from "@/components/EmptyState";
 import { RefreshCw, Link2, Eye, EyeOff, Building2, ChevronDown, Trash2, Loader2, Wallet, PiggyBank, Lock, Landmark, LineChart, CreditCard, Car, House, CircleHelp } from "lucide-react";
 import type { AccountGroupId } from "@/lib/accountGroups";
@@ -17,7 +18,7 @@ const GROUP_ICON: Record<AccountGroupId, typeof Wallet> = {
 };
 
 export default function AccountsPage() {
-  const { accounts, loading, hasData } = useFinancialData();
+  const { accounts, loading, hasData, demo } = useFinancialData();
   const { byAccount: debtTerms } = useLiabilities();
   // Balances hidden by default for privacy — click to reveal
   const [showBalances, setShowBalances] = useState(false);
@@ -76,6 +77,7 @@ export default function AccountsPage() {
           <Button variant="ghost" size="sm" onClick={() => { refreshFinancialData(); window.location.reload(); }}>
             <RefreshCw className="w-4 h-4" /> Sync
           </Button>
+          {!demo && <TrySampleDataButton className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-white/15 text-stone-300 hover:bg-white/[0.06] disabled:opacity-60" label="Try sample data" />}
           <PlaidLinkButton size="sm" label="Add account" />
         </div>
       </div>
@@ -213,7 +215,7 @@ export default function AccountsPage() {
                           </p>
                         </div>
                       ))}
-                      <div className="px-6 py-3 flex justify-end border-t border-[#ffffff0a]">
+                      {!demo && <div className="px-6 py-3 flex justify-end border-t border-[#ffffff0a]">
                         <button
                           onClick={() => disconnect(accts[0].itemId, inst)}
                           disabled={disconnecting === accts[0].itemId}
@@ -222,7 +224,7 @@ export default function AccountsPage() {
                           {disconnecting === accts[0].itemId ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                           Disconnect {inst}
                         </button>
-                      </div>
+                      </div>}
                     </div>
                   )}
                 </Card>

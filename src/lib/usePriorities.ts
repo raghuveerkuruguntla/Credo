@@ -9,7 +9,7 @@
 // the underlying data does).
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useFinancialData } from "@/lib/useFinancialData";
+import { useFinancialData, sampleScoped } from "@/lib/useFinancialData";
 import { buildIntelligence } from "@/lib/intelligence";
 import { useFinancialHealth } from "@/lib/useFinancialHealth";
 import { rankPriorities, buildView, type PriorityItem, type PriorityView } from "@/lib/priorities";
@@ -40,7 +40,7 @@ export function usePriorities(): PrioritiesState {
   const [prevStored, setPrevStored] = useState<Stored | null>(null);
   useEffect(() => {
     try {
-      const d = JSON.parse(localStorage.getItem(KEY) ?? "{}");
+      const d = JSON.parse(localStorage.getItem(sampleScoped(KEY)) ?? "{}");
       if (d && typeof d === "object") setStored(d);
     } catch {
       /* ignore corrupt storage */
@@ -48,7 +48,7 @@ export function usePriorities(): PrioritiesState {
   }, []);
   const persist = useCallback((next: Stored) => {
     setStored(next);
-    try { localStorage.setItem(KEY, JSON.stringify(next)); } catch {}
+    try { localStorage.setItem(sampleScoped(KEY), JSON.stringify(next)); } catch {}
   }, []);
 
   const ranked = useMemo(

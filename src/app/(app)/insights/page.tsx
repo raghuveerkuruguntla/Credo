@@ -16,7 +16,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useFinancialData } from "@/lib/useFinancialData";
+import { useFinancialData, sampleScoped } from "@/lib/useFinancialData";
 import {
   buildIntelligence,
   type Recommendation,
@@ -57,8 +57,8 @@ export default function InsightsPage() {
   // Load persisted decisions (dismissed / accepted) once on mount.
   useEffect(() => {
     try {
-      const d = JSON.parse(localStorage.getItem(DISMISS_KEY) ?? "[]");
-      const a = JSON.parse(localStorage.getItem(ACCEPT_KEY) ?? "{}");
+      const d = JSON.parse(localStorage.getItem(sampleScoped(DISMISS_KEY)) ?? "[]");
+      const a = JSON.parse(localStorage.getItem(sampleScoped(ACCEPT_KEY)) ?? "{}");
       if (Array.isArray(d)) setDismissed(new Set(d));
       if (a && typeof a === "object") setAccepted(a);
     } catch {
@@ -69,11 +69,11 @@ export default function InsightsPage() {
 
   const persistDismissed = (next: Set<string>) => {
     setDismissed(next);
-    try { localStorage.setItem(DISMISS_KEY, JSON.stringify([...next])); } catch {}
+    try { localStorage.setItem(sampleScoped(DISMISS_KEY), JSON.stringify([...next])); } catch {}
   };
   const persistAccepted = (next: Accepted) => {
     setAccepted(next);
-    try { localStorage.setItem(ACCEPT_KEY, JSON.stringify(next)); } catch {}
+    try { localStorage.setItem(sampleScoped(ACCEPT_KEY), JSON.stringify(next)); } catch {}
   };
 
   const { insights, recommendations, goals } = useMemo(
