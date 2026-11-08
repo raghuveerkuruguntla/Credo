@@ -6,7 +6,8 @@ import { useFinancialData } from "@/lib/useFinancialData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { User, Bell, Shield, Link2, Download, Check } from "lucide-react";
+import { User, Bell, Shield, Link2, Download, Check, Smartphone } from "lucide-react";
+import InstallPrompt from "@/components/pwa/InstallPrompt";
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
   return (
@@ -170,6 +171,16 @@ export default function SettingsPage() {
             <div className="px-6 py-8 text-center text-sm text-stone-500">No institutions connected yet.</div>
           )}
         </div>
+      </Card>
+
+      {/* Install the app (PWA) */}
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Smartphone className="w-4 h-4" /> Install the app</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <InstallPrompt variant="card" />
+        </CardContent>
       </Card>
 
       {/* Privacy & Security */}

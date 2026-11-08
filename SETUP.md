@@ -9,6 +9,8 @@ npm run dev
 
 Open http://localhost:3000.
 
+To install Credo as an app on a phone or desktop (PWA), and for HTTPS testing on real devices, see [docs/PWA.md](docs/PWA.md).
+
 ## 1. Authentication (Clerk)
 
 In **development**, Clerk runs in *keyless mode* — no setup needed. The first time you load the app you'll see a "Claim your keys" prompt in the bottom corner; click it to link the app to a free Clerk account.
