@@ -136,7 +136,7 @@ export default function AIPage() {
       if ((err as Error)?.name === "AbortError") {
         setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: m.content ? m.content + "\n\n_Stopped._" : "_Stopped._" } : m)));
       } else {
-        update("Network error: I couldn't reach the server. Please try again.", true);
+        update(typeof navigator !== "undefined" && !navigator.onLine ? "You're offline. The AI coach needs an internet connection; reconnect and try again." : "Network error: I couldn't reach the server. Please try again.", true);
       }
     } finally {
       setStreaming(false);

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "dev:https": "next dev --experimental-https",
+    "dev:lan": "next dev --experimental-https -H 0.0.0.0"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.2",

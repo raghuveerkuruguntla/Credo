@@ -48,6 +48,6 @@ export async function askCoachOnce(question: string): Promise<{ text: string | n
     const raw = await res.text();
     return { text: splitSignature(raw).text, error: null };
   } catch {
-    return { text: null, error: "Network error: couldn't reach the server." };
+    return { text: null, error: typeof navigator !== "undefined" && !navigator.onLine ? "You're offline. The AI coach needs an internet connection; reconnect and try again." : "Network error: couldn't reach the server." };
   }
 }

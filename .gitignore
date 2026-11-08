@@ -48,3 +48,6 @@ next-env.d.ts
 
 # allow the env template
 !.env.example
+
+# next dev --experimental-https local certificates
+/certificates/
