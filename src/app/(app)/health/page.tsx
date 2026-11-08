@@ -7,18 +7,19 @@
 
 import AskCoachLink from "@/components/AskCoachLink";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useFinancialHealth } from "@/lib/useFinancialHealth";
 import { useFinancialData } from "@/lib/useFinancialData";
 import { projectHealth, STATUS_LABEL, HEALTH_VERSION, type CategoryId, type HealthCategory, type IndicatorStatus } from "@/lib/health";
 import { findingsByCategory } from "@/lib/financialIntelligence";
 import type { BlindSpot, FindingKind } from "@/lib/blindspots";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import EmptyState, { LoadingState } from "@/components/EmptyState";
 import UpcomingBills from "@/components/UpcomingBills";
 import NextBestMove from "@/components/NextBestMove";
 import InsightCard, { KIND } from "@/components/InsightCard";
-import { HeartPulse, Sliders, Info, ChevronDown, MessageCircle, Check, EyeOff, RotateCcw, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { HeartPulse, Sliders, Info, ChevronDown, MessageCircle, ArrowRight, Check, EyeOff, RotateCcw, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 const TONE: Record<IndicatorStatus, { text: string; bar: string; stroke: string }> = {
   strong: { text: "text-emerald-300", bar: "bg-emerald-400", stroke: "#34d399" },
@@ -153,9 +154,6 @@ export default function HealthPage() {
   const fh = useFinancialHealth();
   const { transactions } = useFinancialData();
   const { health, inputs } = fh;
-  const [spendLess, setSpendLess] = useState(0);
-  const [extraToCards, setExtraToCards] = useState(0);
-  const [applyFixes, setApplyFixes] = useState(false);
   const [openCats, setOpenCats] = useState<Set<CategoryId> | null>(null);
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
   const [showLog, setShowLog] = useState(false);
@@ -170,12 +168,7 @@ export default function HealthPage() {
   const toggleCat = (id: CategoryId) => { const n = new Set(cats); if (n.has(id)) n.delete(id); else n.add(id); setOpenCats(n); };
   const toggleFinding = (id: string) => { const n = new Set(openIds); if (n.has(id)) n.delete(id); else n.add(id); setOpenIds(n); };
 
-  // What-if: slider ranges scale to the user's own numbers.
-  const spendMax = Math.max(100, Math.round(inputs.monthlyExpenses * 0.3 / 25) * 25);
-  const cardsMax = Math.max(0, Math.ceil(inputs.revolvingBalance / 6 / 25) * 25);
-  const fixes = applyFixes ? fh.fixableMonthly : 0;
   const baseline = useMemo(() => projectHealth(inputs, { spendLess: 0, extraToCards: 0 }), [inputs]);
-  const scenario = useMemo(() => projectHealth(inputs, { spendLess: spendLess + fixes, extraToCards }), [inputs, spendLess, fixes, extraToCards]);
 
   if (fh.loading) return <div className="p-6"><LoadingState /></div>;
   if (!fh.hasData) {
@@ -276,71 +269,20 @@ export default function HealthPage() {
         ))}
       </section>
 
-      {/* 3b ── What-if + upcoming obligations */}
+      {/* 3b ── What-if (one simulator, on Forecast) + upcoming obligations */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div id="whatif" className="lg:col-span-3 scroll-mt-20">
-          <Card className="h-full">
-            <CardHeader><CardTitle className="flex items-center gap-2"><Sliders className="w-4 h-4" /> What if… (6 months from now)</CardTitle></CardHeader>
-            <CardContent className="space-y-5">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label htmlFor="wi-spend" className="text-sm font-medium text-stone-300">Spend less each month</label>
-                  <span className="text-sm font-bold text-indigo-300">{formatCurrency(spendLess)}</span>
-                </div>
-                <input id="wi-spend" type="range" min={0} max={spendMax} step={25} value={Math.min(spendLess, spendMax)} onChange={(e) => setSpendLess(Number(e.target.value))}
-                  className="w-full h-2 bg-[#ffffff1a] rounded-full appearance-none cursor-pointer accent-indigo-500" />
-              </div>
-              {cardsMax > 0 && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label htmlFor="wi-cards" className="text-sm font-medium text-stone-300">Extra toward credit cards each month</label>
-                    <span className="text-sm font-bold text-indigo-300">{formatCurrency(extraToCards)}</span>
-                  </div>
-                  <input id="wi-cards" type="range" min={0} max={cardsMax} step={25} value={Math.min(extraToCards, cardsMax)} onChange={(e) => setExtraToCards(Number(e.target.value))}
-                    className="w-full h-2 bg-[#ffffff1a] rounded-full appearance-none cursor-pointer accent-indigo-500" />
-                </div>
-              )}
-              {fh.fixableMonthly > 0 && (
-                <label htmlFor="wi-fix" className="flex items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 cursor-pointer hover:bg-white/[0.04]">
-                  <input id="wi-fix" type="checkbox" checked={applyFixes} onChange={(e) => setApplyFixes(e.target.checked)} className="mt-1 w-4 h-4 accent-indigo-500" />
-                  <span className="text-sm">
-                    <span className="text-stone-200 font-medium">Fix the insights with measurable savings</span>
-                    <span className="block text-xs text-stone-400 mt-0.5">Frees about {formatCurrency(Math.round(fh.fixableMonthly))}/mo from fees, interest, price increases and overspending, as if those changes showed up in your data.</span>
-                  </span>
-                </label>
-              )}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div className="rounded-xl bg-indigo-500/10 border border-indigo-500/20 p-3 col-span-2 sm:col-span-1">
-                  <p className="text-[11px] text-indigo-300 uppercase tracking-wide">Score in 6 mo</p>
-                  <p className="text-3xl font-bold text-white mt-1">{scenario.health.score ?? "—"}</p>
-                  <p className="text-xs text-stone-400">{baseline.health.score ?? "—"} if nothing changes{health.score != null ? ` · ${health.score} today` : ""}</p>
-                </div>
-                <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-3">
-                  <p className="text-[11px] text-stone-400 uppercase tracking-wide">Cash in 6 mo</p>
-                  <p className="text-xl font-bold text-white mt-1">{formatCurrency(scenario.inputs.cash)}</p>
-                </div>
-                <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-3">
-                  <p className="text-[11px] text-stone-400 uppercase tracking-wide">Card balances</p>
-                  <p className="text-xl font-bold text-white mt-1">{formatCurrency(scenario.inputs.revolvingBalance)}</p>
-                  {scenario.cardsPaidOffInMonths !== null && inputs.revolvingBalance > 0 && <p className="text-xs text-emerald-300">Paid off in month {scenario.cardsPaidOffInMonths}</p>}
-                </div>
-              </div>
-              <ul className="divide-y divide-white/[0.05]">
-                {scenario.health.categories.map((c) => {
-                  const before = health.categories.find((b) => b.id === c.id);
-                  return (
-                    <li key={c.id} className="flex items-center justify-between py-2 text-sm">
-                      <span className="text-stone-300">{c.name}</span>
-                      <span className="text-stone-400">{before?.score ?? "—"} → <span className={c.status ? TONE[c.status].text : ""}>{c.score ?? "—"}</span></span>
-                    </li>
-                  );
-                })}
-              </ul>
-              <p className="text-[11px] text-stone-500 flex gap-1.5"><Info className="w-3.5 h-3.5 shrink-0 mt-px" /> Same formula as your score. Each month, cash grows by income minus spending and drops by any extra card payment. Interest is ignored, so payoff is slightly optimistic. For exploring, not financial advice.</p>
-            </CardContent>
-          </Card>
-        </div>
-        <UpcomingBills transactions={transactions} cash={inputs.checkingCash ?? inputs.cash} className="lg:col-span-2" forecastLink />
+        <Card className="lg:col-span-2">
+          <CardHeader><CardTitle className="flex items-center gap-2"><Sliders className="w-4 h-4" /> What if…</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-stone-400">Test a change before you make it: earn more, spend less, pay down cards, or fix the insights above. See your net worth and this score update together.</p>
+            <div className="rounded-xl bg-indigo-500/10 border border-indigo-500/20 p-3">
+              <p className="text-[11px] text-indigo-300 uppercase tracking-wide">Score in 6 months if nothing changes</p>
+              <p className="text-2xl font-bold text-white mt-1">{baseline.health.score ?? "—"}<span className="text-sm text-stone-400 font-normal">{health.score != null ? ` · ${health.score} today` : ""}</span></p>
+            </div>
+            <Link href="/forecast#whatif" className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl bg-white text-[#0a0b0f] hover:bg-stone-200">Open the what-if simulator <ArrowRight className="w-4 h-4" /></Link>
+          </CardContent>
+        </Card>
+        <UpcomingBills transactions={transactions} cash={inputs.checkingCash ?? inputs.cash} className="lg:col-span-3" forecastLink />
       </div>
 
       {/* 3c ── Progress */}

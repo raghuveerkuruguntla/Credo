@@ -2,18 +2,25 @@
 
 import { useState, useMemo } from "react";
 import { useFinancialData, refreshFinancialData, signedBalance, isDebt } from "@/lib/useFinancialData";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
+import { groupAccounts } from "@/lib/accountGroups";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import PlaidLinkButton from "@/components/PlaidLinkButton";
 import EmptyState, { LoadingState } from "@/components/EmptyState";
-import { RefreshCw, Link2, Eye, EyeOff, Building2, ChevronDown, Trash2, Loader2 } from "lucide-react";
+import { RefreshCw, Link2, Eye, EyeOff, Building2, ChevronDown, Trash2, Loader2, Wallet, PiggyBank, Lock, Landmark, LineChart, CreditCard, Car, House, CircleHelp } from "lucide-react";
+import type { AccountGroupId } from "@/lib/accountGroups";
+
+const GROUP_ICON: Record<AccountGroupId, typeof Wallet> = {
+  cash: Wallet, savings: PiggyBank, cds: Lock, retirement: Landmark, investments: LineChart, cards: CreditCard, loans: Car, mortgages: House, other: CircleHelp,
+};
 
 export default function AccountsPage() {
   const { accounts, loading, hasData } = useFinancialData();
   // Balances hidden by default for privacy — click to reveal
   const [showBalances, setShowBalances] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [view, setView] = useState<"type" | "institution">("type");
 
   const toggleInst = (inst: string) => setExpanded((p) => ({ ...p, [inst]: !p[inst] }));
   const masked = "••••••";
@@ -42,12 +49,12 @@ export default function AccountsPage() {
     }
   }
 
-  const { totalAssets, totalDebt, netWorth, institutions } = useMemo(() => {
+  const { totalAssets, totalDebt, netWorth, institutions, groups } = useMemo(() => {
     const totalAssets = accounts.filter((a) => !isDebt(a)).reduce((s, a) => s + (a.balance ?? 0), 0);
     const totalDebt = accounts.filter(isDebt).reduce((s, a) => s + Math.abs(a.balance ?? 0), 0);
     const netWorth = accounts.reduce((s, a) => s + signedBalance(a), 0);
     const institutions = Array.from(new Set(accounts.map((a) => a.institution)));
-    return { totalAssets, totalDebt, netWorth, institutions };
+    return { totalAssets, totalDebt, netWorth, institutions, groups: groupAccounts(accounts) };
   }, [accounts]);
 
   return (
@@ -95,8 +102,69 @@ export default function AccountsPage() {
             ))}
           </div>
 
+          {/* View switch */}
+          <div className="flex items-center gap-1 mb-4 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] w-fit" role="tablist" aria-label="Group accounts">
+            {([["type", "By type"], ["institution", "By institution"]] as const).map(([k, l]) => (
+              <button key={k} type="button" role="tab" aria-selected={view === k} onClick={() => setView(k)}
+                className={cn("text-sm px-3.5 py-1.5 rounded-lg transition-colors cursor-pointer", view === k ? "bg-white/[0.08] text-white" : "text-stone-400 hover:text-stone-200")}>
+                {l}
+              </button>
+            ))}
+          </div>
+
+          {view === "type" && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {groups.filter((g) => g.accounts.length > 0).map((g) => {
+                  const Icon = GROUP_ICON[g.id];
+                  return (
+                    <Card key={g.id}>
+                      <CardContent className="pt-5 pb-4">
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className={cn("w-9 h-9 rounded-xl flex items-center justify-center", g.liability ? "bg-red-500/10 text-red-300" : "bg-indigo-500/10 text-indigo-300")}><Icon className="w-4 h-4" /></span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-stone-100">{g.label}</p>
+                            <p className="text-xs text-stone-500">{g.accounts.length} account{g.accounts.length > 1 ? "s" : ""} · {g.hint}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className={cn("text-base font-bold", g.liability ? "text-red-400" : "text-stone-100")}>{showBalances ? `${g.liability ? "−" : ""}${formatCurrency(g.total)}` : masked}</p>
+                            <p className="text-[11px] text-stone-500">{g.liability ? "Owed" : "Balance"}</p>
+                          </div>
+                        </div>
+                        <ul className="divide-y divide-white/[0.05]">
+                          {g.accounts.map((acct) => (
+                            <li key={acct.id} className="flex items-center gap-3 py-2.5">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-stone-200 truncate">{acct.name}</p>
+                                <p className="text-xs text-stone-500 truncate">{acct.institution}{acct.mask ? ` · ····${acct.mask}` : ""} · {acct.type}</p>
+                              </div>
+                              <p className={cn("text-sm font-semibold", g.liability ? "text-red-400" : "text-stone-100")}>
+                                {showBalances ? (acct.balance != null ? formatCurrency(acct.balance) : "—") : masked}
+                              </p>
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+              {groups.some((g) => g.accounts.length === 0 && g.id !== "other") && (
+                <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                  <p className="text-xs text-stone-400 mb-2">Not connected yet. Add these to see your whole picture (and score your debt):</p>
+                  <div className="flex flex-wrap gap-2">
+                    {groups.filter((g) => g.accounts.length === 0 && g.id !== "other").map((g) => {
+                      const Icon = GROUP_ICON[g.id];
+                      return <span key={g.id} className="inline-flex items-center gap-1.5 text-xs text-stone-400 px-2.5 py-1 rounded-full border border-white/[0.08]"><Icon className="w-3.5 h-3.5" /> {g.label}</span>;
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
           {/* Institutions */}
-          <div className="space-y-4">
+          {view === "institution" && <div className="space-y-4">
             {institutions.map((inst) => {
               const accts = accounts.filter((a) => a.institution === inst);
               const instTotal = accts.reduce((s, a) => s + signedBalance(a), 0);
@@ -156,7 +224,7 @@ export default function AccountsPage() {
                 </Card>
               );
             })}
-          </div>
+          </div>}
 
           {/* Add institution CTA */}
           <div className="mt-4 border-2 border-dashed border-[#ffffff14] rounded-xl p-8 text-center">

@@ -53,6 +53,7 @@ export interface HealthInputs {
   billsNext30?: number | null;     // recurring bills expected in the next 30 days; null = none detected
   paymentIncidents?: number;       // overdraft / NSF / late fees, or an overdrawn account
   incomeVariation?: number | null; // paycheck variation from the detector; preferred over windows
+  debtAccounts?: number;           // connected credit cards / loans / mortgages (0 = debt not measurable)
 }
 
 export interface HealthMetric {
@@ -177,7 +178,9 @@ export function computeHealth(i: HealthInputs): HealthScore {
       meaning: "A major input to your credit score. Lower is better.",
     }));
   }
-  if (i.monthlyIncome > 0) {
+  // Without a connected card or loan, "loan payments" can't be told apart from
+  // transfers to accounts we can't see, so debt isn't scored rather than guessed.
+  if (i.monthlyIncome > 0 && i.debtAccounts !== 0) {
     const d = (Math.max(0, i.monthlyDebtPayments) / i.monthlyIncome) * 100;
     m.debt.push(metric({
       id: "dti", category: "debt", name: "Debt payments vs income", value: d, display: pct(d),
@@ -186,7 +189,7 @@ export function computeHealth(i: HealthInputs): HealthScore {
       meaning: "How much of what you earn is already spoken for by debt.",
     }));
   }
-  if (!m.debt.length) missing.debt.push("no income or credit cards to measure debt against");
+  if (!m.debt.length) missing.debt.push(i.debtAccounts === 0 ? "connect your credit cards and loans to score debt" : "no income or credit cards to measure debt against");
 
   // ── Savings & emergency preparedness ──
   if (i.monthlyExpenses > 0) {
@@ -287,7 +290,13 @@ export function metricCost(h: HealthScore, id: MetricId): { category: number; ov
 
 // ── What-if: the score six months from now under a plan ─────────────────────
 
-export interface HealthPlan { spendLess: number; extraToCards: number; months?: number }
+export interface HealthPlan {
+  spendLess: number;            // $/mo less spending overall (negative = spending more)
+  extraToCards: number;         // $/mo extra toward card balances
+  incomeChange?: number;        // $/mo change in income
+  discretionaryLess?: number;   // how much of spendLess comes out of discretionary (default: all of it)
+  months?: number;
+}
 export interface HealthProjection { inputs: HealthInputs; health: HealthScore; cardsPaidOffInMonths: number | null }
 
 /**
@@ -298,11 +307,12 @@ export interface HealthProjection { inputs: HealthInputs; health: HealthScore; c
 export function projectHealth(base: HealthInputs, plan: HealthPlan): HealthProjection {
   const months = plan.months ?? 6;
   const expenses = Math.max(0, base.monthlyExpenses - plan.spendLess);
+  const income = Math.max(0, base.monthlyIncome + (plan.incomeChange ?? 0));
   let cash = base.cash, checking = base.checkingCash ?? 0, revolving = base.revolvingBalance;
   let paidOff: number | null = revolving <= 0 ? 0 : null;
   for (let mo = 1; mo <= months; mo++) {
     const pay = Math.min(plan.extraToCards, revolving);
-    const net = base.monthlyIncome - expenses - pay;
+    const net = income - expenses - pay;
     cash += net;
     checking += net;
     revolving -= pay;
@@ -311,9 +321,10 @@ export function projectHealth(base: HealthInputs, plan: HealthPlan): HealthProje
   const inputs: HealthInputs = {
     ...base,
     cash: Math.max(0, cash),
+    monthlyIncome: income,
     checkingCash: base.checkingCash == null ? undefined : Math.max(0, checking),
     monthlyExpenses: expenses,
-    monthlyDiscretionary: base.monthlyDiscretionary == null ? undefined : Math.max(0, base.monthlyDiscretionary - plan.spendLess),
+    monthlyDiscretionary: base.monthlyDiscretionary == null ? undefined : Math.max(0, base.monthlyDiscretionary - (plan.discretionaryLess ?? Math.max(0, plan.spendLess))),
     revolvingBalance: Math.max(0, revolving),
     spendingWindows: base.spendingWindows ? [expenses, ...base.spendingWindows.slice(1)] : undefined,
   };
@@ -405,6 +416,7 @@ export function healthInputsFrom(accounts: HealthAccount[], txns: HealthTxn[], n
     revolvingLimit,
     historyMonths: txns.length ? monthSet.size : 0,
     historyDays,
+    debtAccounts: accounts.filter((a) => has(DEBT_TYPES, a.type)).length,
     incomeWindows: incW,
     spendingWindows: spW,
   };

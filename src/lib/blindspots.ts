@@ -305,7 +305,7 @@ function priceIncreases(ctx: Ctx): Draft[] {
       ],
       ease: "easy",
       urgencyDays: null,
-      links: [{ href: "/health#whatif", label: "See the effect in what-if" }],
+      links: [{ href: "/forecast#whatif", label: "See the effect in what-if" }],
       explanation: {
         sourceFacts: m.map(txnFact),
         reasoningSummary: fixedRate
@@ -578,7 +578,7 @@ function feesAndInterest(ctx: Ctx): Draft[] {
       ],
       ease: "medium",
       urgencyDays: 30,
-      links: [{ href: "/health#whatif", label: "Try paying it down in what-if" }],
+      links: [{ href: "/forecast#whatif", label: "Try paying it down in what-if" }],
       explanation: { sourceFacts: int.map(txnFact), reasoningSummary: `Rule v${BLINDSPOT_VERSION}: bank-fee transactions described as interest or finance charges. Annual = total × 365 ÷ ${Math.round(ctx.historyDays)} days of history.`, confidence: "high" },
     });
   }
@@ -630,7 +630,7 @@ function emergencyCushion(ctx: Ctx): Draft[] {
     ],
     ease: "medium",
     urgencyDays: null,
-    links: [{ href: "/health#whatif", label: "Model it in what-if" }],
+    links: [{ href: "/forecast#whatif", label: "Model it in what-if" }],
     explanation: {
       sourceFacts: [
         { label: "Cash in checking and savings", amount: ctx.cash, href: "/accounts" },
@@ -670,7 +670,7 @@ function creditUtilization(ctx: Ctx): Draft[] {
     ],
     ease: "medium",
     urgencyDays: 30,
-    links: [{ href: "/health#whatif", label: "Try extra payments in what-if" }],
+    links: [{ href: "/forecast#whatif", label: "Try extra payments in what-if" }],
     explanation: {
       sourceFacts: rows.map((r) => ({ label: `${r.a.name}${r.a.mask ? ` ••${r.a.mask}` : ""}`, detail: `${whole(r.owed)} of ${whole(r.limit)} (${Math.round(r.pct)}%)`, amount: -r.owed, href: "/accounts" })),
       reasoningSummary: `Same formula as the health score: card balances ÷ (balance + available credit). Flagged at 30%+, critical at 70%+ or any single card at 90%+.`,
@@ -728,7 +728,7 @@ function growingCardDebt(ctx: Ctx): Draft[] {
     actions: ["Aim to pay at least your new charges each month so the balance stops growing.", "Move recurring bills to your debit card while you pay the cards down."],
     ease: "medium",
     urgencyDays: 30,
-    links: [{ href: "/health#whatif", label: "Model payoff in what-if" }],
+    links: [{ href: "/forecast#whatif", label: "Model payoff in what-if" }],
     explanation: {
       sourceFacts: [
         { label: "Last 30 days", detail: `Charges ${whole(charges[0])} · payments ${whole(pays[0])}`, amount: -net[0] },

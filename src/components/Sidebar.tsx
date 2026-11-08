@@ -26,7 +26,7 @@ const groups: { heading: string; items: { href: string; label: string; icon: Luc
     items: [
       { href: "/spending", label: "Spending", icon: PieChart },
       { href: "/budget", label: "Budget", icon: Wallet },
-      { href: "/forecast", label: "Forecast", icon: TrendingUp },
+      { href: "/forecast", label: "Forecast & What-if", icon: TrendingUp },
     ],
   },
   {
